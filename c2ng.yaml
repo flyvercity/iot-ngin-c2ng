@@ -52,11 +52,36 @@ paths:
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+  /rps/session:
+    get:
+      summary: Get RPS public key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                UavID:
+                  type: string
+      responses:
+        '200':
+          description: Returning public key for the associated RPS
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  Success:
-                    type: boolean
-  /rps/session:
+                  SessionPublic:
+                    type: string
+                    format: byte
+        '400':
+          description: Wrong request response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
     post:
       summary: Aerial Connectivity Session Request for RPS
       requestBody:
@@ -77,7 +102,7 @@ paths:
                 RpsID:
                   description: RPS identifier as registered with the Service
                   type: string
-                UavIdList:
+                UavIDList:
                   description: A list of UAV identifiers that the RPS intends to control
                   type: array
                   items:
@@ -119,10 +144,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  Success:
-                    type: boolean
+                $ref: '#/components/schemas/BadRequestResponse'
 components:
   schemas:
     GeoPoint:
@@ -140,3 +162,12 @@ components:
           description: Height above WGS-84 ellipsoid in meters
           type: number
           format: double
+    BadRequestResponse:
+      type: object
+      properties:
+        Success:
+          type: boolean
+        ErrorID:
+          type: string
+        ErrorString:
+          type: string
