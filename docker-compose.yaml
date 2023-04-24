@@ -42,8 +42,8 @@ services:
   mongo:
     image: mongo
     restart: always
-    ports:
-      - 27017:27017
+    expose:
+      - 27017
     env_file:
       - .env
     networks:
@@ -58,6 +58,8 @@ services:
       - .env
     networks:
       - c2ng
+    depends_on:
+      - mongo
 
   influxdb:
     image: influxdb
