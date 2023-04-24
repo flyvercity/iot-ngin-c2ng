@@ -74,7 +74,6 @@ services:
     image: c2ng
     volumes:
       - ./app:/usr/src/app
-    command: ['python3', 'c2ng.py']
     ports:
       - 9090:9090
     networks:

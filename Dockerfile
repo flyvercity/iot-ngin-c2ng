@@ -10,4 +10,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app .
 
-ENTRYPOINT ["python3", "c2ng.py"]
+ENTRYPOINT ["python3", "c2ng_service.py"]
