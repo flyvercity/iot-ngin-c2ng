@@ -5,7 +5,7 @@ services:
     image: mariadb
     restart: unless-stopped
     env_file:
-      - '.env'
+      - .env
     ports:
       - 3306:3306
     volumes:
@@ -27,13 +27,12 @@ services:
   #     - dbca
   #   networks:
   #     - c2ng
-    
 
   oauth:
     image: quay.io/keycloak/keycloak
     restart: unless-stopped
     env_file:
-      - '.env'
+      - .env
     command: [ 'start-dev' ]
     ports:
       - 8080:8080
@@ -46,7 +45,7 @@ services:
     ports:
       - 27017:27017
     env_file:
-      - '.env'
+      - .env
     networks:
       - c2ng
 
@@ -56,7 +55,7 @@ services:
     ports:
       - 8081:8081
     env_file:
-      - '.env'
+      - .env
     networks:
       - c2ng
 
@@ -65,7 +64,19 @@ services:
     volumes:
       - influx:/var/lib/influxdb2
     ports:
-      - "8086:8086"
+      - 8086:8086
+    networks:
+      - c2ng
+
+  c2ng:
+    image: c2ng
+    volumes:
+      - ./app:/usr/src/app
+    command: ['python3', 'c2ng.py']
+    ports:
+      - 9090:9090
+    networks:
+      - c2ng
 
 networks:
   c2ng:
