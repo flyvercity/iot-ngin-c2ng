@@ -1,0 +1,76 @@
+version: '3'
+
+services:
+  dbca:
+    image: mariadb
+    restart: unless-stopped
+    env_file:
+      - '.env'
+    ports:
+      - 3306:3306
+    volumes:
+      - db_ca:/var/lib/mysql
+    networks:
+      - c2ng
+
+  # ca:
+  #   image: smallstep/step-ca:0.18.0
+  #   restart: unless-stopped
+  #   env_file:
+  #     - '.env'
+  #   ports:
+  #     - 8500:8500
+  #   volumes:
+  #     - step:/home/step
+  #     - ./config/step-ca/ca.json:/home/step/config/ca.json:ro
+  #   depends_on:
+  #     - dbca
+  #   networks:
+  #     - c2ng
+    
+
+  oauth:
+    image: quay.io/keycloak/keycloak
+    restart: unless-stopped
+    env_file:
+      - '.env'
+    command: [ 'start-dev' ]
+    ports:
+      - 8080:8080
+    networks:
+      - c2ng
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    env_file:
+      - '.env'
+    networks:
+      - c2ng
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    env_file:
+      - '.env'
+    networks:
+      - c2ng
+
+  influxdb:
+    image: influxdb
+    volumes:
+      - influx:/var/lib/influxdb2
+    ports:
+      - "8086:8086"
+
+networks:
+  c2ng:
+
+volumes:
+  db_ca:
+  step:
+  influx:
