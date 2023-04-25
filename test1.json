@@ -1,0 +1,9 @@
+{
+    "info": {
+        "description": "Documentation for the Command-and-Control NextGen APi",
+        "title": "C2NG API Definition",
+        "version": "1.0.0"
+    },
+    "paths": {},
+    "openapi": "3.0.2"
+}

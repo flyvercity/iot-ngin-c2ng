@@ -49,7 +49,6 @@ def main():
     sp.add_parser('test', help='Test a connection with the service')
     args = parser.parse_args()
 
-
     try:
         handler = COMMANDS[args.command]
         handler(args)

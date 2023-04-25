@@ -2,24 +2,35 @@ import os
 import logging as lg
 import json
 import asyncio
-import traceback
+from pathlib import Path
+from typing import Tuple, List, Type
 
 import tornado.web as web
 
-
 DEFAULT_LISTEN_PORT = 9090
 
-ERROR_SUCCESS=0
 ERROR_INTERNAL_ERROR = 1
 
 
 class HandlerBase(web.RequestHandler):
+    '''
+        Handler base comment
+    '''
+
     def respond(self, data={}):
+        '''
+            Handler base comment
+        '''
+
         self.set_header('Content-Type', 'application/json')
         data['Success'] = True
         self.finish(json.dumps(data) + '\n')
 
     def fail(self, error_id, error_str):
+        '''
+            Handler base comment
+        '''
+
         self.set_header('Content-Type', 'application/json')
         self.set_status(400, error_str)
 
@@ -30,6 +41,10 @@ class HandlerBase(web.RequestHandler):
         }))
 
     def write_error(self, status_code, **kwargs):
+        '''
+            Handler base comment
+        '''
+
         self.set_header('Content-Type', 'application/json')
 
         self.finish(json.dumps({
@@ -41,13 +56,21 @@ class HandlerBase(web.RequestHandler):
 
 
 class MainHandler(HandlerBase):
+    '''
+        Handler base comment
+    '''
+
     def get(self):
+        '''
+            Handler method comment
+        '''
+
         self.respond()
 
 
-def handlers():
+def handlers() -> List[Tuple[str, Type[HandlerBase]]]:
     return [
-        (r'/', MainHandler)
+        (r'/test', MainHandler)
     ]
 
 
