@@ -2,7 +2,6 @@ import os
 import logging as lg
 import json
 import asyncio
-from pathlib import Path
 from typing import Tuple, List, Type
 
 import tornado.web as web
@@ -13,24 +12,16 @@ ERROR_INTERNAL_ERROR = 1
 
 
 class HandlerBase(web.RequestHandler):
-    '''
-        Handler base comment
-    '''
+    ''' Helper methods for request and errors handling '''
 
     def respond(self, data={}):
-        '''
-            Handler base comment
-        '''
-
+        ''' Successful response with optional data '''
         self.set_header('Content-Type', 'application/json')
         data['Success'] = True
         self.finish(json.dumps(data) + '\n')
 
     def fail(self, error_id, error_str):
-        '''
-            Handler base comment
-        '''
-
+        ''' Graceful failure response '''
         self.set_header('Content-Type', 'application/json')
         self.set_status(400, error_str)
 
@@ -41,10 +32,7 @@ class HandlerBase(web.RequestHandler):
         }))
 
     def write_error(self, status_code, **kwargs):
-        '''
-            Handler base comment
-        '''
-
+        ''' Exception response '''
         self.set_header('Content-Type', 'application/json')
 
         self.finish(json.dumps({
@@ -55,14 +43,34 @@ class HandlerBase(web.RequestHandler):
         }))
 
 
-class MainHandler(HandlerBase):
-    '''
-        Handler base comment
-    '''
+class TestHandler(HandlerBase):
+    ''' Test Endpoint Handler '''
 
     def get(self):
+        ''' Return empty success result
+        ---
+        summary: Return empty success result
+        responses:
+            200:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                Success:
+                                    type: boolean
         '''
-            Handler method comment
+
+        self.respond()
+
+
+class UavSessionRequestHandler(HandlerBase):
+    ''' UAV Session Endpoint Handler '''
+
+    def post(self):
+        ''' Returns new connection credentials
+        ---
+        summary: Aerial Connectivity Session Request for UAV
         '''
 
         self.respond()
@@ -70,7 +78,8 @@ class MainHandler(HandlerBase):
 
 def handlers() -> List[Tuple[str, Type[HandlerBase]]]:
     return [
-        (r'/test', MainHandler)
+        (r'/test', TestHandler),
+        (r'/uav/session', UavSessionRequestHandler)
     ]
 
 
