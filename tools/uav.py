@@ -14,7 +14,7 @@ def fake_point():
 def request(ctx):
     query = {
         'ReferenceTime': datetime.now().timestamp(),
-        'UavID': ctx.args.uavid,
+        'UasID': ctx.args.uasid,
         'Waypoints': [
             fake_point()
         ],

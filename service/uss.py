@@ -8,9 +8,9 @@ class UssInteface:
         self.config = config
 
     def request(self, request):
-        uavid = request['uavid']
-        url = f"{self.config['uss']['endpoint']}/approve?UavID={uavid}"
-        lg.info(f'Approving request from {uavid}')
+        uasid = request['uasid']
+        url = f"{self.config['uss']['endpoint']}/approve?UasID={uasid}"
+        lg.info(f'Approving request from {uasid}')
         lg.debug(f'USS Request URL: {url}')
 
         try:

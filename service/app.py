@@ -127,7 +127,7 @@ class UavSessionRequestHandler(HandlerBase):
             self.fail(AerialConnectionSessionResponseFailed, {'USS': error})
             return
 
-        lg.info(f'USS approval for {request["uavid"]}: {approved}')
+        lg.info(f'USS approval for {request["uasid"]}: {approved}')
         self.respond()
 
 

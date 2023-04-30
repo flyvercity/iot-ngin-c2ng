@@ -18,11 +18,11 @@ class ValidationErrorSchema(ErrorSchema):
     )
 
 
-def uavid():
+def uasid():
     return fields.String(
-        data_key='UavID',
+        data_key='UasID',
         required=True,
-        description='CAA UAV ID'
+        description='CAA UAS ID'
     )
 
 
@@ -49,7 +49,7 @@ class AerialConnectionSessionRequest(Schema):
         required=True
     )
 
-    uavid = uavid()
+    uasid = uasid()
     waypoints = fields.List(fields.Nested(Waypoint), data_key='Waypoints')
     margin = Meters('OperationalMargin')
     metadata = fields.Dict(data_key='UssMetadata', required=False)
@@ -68,9 +68,15 @@ class AerialConnectionSessionResponse(Schema):
         required=True
     )
 
-    rps_ip = fields.IP(
-        data_key='RemoteStationAddress',
-        description='IP (v4 or v6) address of the remote pilot stations',
+    private_key = fields.String(
+        data_key='SessionPrivateKey', 
+        description='Session private key in encrypt own traffic',
+        required=True
+    )
+
+    public_key = fields.String(
+        data_key='SessionPublicKey',
+        description='Session key to decrypt RPS traffic',
         required=True
     )
 

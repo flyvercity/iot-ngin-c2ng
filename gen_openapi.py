@@ -10,7 +10,9 @@ from apispec_webframeworks.tornado import TornadoPlugin  # type: ignore
 from service.app import handlers
 
 
-def generate_swagger_file(file: Path):
+def generate_openapi_file(file: Path):
+    ''' Generate OpenAPI Specification from Code '''
+
     spec = APISpec(
         title='C2NG API Definition',
         version='1.0.0',
@@ -36,7 +38,7 @@ def main():
     parser = ArgumentParser()
     parser.add_argument('-f', '--file', help='Target file to write specification', required=True)
     args = parser.parse_args()
-    generate_swagger_file(Path(args.file))
+    generate_openapi_file(Path(args.file))
 
 
 if __name__ == '__main__':

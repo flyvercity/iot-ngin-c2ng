@@ -61,7 +61,7 @@ def main():
     sp = parser.add_subparsers(dest='command', required=True, metavar='CMD')
     sp.add_parser('test', help='Test a connection with the service')
     uav = sp.add_parser('uav', help='Command on behalf of UAV')
-    uav.add_argument('-i', '--uavid', help='UAV CAA ID', default='droneid')
+    uav.add_argument('-i', '--uasid', help='UAS CAA ID', default='droneid')
     uss = sp.add_parser('uss', help='USSP Simulator')
     uss.add_argument('-p', '--port', type=int, default=DEFAULT_USS_PORT)
     args = parser.parse_args()
