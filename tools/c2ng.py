@@ -1,31 +1,21 @@
 import requests
 import json
 from argparse import ArgumentParser
-from datetime import datetime
 import logging as lg
 
+import uav
 import uss_sim
 
 
-DEFAULT_SAFETY_MARGIN = 300
 DEFAULT_USS_PORT = 9091
-
-
-def fake_point():
-    return {
-        'Latitude': 30.0,
-        'Longitude': 30.0,
-        'Altitude': 100.0
-    }
-
-
-def dump(data):
-    print(json.dumps(data, indent=4))
 
 
 class Handler:
     def __init__(self, args):
         self.args = args
+
+    def dump(data):
+        print(json.dumps(data, indent=4))
 
     def handle(self):
         try:
@@ -56,20 +46,10 @@ class Handler:
 
     def test(self):
         r = self.request('/test')
-        dump(r)
+        self.dump(r)
 
     def uav(self):
-        query = {
-            'ReferenceTime': datetime.now().timestamp(),
-            'UavID': self.args.uavid,
-            'Waypoints': [
-                fake_point()
-            ],
-            'OperationalMargin': DEFAULT_SAFETY_MARGIN
-        }
-
-        r = self.request('/uav/session', method='POST', body=query)
-        dump(r)
+        uav.request(self)
 
     def uss(self):
         uss_sim.run(self.args)

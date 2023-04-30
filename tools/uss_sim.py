@@ -11,8 +11,11 @@ class ApproveHandler(web.RequestHandler):
     def get(self):
         ''' Return approval '''
         self.set_header('Content-Type', 'application/json')
+        uavid = self.get_argument('UavID')
+        lg.info(f'Approving connection for {uavid}')
 
         data = {
+            'UavID': uavid,
             'Approved': True
         }
 
