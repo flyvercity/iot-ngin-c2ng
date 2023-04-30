@@ -14,7 +14,8 @@ from schemas import (
     AerialConnectionSessionResponseFailed
 )
 
-from uss import UssInteface
+from uss import UssInterface
+from mongo import Mongo
 
 
 DEFAULT_LISTEN_PORT = 9090
@@ -22,6 +23,11 @@ DEFAULT_LISTEN_PORT = 9090
 
 class HandlerBase(web.RequestHandler):
     ''' Helper methods for request and errors handling '''
+
+    def prepare(self):
+        ''' Creating shortcuts to subservices '''
+        self.uss = self.settings['uss']  # type: UssInterface
+        self.mongo = self.settings['mongo']  # type: Mongo
 
     def respond(self, data={}):
         ''' Successful response with optional data '''
@@ -120,14 +126,25 @@ class UavSessionRequestHandler(HandlerBase):
         if not (request := self.get_request(AerialConnectionSessionRequest)):
             return
 
-        uss = self.settings['uss']
-        approved, error = uss.request(request)
+        uasid = request['UasID']
+        approved, error = self.uss.request(uasid)
 
         if error:
             self.fail(AerialConnectionSessionResponseFailed, {'USS': error})
             return
 
-        lg.info(f'USS approval for {request["uasid"]}: {approved}')
+        lg.info(f'USS approval for {uasid}: {approved}')
+
+        session = {
+            'UasID': uasid,
+            "GatewayIP": '127.0.0.1',
+            "UasIP": '127.0.0.1',
+            "RpsIP": '127.0.0.1',
+            "UavPublicKey": 'w43frgojerpgojerpvjervp',
+            "UavPrivateKey": 'cdssvsdvsdvsdvsdvdsvdv'
+        }
+
+        self.mongo.put_session(session)
         self.respond()
 
 
@@ -146,8 +163,16 @@ async def main():
     verbose = config['logging']['verbose']
     lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
     lg.debug('C2NG :: Starting up')
-    uss = UssInteface(config)
-    app = web.Application(handlers(), uss=uss, config=config)
+    mongo = Mongo(config['mongo'])
+    uss = UssInterface(config['uss'])
+
+    app = web.Application(
+        handlers(),
+        config=config,
+        mongo=mongo,
+        uss=uss
+    )
+
     lg.info(f'C2NG :: Listening for requests on {port}')
     app.listen(port)
     await asyncio.Event().wait()

@@ -1,33 +1,6 @@
 version: '3'
 
 services:
-  dbca:
-    image: mariadb
-    restart: unless-stopped
-    env_file:
-      - .env
-    ports:
-      - 3306:3306
-    volumes:
-      - db_ca:/var/lib/mysql
-    networks:
-      - c2ng
-
-  # ca:
-  #   image: smallstep/step-ca:0.18.0
-  #   restart: unless-stopped
-  #   env_file:
-  #     - '.env'
-  #   ports:
-  #     - 8500:8500
-  #   volumes:
-  #     - step:/home/step
-  #     - ./config/step-ca/ca.json:/home/step/config/ca.json:ro
-  #   depends_on:
-  #     - dbca
-  #   networks:
-  #     - c2ng
-
   oauth:
     image: quay.io/keycloak/keycloak
     restart: unless-stopped
@@ -42,8 +15,8 @@ services:
   mongo:
     image: mongo
     restart: always
-    expose:
-      - 27017
+    ports:
+      - 27017:27017
     env_file:
       - .env
     networks:
@@ -81,11 +54,11 @@ services:
       - 9090:9090
     networks:
       - c2ng
+    depends_on:
+      - mongo
 
 networks:
   c2ng:
 
 volumes:
-  db_ca:
-  step:
   influx:

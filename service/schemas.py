@@ -20,26 +20,9 @@ class ValidationErrorSchema(ErrorSchema):
 
 def uasid():
     return fields.String(
-        data_key='UasID',
         required=True,
         description='CAA UAS ID'
     )
-
-
-class Degrees(fields.Float):
-    def __init__(self, key):
-        super().__init__(required=True, data_key=key)
-
-
-class Meters(fields.Float):
-    def __init__(self, key):
-        super().__init__(required=True, data_key=key)
-
-
-class Waypoint(Schema):
-    lat = Degrees('Latitude')
-    lon = Degrees('Longitude')
-    alt = Meters('Altitude')
 
 
 class AerialConnectionSessionRequest(Schema):
@@ -49,9 +32,8 @@ class AerialConnectionSessionRequest(Schema):
         required=True
     )
 
-    uasid = uasid()
-    waypoints = fields.List(fields.Nested(Waypoint), data_key='Waypoints')
-    margin = Meters('OperationalMargin')
+    UasID = uasid()
+    # TODO: Transmit metadata to USS
     metadata = fields.Dict(data_key='UssMetadata', required=False)
 
 

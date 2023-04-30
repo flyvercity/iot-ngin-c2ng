@@ -3,13 +3,12 @@ import logging as lg
 import requests  # TODO: asynchronize it
 
 
-class UssInteface:
+class UssInterface:
     def __init__(self, config) -> None:
         self.config = config
 
-    def request(self, request):
-        uasid = request['uasid']
-        url = f"{self.config['uss']['endpoint']}/approve?UasID={uasid}"
+    def request(self, uasid):
+        url = f"{self.config['endpoint']}/approve?UasID={uasid}"
         lg.info(f'Approving request from {uasid}')
         lg.debug(f'USS Request URL: {url}')
 

@@ -3,7 +3,7 @@ import json
 import logging as lg
 from argparse import ArgumentParser
 
-import uav
+import uas_sim
 import uss_sim
 
 
@@ -48,7 +48,7 @@ class Handler:
         self.dump(r)
 
     def uav(self):
-        uav.request(self)
+        uas_sim.request(self)
 
     def uss(self):
         uss_sim.run(self.args)
