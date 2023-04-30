@@ -2,13 +2,13 @@ import os
 import logging as lg
 import json
 import asyncio
-from typing import Tuple, List, Type
 
 import tornado.web as web
 
-DEFAULT_LISTEN_PORT = 9090
+from schemas import AerialConnectionSessionRequest
 
-ERROR_INTERNAL_ERROR = 1
+
+DEFAULT_LISTEN_PORT = 9090
 
 
 class HandlerBase(web.RequestHandler):
@@ -20,15 +20,14 @@ class HandlerBase(web.RequestHandler):
         data['Success'] = True
         self.finish(json.dumps(data) + '\n')
 
-    def fail(self, error_id, error_str):
+    def fail(self, errors):
         ''' Graceful failure response '''
         self.set_header('Content-Type', 'application/json')
-        self.set_status(400, error_str)
+        self.set_status(400, str(errors))
 
         self.finish(json.dumps({
             'Success': False,
-            'ErrorID': error_id,
-            'ErrorString': error_str
+            'Errors': errors
         }))
 
     def write_error(self, status_code, **kwargs):
@@ -38,9 +37,23 @@ class HandlerBase(web.RequestHandler):
         self.finish(json.dumps({
             'Code': status_code,
             'Success': False,
-            'ErrorID': ERROR_INTERNAL_ERROR,
-            'ErrorString': 'Internal Server Error'
+            'Errors': 'Internal Server Error'
         }))
+
+    def prepare(self):
+        ''' Unmarshal the payload if present '''
+        if self.request.body:
+            self.payload = json.loads(self.request.body)
+
+    def get_request(self, RequestSchema):
+        ''' Validate the payload agains given class '''
+        request = RequestSchema()
+        ve = request.validate(self.payload)
+
+        if ve:
+            self.fail(ve)
+
+        return request.load(self.payload)
 
 
 class TestHandler(HandlerBase):
@@ -55,10 +68,7 @@ class TestHandler(HandlerBase):
                 content:
                     application/json:
                         schema:
-                            type: object
-                            properties:
-                                Success:
-                                    type: boolean
+                            BaseSuccessSchema
         '''
 
         self.respond()
@@ -72,11 +82,11 @@ class UavSessionRequestHandler(HandlerBase):
         ---
         summary: Aerial Connectivity Session Request for UAV
         '''
-
+        request = self.get_request(AerialConnectionSessionRequest)
         self.respond()
 
 
-def handlers() -> List[Tuple[str, Type[HandlerBase]]]:
+def handlers():
     return [
         (r'/test', TestHandler),
         (r'/uav/session', UavSessionRequestHandler)
