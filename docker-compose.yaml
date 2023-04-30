@@ -72,8 +72,11 @@ services:
 
   c2ng:
     image: c2ng
+    env_file:
+      - .env
     volumes:
-      - ./app:/usr/src/app
+      - ./app:/app
+      - ./config/c2ng/config.yaml:/etc/c2ng/config.yaml
     ports:
       - 9090:9090
     networks:

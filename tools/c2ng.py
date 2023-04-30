@@ -1,7 +1,7 @@
 import requests
 import json
-from argparse import ArgumentParser
 import logging as lg
+from argparse import ArgumentParser
 
 import uav
 import uss_sim
@@ -14,7 +14,7 @@ class Handler:
     def __init__(self, args):
         self.args = args
 
-    def dump(data):
+    def dump(self, data):
         print(json.dumps(data, indent=4))
 
     def handle(self):
@@ -28,19 +28,18 @@ class Handler:
     def request(self, path: str, method='GET', body={}) -> dict:
         url = self.args.url + path
         r = requests.request(method=method, url=url, json=body)
-        r.raise_for_status()
+
         reply = r.json()
 
         if 'Success' not in reply:
             raise UserWarning(f'Malformed reply: {r.text}')
 
         if not reply['Success']:
-            if ('ErrorID' not in reply) or ('ErrorString' not in reply):
+            if 'Errors' not in reply:
                 raise UserWarning(f'Malformed failure reply: {r.text}')
 
-            eid = reply['ErrorID']
-            text = reply['ErrorString']
-            raise UserWarning(f'Service replied with an error ({eid}): {text}')
+            errors = reply['Errors']
+            raise UserWarning(f'Service replied with an error {errors}')
 
         return reply
 

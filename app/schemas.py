@@ -1,14 +1,21 @@
 ''' Incoming Request Schemas '''
-from marshmallow import Schema, fields, post_load
+from marshmallow import Schema, fields
 
 
-class BaseSuccessSchema:
+class BaseSuccessSchema(Schema):
     success = fields.Boolean(data_key='Success', default=True)
 
 
-class ErrorSchema:
+class ErrorSchema(Schema):
     success = fields.Boolean(data_key='Success', default=False)
-    errors = fields.Dict(data_key='Errors', required=True)
+
+
+class ValidationErrorSchema(ErrorSchema):
+    errors = fields.Dict(
+        data_key='Errors',
+        keys=fields.String,
+        values=fields.List(fields.String)
+    )
 
 
 def uavid():
@@ -46,3 +53,11 @@ class AerialConnectionSessionRequest(Schema):
     waypoints = fields.List(fields.Nested(Waypoint), data_key='Waypoints')
     margin = Meters('OperationalMargin')
     metadata = fields.Dict(data_key='UssMetadata', required=False)
+
+
+class AerialConnectionSessionResponseErrors(Schema):
+    uss = fields.String(data_key='USS', required=True)
+
+
+class AerialConnectionSessionResponseFailed(ErrorSchema):
+    errors = fields.Nested(AerialConnectionSessionResponseErrors, data_key='Errors')

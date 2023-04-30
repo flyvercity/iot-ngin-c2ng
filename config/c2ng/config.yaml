@@ -1,0 +1,6 @@
+service:
+  port: 9090
+logging:
+  verbose: false
+uss:
+  endpoint: http://host.docker.internal:9091

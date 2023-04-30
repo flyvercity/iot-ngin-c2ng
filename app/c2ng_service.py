@@ -1,11 +1,16 @@
 import os
 import logging as lg
 import json
+import yaml
 import asyncio
+from pathlib import Path
 
 import tornado.web as web
+from marshmallow.exceptions import ValidationError
 
-from schemas import AerialConnectionSessionRequest
+from schemas import ValidationErrorSchema
+from schemas import AerialConnectionSessionRequest, AerialConnectionSessionResponseFailed
+from uss import UssInteface
 
 
 DEFAULT_LISTEN_PORT = 9090
@@ -20,40 +25,48 @@ class HandlerBase(web.RequestHandler):
         data['Success'] = True
         self.finish(json.dumps(data) + '\n')
 
-    def fail(self, errors):
+    def fail(self, ResponseSchema, errors):
         ''' Graceful failure response '''
         self.set_header('Content-Type', 'application/json')
-        self.set_status(400, str(errors))
+        self.set_status(400)
+        response = {'Success': False, 'Errors': errors}
+        schema = ResponseSchema()
 
-        self.finish(json.dumps({
-            'Success': False,
-            'Errors': errors
-        }))
+        try:
+            schema.validate(response)
+            self.finish(json.dumps(response) + '\n')
+
+        except ValidationError as ve:
+            lg.error(f'Invalid response {response}: {ve}')
+            raise RuntimeError('Invalid response')
 
     def write_error(self, status_code, **kwargs):
         ''' Exception response '''
         self.set_header('Content-Type', 'application/json')
 
         self.finish(json.dumps({
-            'Code': status_code,
             'Success': False,
+            'Code': status_code,
             'Errors': 'Internal Server Error'
         }))
 
-    def prepare(self):
-        ''' Unmarshal the payload if present '''
-        if self.request.body:
-            self.payload = json.loads(self.request.body)
 
-    def get_request(self, RequestSchema):
-        ''' Validate the payload agains given class '''
-        request = RequestSchema()
-        ve = request.validate(self.payload)
+def with_request(RequestSchema):
+    def decorator(func):
+        def wrapper(object):
+            try:
+                payload = json.loads(object.request.body)
+                schema = RequestSchema()
+                schema.validate(payload)
+                request = schema.load(payload)
+                return func(object, request)
 
-        if ve:
-            self.fail(ve)
+            except ValidationError as ve:
+                object.fail(ValidationErrorSchema, ve.messages_dict)
 
-        return request.load(self.payload)
+        return wrapper
+
+    return decorator
 
 
 class TestHandler(HandlerBase):
@@ -77,13 +90,27 @@ class TestHandler(HandlerBase):
 class UavSessionRequestHandler(HandlerBase):
     ''' UAV Session Endpoint Handler '''
 
-    def post(self):
+    @with_request(AerialConnectionSessionRequest)
+    def post(self, request):
         ''' Returns new connection credentials
         ---
         summary: Aerial Connectivity Session Request for UAV
         '''
-        request = self.get_request(AerialConnectionSessionRequest)
-        self.respond()
+        uss = self.settings['uss']
+
+        try:
+            approved = not uss.request(request)
+
+            if not approved:
+                self.fail(AerialConnectionSessionResponseFailed, {
+                    'USS': 'Denied'
+                })
+            else:
+                self.respond()
+        except Exception:
+            self.fail(AerialConnectionSessionResponseFailed, {
+                'USS': 'Request failed'
+            })
 
 
 def handlers():
@@ -94,11 +121,15 @@ def handlers():
 
 
 async def main():
-    port = os.getenv('C2NG_SERVICE_PORT', DEFAULT_LISTEN_PORT)
-    verbose = os.getenv('C2NG_LOGGING_VERBOSE', 0)
+    config_file = Path(os.getenv('C2NG_CONFIG_FILE', '/etc/c2ng/config.yaml'))
+    # TODO: Validate config
+    config = yaml.safe_load(config_file.read_text())
+    port = config['service']['port']
+    verbose = config['logging']['verbose']
     lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
     lg.debug('C2NG :: Starting up')
-    app = web.Application(handlers())
+    uss = UssInteface(config)
+    app = web.Application(handlers(), uss=uss, config=config)
     lg.info(f'C2NG :: Listening for requests on {port}')
     app.listen(port)
     await asyncio.Event().wait()
