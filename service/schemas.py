@@ -55,6 +55,26 @@ class AerialConnectionSessionRequest(Schema):
     metadata = fields.Dict(data_key='UssMetadata', required=False)
 
 
+class AerialConnectionSessionResponse(Schema):
+    own_ip = fields.IP(
+        data_key='IP',
+        description='Own IP (v4 or v6) for the reliable connection',
+        required=True
+    )
+
+    gateway_id = fields.IP(
+        data_key='GatewayIP',
+        description='IP (v4 or v6) for the reliable connection gateway',
+        required=True
+    )
+
+    rps_ip = fields.IP(
+        data_key='RemoteStationAddress',
+        description='IP (v4 or v6) address of the remote pilot stations',
+        required=True
+    )
+
+
 class AerialConnectionSessionResponseErrors(Schema):
     uss = fields.String(data_key='USS', required=True)
 

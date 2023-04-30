@@ -8,8 +8,12 @@ from pathlib import Path
 import tornado.web as web
 from marshmallow.exceptions import ValidationError
 
-from schemas import ValidationErrorSchema
-from schemas import AerialConnectionSessionRequest, AerialConnectionSessionResponseFailed
+from schemas import (
+    ValidationErrorSchema,
+    AerialConnectionSessionRequest,
+    AerialConnectionSessionResponseFailed
+)
+
 from uss import UssInteface
 
 
@@ -50,23 +54,17 @@ class HandlerBase(web.RequestHandler):
             'Errors': 'Internal Server Error'
         }))
 
+    def get_request(self, RequestSchema):
+        try:
+            payload = json.loads(self.request.body)
+            schema = RequestSchema()
+            schema.validate(payload)
+            request = schema.load(payload)
+            return request
 
-def with_request(RequestSchema):
-    def decorator(func):
-        def wrapper(object):
-            try:
-                payload = json.loads(object.request.body)
-                schema = RequestSchema()
-                schema.validate(payload)
-                request = schema.load(payload)
-                return func(object, request)
-
-            except ValidationError as ve:
-                object.fail(ValidationErrorSchema, ve.messages_dict)
-
-        return wrapper
-
-    return decorator
+        except ValidationError as ve:
+            object.fail(ValidationErrorSchema, ve.messages_dict)
+            return None
 
 
 class TestHandler(HandlerBase):
@@ -90,27 +88,47 @@ class TestHandler(HandlerBase):
 class UavSessionRequestHandler(HandlerBase):
     ''' UAV Session Endpoint Handler '''
 
-    @with_request(AerialConnectionSessionRequest)
-    def post(self, request):
+    def post(self):
         ''' Returns new connection credentials
         ---
-        summary: Aerial Connectivity Session Request for UAV
+        summary: Request a new session for UAV
+
+        requestBody:
+            description: Aerial Connectivity Session Request
+            required: True
+            content:
+                application/json:
+                    schema:
+                        AerialConnectionSessionRequest
+
+        responses:
+            200:
+                description: Success payload containing session information
+                content:
+                    application/json:
+                        schema:
+                            AerialConnectionSessionResponse
+            400:
+                description: Payload containing error description
+                content:
+                    application/json:
+                        schema:
+                            AerialConnectionSessionResponseFailed
+
         '''
+
+        if not (request := self.get_request(AerialConnectionSessionRequest)):
+            return
+
         uss = self.settings['uss']
+        approved, error = uss.request(request)
 
-        try:
-            approved = not uss.request(request)
+        if error:
+            self.fail(AerialConnectionSessionResponseFailed, {'USS': error})
+            return
 
-            if not approved:
-                self.fail(AerialConnectionSessionResponseFailed, {
-                    'USS': 'Denied'
-                })
-            else:
-                self.respond()
-        except Exception:
-            self.fail(AerialConnectionSessionResponseFailed, {
-                'USS': 'Request failed'
-            })
+        lg.info(f'USS approval for {request["uavid"]}: {approved}')
+        self.respond()
 
 
 def handlers():
@@ -121,7 +139,7 @@ def handlers():
 
 
 async def main():
-    config_file = Path(os.getenv('C2NG_CONFIG_FILE', '/etc/c2ng/config.yaml'))
+    config_file = Path(os.getenv('C2NG_CONFIG_FILE', '/c2ng/config/config.yaml'))
     # TODO: Validate config
     config = yaml.safe_load(config_file.read_text())
     port = config['service']['port']

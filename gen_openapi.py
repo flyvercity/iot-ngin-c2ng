@@ -1,4 +1,4 @@
-import json
+import yaml
 from pathlib import Path
 from argparse import ArgumentParser
 
@@ -7,7 +7,7 @@ from apispec.exceptions import APISpecError
 from apispec.ext.marshmallow import MarshmallowPlugin
 from apispec_webframeworks.tornado import TornadoPlugin  # type: ignore
 
-from app.c2ng_service import handlers
+from service.app import handlers
 
 
 def generate_swagger_file(file: Path):
@@ -15,7 +15,7 @@ def generate_swagger_file(file: Path):
         title='C2NG API Definition',
         version='1.0.0',
         openapi_version='3.0.2',
-        info=dict(description='Documentation for the Command-and-Control NextGen APi'),
+        info=dict(description='Documentation for the Command-and-Control NextGen API'),
         plugins=[TornadoPlugin(), MarshmallowPlugin()]
     )
 
@@ -25,8 +25,11 @@ def generate_swagger_file(file: Path):
         except APISpecError:
             pass
 
-    spec_str = json.dumps(spec.to_dict(), ensure_ascii=False, indent=4)
-    file.write_text(spec_str)
+    spec_dict = spec.to_dict()
+    yaml_version = yaml.dump({'openapi': spec_dict.pop('openapi')})
+    yaml_imfo = yaml.dump({'info': spec_dict.pop('info')})
+    yaml_rest = yaml.dump(spec_dict)
+    file.write_text(yaml_version + yaml_imfo + yaml_rest)
 
 
 def main():

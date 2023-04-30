@@ -2,12 +2,12 @@ FROM python:3.10
 
 EXPOSE 9090
 
-RUN mkdir -p /app
-WORKDIR /app
+RUN mkdir -p /c2ng/service
+WORKDIR /c2ng/service
 
-COPY requirements.txt /app/
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app .
+COPY service .
 
-ENTRYPOINT ["python3", "c2ng_service.py"]
+ENTRYPOINT ["python3", "app.py"]

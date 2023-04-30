@@ -18,7 +18,7 @@ def request(ctx):
         'Waypoints': [
             fake_point()
         ],
-        'OperationalMargcin': DEFAULT_SAFETY_MARGIN
+        'OperationalMargin': DEFAULT_SAFETY_MARGIN
     }
 
     response = ctx.request('/uav/session', method='POST', body=query)
