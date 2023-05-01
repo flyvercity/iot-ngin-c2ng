@@ -1,3 +1,8 @@
+#   SPDX-License-Identifier: MIT
+#   Copyright 2023 Flyvercity
+
+''' USSP Endpoint Simulator '''
+
 import logging as lg
 import json
 import asyncio
@@ -23,6 +28,8 @@ class ApproveHandler(web.RequestHandler):
 
 
 def handlers():
+    ''' Return a full set of URLSpec '''
+
     return [
         (r'/approve', ApproveHandler),
     ]

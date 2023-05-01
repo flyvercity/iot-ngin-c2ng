@@ -1,3 +1,8 @@
+#   SPDX-License-Identifier: MIT
+#   Copyright 2023 Flyvercity
+
+''' UAV and RPR Simulators '''
+
 from datetime import datetime
 
 DEFAULT_SAFETY_MARGIN = 300

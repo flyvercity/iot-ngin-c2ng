@@ -1,3 +1,8 @@
+#   SPDX-License-Identifier: MIT
+#   Copyright 2023 Flyvercity
+
+''' Service Main Module '''
+
 import os
 import logging as lg
 import json
@@ -61,6 +66,12 @@ class HandlerBase(web.RequestHandler):
         }))
 
     def get_request(self, RequestSchema):
+        ''' Unmarshal and validate a JSON request
+        
+        Parameters:
+        - `RequestSchema` - a type of the request to validate against
+        '''
+
         try:
             payload = json.loads(self.request.body)
             schema = RequestSchema()
@@ -120,7 +131,6 @@ class UavSessionRequestHandler(HandlerBase):
                     application/json:
                         schema:
                             AerialConnectionSessionResponseFailed
-
         '''
 
         if not (request := self.get_request(AerialConnectionSessionRequest)):
@@ -149,6 +159,8 @@ class UavSessionRequestHandler(HandlerBase):
 
 
 def handlers():
+    ''' Return a full set of URLSpec '''
+
     return [
         (r'/test', TestHandler),
         (r'/uav/session', UavSessionRequestHandler)
@@ -156,6 +168,7 @@ def handlers():
 
 
 async def main():
+    ''' Asynchronious entry point. '''
     config_file = Path(os.getenv('C2NG_CONFIG_FILE', '/c2ng/config/config.yaml'))
     # TODO: Validate config
     config = yaml.safe_load(config_file.read_text())

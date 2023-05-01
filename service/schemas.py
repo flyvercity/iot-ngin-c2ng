@@ -1,4 +1,8 @@
-''' Incoming Request Schemas '''
+#   SPDX-License-Identifier: MIT
+#   Copyright 2023 Flyvercity
+
+''' Input/Output Data Object Schemas '''
+
 from marshmallow import Schema, fields
 
 

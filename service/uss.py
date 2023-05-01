@@ -1,3 +1,8 @@
+#   SPDX-License-Identifier: MIT
+#   Copyright 2023 Flyvercity
+
+''' Interface with USSP Endpoint '''
+
 import logging as lg
 
 import requests  # TODO: asynchronize it

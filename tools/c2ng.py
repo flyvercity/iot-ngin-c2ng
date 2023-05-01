@@ -1,3 +1,8 @@
+#   SPDX-License-Identifier: MIT
+#   Copyright 2023 Flyvercity
+
+''' CLI Tools to manage the Service and simulators '''
+
 import requests
 import json
 import logging as lg

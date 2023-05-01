@@ -1,3 +1,6 @@
+#   SPDX-License-Identifier: MIT
+#   Copyright 2023 Flyvercity
+
 import yaml
 from pathlib import Path
 from argparse import ArgumentParser
