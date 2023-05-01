@@ -17,13 +17,13 @@ Document schema:
     "UasID": "string",
     "UavID": "string",
 
-    "GatewayIP": "string: IPv4 or IPv6 address",
-    "UasIP": "string: IPv4 or IPv6 address",
-
+    "UavIP": "string: IPv4 or IPv6 address",
+    "UavGatewayIP": "string: IPv4 or IPv6 address",
     "UavPublicKey": "string: hex",
     "UavPrivateKey": "string: hex",
 
     "RpsIP": "string: IPv4 or IPv6 address",
+    "RpsGatewayIP": "string: IPv4 or IPv6 address",
     "RpsPublicKey": "string: hex",
     "RpsPrivateKey": "string: hex"
 }

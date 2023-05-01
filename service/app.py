@@ -14,9 +14,11 @@ import tornado.web as web
 from marshmallow.exceptions import ValidationError
 
 from schemas import (
+    BaseSuccessSchema,
     ValidationErrorSchema,
     AerialConnectionSessionRequest,
-    AerialConnectionSessionResponseFailed
+    AerialConnectionSessionResponseFailed,
+    AerialConnectionSessionResponse
 )
 
 from uss import UssInterface
@@ -59,7 +61,7 @@ class HandlerBase(web.RequestHandler):
             lg.error(f'Invalid response {response}: {ve}')
             raise RuntimeError('Invalid response')
 
-    def respond(self, ResponseSchema: type, data: dict = {}):
+    def respond(self, ResponseSchema: type = BaseSuccessSchema, data: dict = {}):
         '''Successful response with optional data
 
         Args:
@@ -194,17 +196,28 @@ class UavSessionRequestHandler(HandlerBase):
 
             return
 
-        session = {
-            'UasID': uasid,
-            "GatewayIP": '127.0.0.1',
-            "UasIP": '127.0.0.1',
-            "RpsIP": '127.0.0.1',
-            "UavPublicKey": 'w43frgojerpgojerpvjervp',
-            "UavPrivateKey": 'cdssvsdvsdvsdvsdvdsvdv'
+        session = self.mongo.get_session(uasid)
+
+        if not session:
+            lg.info(f'Initializing new session for {uasid}')
+            session = {'UasID': uasid}
+
+        if 'UavIP' not in session:
+            uav_creds = self.nsacf.get_ue_network_creds(request['IMSI'])
+            session['UavIP'] = uav_creds['IP']
+            session['UavGateway'] = uav_creds['Gateway']
+            self.mongo.put_session(session)
+            cached = False
+        else:
+            cached = True
+
+        response = {
+            'IP': session['UavIP'],
+            'GatewayIP': session['UavGateway'],
+            'Cached': cached
         }
 
-        self.mongo.put_session(session)
-        self.respond()
+        self.respond(AerialConnectionSessionResponse, response)
 
 
 def handlers():

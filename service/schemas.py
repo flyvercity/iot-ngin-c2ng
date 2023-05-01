@@ -6,65 +6,43 @@
 from marshmallow import Schema, fields, validate
 
 
+def uasid():
+    '''Generate standard UAS ID field.'''
+    return fields.String(required=True, description='CAA UAS ID')
+
+
+def validate_imsi(value):
+    '''Validate standard 3GPP IMSI number.'''
+    return validate.Regexp('[0-9]{14,15}')
+
+
 class BaseSuccessSchema(Schema):
-    Success = fields.Boolean(validate=validate.Equal(True))
+    Success = fields.Boolean(validate=validate.Equal(True), description='Success flag')
 
 
 class ErrorSchema(Schema):
-    Success = fields.Boolean(validate=validate.Equal(False))
+    Success = fields.Boolean(validate=validate.Equal(False), description='Failure flag.')
     Message = fields.String()
 
 
 class ValidationErrorSchema(ErrorSchema):
     Errors = fields.Dict(
         keys=fields.String,
-        values=fields.List(fields.String)
-    )
-
-
-def uasid():
-    return fields.String(
-        required=True,
-        description='CAA UAS ID'
+        values=fields.List(fields.String),
+        description='Error identifier dict'
     )
 
 
 class AerialConnectionSessionRequest(Schema):
-    ref_time = fields.Integer(
-        data_key='ReferenceTime',
+    ReferenceTime = fields.Integer(
         description='UNIX Timestamp',
         required=True
     )
 
     UasID = uasid()
+    IMSI = fields.String(validate=validate_imsi, required=True, description='UE IMSI ID')
     # TODO: Transmit metadata to USS
-    metadata = fields.Dict(data_key='UssMetadata', required=False)
-
-
-class AerialConnectionSessionResponse(Schema):
-    own_ip = fields.IP(
-        data_key='IP',
-        description='Own IP (v4 or v6) for the reliable connection',
-        required=True
-    )
-
-    gateway_id = fields.IP(
-        data_key='GatewayIP',
-        description='IP (v4 or v6) for the reliable connection gateway',
-        required=True
-    )
-
-    private_key = fields.String(
-        data_key='SessionPrivateKey',
-        description='Session private key in encrypt own traffic (hex)',
-        required=True
-    )
-
-    public_key = fields.String(
-        data_key='SessionPublicKey',
-        description='Session key to decrypt RPS traffic (hex)',
-        required=True
-    )
+    Metadata = fields.Dict(required=False, description='Opaque object to pass to USSP')
 
 
 class AerialConnectionSessionResponseErrors(Schema):
@@ -76,3 +54,9 @@ class AerialConnectionSessionResponseErrors(Schema):
 
 class AerialConnectionSessionResponseFailed(ErrorSchema):
     Errors = fields.Nested(AerialConnectionSessionResponseErrors, required=True)
+
+
+class AerialConnectionSessionResponse(BaseSuccessSchema):
+    IP = fields.IP(required=True, description='Own IP address for aerial connection.')
+    GatewayIP = fields.IP(required=True, description='Gateway IP for aerial connection.')
+    Cached = fields.Boolean(required=True)

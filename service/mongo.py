@@ -18,9 +18,9 @@ class Mongo:
 
         self._client = MongoClient(config['uri'])
 
-    def get_session(self, id: str) -> dict | None:
+    def get_session(self, sid: str) -> dict | None:
         '''Fetch a session from a collection.'''
-        return self._client.c2ng.c2session.find_one({'_id': id})
+        return self._client.c2ng.c2session.find_one({'_id': sid})
 
     def put_session(self, session: dict):
         '''Put a session object into collection.'''
