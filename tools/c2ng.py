@@ -44,7 +44,11 @@ class Handler:
                 raise UserWarning(f'Malformed failure reply: {r.text}')
 
             errors = reply['Errors']
-            raise UserWarning(f'Service replied with an error {errors}')
+
+            if message := reply.get('Message'):
+                print(f'Error message from service: {message}')
+
+            raise UserWarning(errors)
 
         return reply
 

@@ -6,3 +6,5 @@ uss:
   endpoint: http://host.docker.internal:9091
 mongo:
   uri: mongodb://root:example@mongo:27017/
+nsacf:
+  simulated: true

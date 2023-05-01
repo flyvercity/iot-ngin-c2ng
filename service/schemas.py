@@ -3,20 +3,20 @@
 
 ''' Input/Output Data Object Schemas '''
 
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, validate
 
 
 class BaseSuccessSchema(Schema):
-    success = fields.Boolean(data_key='Success', default=True)
+    Success = fields.Boolean(validate=validate.Equal(True))
 
 
 class ErrorSchema(Schema):
-    success = fields.Boolean(data_key='Success', default=False)
+    Success = fields.Boolean(validate=validate.Equal(False))
+    Message = fields.String()
 
 
 class ValidationErrorSchema(ErrorSchema):
-    errors = fields.Dict(
-        data_key='Errors',
+    Errors = fields.Dict(
         keys=fields.String,
         values=fields.List(fields.String)
     )
@@ -56,20 +56,27 @@ class AerialConnectionSessionResponse(Schema):
 
     private_key = fields.String(
         data_key='SessionPrivateKey', 
-        description='Session private key in encrypt own traffic',
+        description='Session private key in encrypt own traffic (hex)',
         required=True
     )
 
     public_key = fields.String(
         data_key='SessionPublicKey',
-        description='Session key to decrypt RPS traffic',
+        description='Session key to decrypt RPS traffic (hex)',
         required=True
     )
 
 
-class AerialConnectionSessionResponseErrors(Schema):
-    uss = fields.String(data_key='USS', required=True)
-
-
 class AerialConnectionSessionResponseFailed(ErrorSchema):
-    errors = fields.Nested(AerialConnectionSessionResponseErrors, data_key='Errors')
+    Errors = fields.Nested(
+        {
+            'USS': fields.String(
+                required=True,
+                validate=validate.OneOf([
+                    'provider_unavailable',
+                    'flight_not_approved'
+                ])
+            )
+        },
+        required=True
+    )

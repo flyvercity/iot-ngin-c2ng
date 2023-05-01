@@ -21,6 +21,7 @@ from schemas import (
 
 from uss import UssInterface
 from mongo import Mongo
+from nsacf import NSACF
 
 
 DEFAULT_LISTEN_PORT = 9090
@@ -30,30 +31,62 @@ class HandlerBase(web.RequestHandler):
     ''' Helper methods for request and errors handling '''
 
     def prepare(self):
-        ''' Creating shortcuts to subservices '''
+        '''Creates shortcuts to subservices'''
         self.uss = self.settings['uss']  # type: UssInterface
         self.mongo = self.settings['mongo']  # type: Mongo
+        self.nsacf = self.settings['nsacf']  # type: NSACF
 
-    def respond(self, data={}):
-        ''' Successful response with optional data '''
-        self.set_header('Content-Type', 'application/json')
-        data['Success'] = True
-        self.finish(json.dumps(data) + '\n')
+    def _return(self, ResponseSchema: type, response: dict):
+        '''Validate and return a response
 
-    def fail(self, ResponseSchema, errors):
-        ''' Graceful failure response '''
+        Args:
+        - `ResponseSchema` - a schema of the response, subclass of `Schema`
+        - `response` - a dict with formattable data
+        '''
+
         self.set_header('Content-Type', 'application/json')
-        self.set_status(400)
-        response = {'Success': False, 'Errors': errors}
         schema = ResponseSchema()
 
         try:
-            schema.validate(response)
+            ve = schema.validate(response)
+
+            if ve:
+                raise ValidationError(ve)
+
             self.finish(json.dumps(response) + '\n')
 
         except ValidationError as ve:
             lg.error(f'Invalid response {response}: {ve}')
             raise RuntimeError('Invalid response')
+
+    def respond(self, ResponseSchema: type, data: dict = {}):
+        '''Successful response with optional data
+
+        Args:
+        - `ResponseSchema` - a schema of the successful response, subclass of `BaseSuccessSchema`
+        - data: JSON-formattable response
+        '''
+
+        self.set_status(200)
+        data['Success'] = True
+        self._return(ResponseSchema, data)
+
+    def fail(self, ResponseSchema: type, errors: dict, message: str = None):
+        '''Graceful failure response
+
+        Args:
+        - `ResponseSchema` - a schema of the erroneous response, subclass of `ErrorSchema`
+        - `errors` - a dict with structured error
+        - `message` - an optional human readable message
+        '''
+
+        self.set_status(400)
+        response = {'Success': False, 'Errors': errors}
+
+        if message:
+            response.update({'Message': message})
+
+        self._return(ResponseSchema, response)
 
     def write_error(self, status_code, **kwargs):
         ''' Exception response '''
@@ -67,7 +100,7 @@ class HandlerBase(web.RequestHandler):
 
     def get_request(self, RequestSchema):
         ''' Unmarshal and validate a JSON request
-        
+
         Parameters:
         - `RequestSchema` - a type of the request to validate against
         '''
@@ -75,12 +108,15 @@ class HandlerBase(web.RequestHandler):
         try:
             payload = json.loads(self.request.body)
             schema = RequestSchema()
-            schema.validate(payload)
+
+            if ve := schema.validate(payload):
+                raise ValidationError(ve)
+
             request = schema.load(payload)
             return request
 
         except ValidationError as ve:
-            object.fail(ValidationErrorSchema, ve.messages_dict)
+            self.fail(ValidationErrorSchema, ve.messages_dict)
             return None
 
 
@@ -140,10 +176,20 @@ class UavSessionRequestHandler(HandlerBase):
         approved, error = self.uss.request(uasid)
 
         if error:
-            self.fail(AerialConnectionSessionResponseFailed, {'USS': error})
+            self.fail(AerialConnectionSessionResponseFailed, {
+                    'USS': 'provider_unavailable',
+                },
+                message=error
+            )
+
             return
 
         lg.info(f'USS approval for {uasid}: {approved}')
+
+        if not approved:
+            self.fail(AerialConnectionSessionResponseFailed, {
+                'USS': 'flight_not_approved'
+            })
 
         session = {
             'UasID': uasid,
@@ -178,12 +224,14 @@ async def main():
     lg.debug('C2NG :: Starting up')
     mongo = Mongo(config['mongo'])
     uss = UssInterface(config['uss'])
+    nsacf = NSACF(config['nsacf'])
 
     app = web.Application(
         handlers(),
         config=config,
         mongo=mongo,
-        uss=uss
+        uss=uss,
+        nsacf=nsacf
     )
 
     lg.info(f'C2NG :: Listening for requests on {port}')
