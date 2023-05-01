@@ -1,16 +1,16 @@
 #   SPDX-License-Identifier: MIT
 #   Copyright 2023 Flyvercity
 
-''' Interface with MongoDB '''
+'''Interface with MongoDB'''
 
 from pymongo import MongoClient
 
 
 class Mongo:
-    '''Mongo Client Helper '''
+    '''Mongo client helper class.'''
 
     def __init__(self, config):
-        '''Constructor
+        '''Constructor.
 
         Args:
         - `config`: `mongo` section of the configuration dict
@@ -19,11 +19,11 @@ class Mongo:
         self._client = MongoClient(config['uri'])
 
     def get_session(self, id: str) -> dict | None:
-        '''Fetch a session from a collection '''
+        '''Fetch a session from a collection.'''
         return self._client.c2ng.c2session.find_one({'_id': id})
 
     def put_session(self, session: dict):
-        '''Put a session object into collection '''
+        '''Put a session object into collection.'''
         sid = session['UasID']
         session.update({'_id': sid})
 

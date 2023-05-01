@@ -1,14 +1,14 @@
 #   SPDX-License-Identifier: MIT
 #   Copyright 2023 Flyvercity
 
-''' Interface with Network Slice Admission Control Function '''
+'''Interface with Network Slice Admission Control Function'''
 
 
 class NSACF:
     '''NSACF API'''
 
     def __init__(self, config: dict):
-        '''Constructor
+        '''Constructor.
 
         Parameters:
         - `config` - `nsacf` section of the configuration file
@@ -17,7 +17,7 @@ class NSACF:
         self._config = config
 
     def get_ue_network_creds(self, imsi: str):
-        '''Get next network credentials for a UE
+        '''Get next network credentials for a UE.
 
         Parameters:
         - `imsi` - unique UE identified
@@ -41,7 +41,7 @@ class NSACF:
         raise RuntimeError('Not implemented exception')
 
     def get_ground_network_creds(self, uid):
-        '''Get next network credentials for an ADX client
+        '''Get next network credentials for an ADX client.
 
         Parameters:
         - `uid` - uniqie client identifier

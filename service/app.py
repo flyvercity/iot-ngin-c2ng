@@ -1,7 +1,7 @@
 #   SPDX-License-Identifier: MIT
 #   Copyright 2023 Flyvercity
 
-''' Service Main Module '''
+'''Service Main Module'''
 
 import os
 import logging as lg
@@ -28,16 +28,16 @@ DEFAULT_LISTEN_PORT = 9090
 
 
 class HandlerBase(web.RequestHandler):
-    ''' Helper methods for request and errors handling '''
+    '''Helper methods for request and errors handling'''
 
     def prepare(self):
-        '''Creates shortcuts to subservices'''
+        '''Creates shortcuts to subservices.'''
         self.uss = self.settings['uss']  # type: UssInterface
         self.mongo = self.settings['mongo']  # type: Mongo
         self.nsacf = self.settings['nsacf']  # type: NSACF
 
     def _return(self, ResponseSchema: type, response: dict):
-        '''Validate and return a response
+        '''Validate and return a response.
 
         Args:
         - `ResponseSchema` - a schema of the response, subclass of `Schema`
@@ -72,7 +72,7 @@ class HandlerBase(web.RequestHandler):
         self._return(ResponseSchema, data)
 
     def fail(self, ResponseSchema: type, errors: dict, message: str = None):
-        '''Graceful failure response
+        '''Produces a graceful failure response.
 
         Args:
         - `ResponseSchema` - a schema of the erroneous response, subclass of `ErrorSchema`
@@ -89,7 +89,7 @@ class HandlerBase(web.RequestHandler):
         self._return(ResponseSchema, response)
 
     def write_error(self, status_code, **kwargs):
-        ''' Exception response '''
+        '''Produces an exception response'''
         self.set_header('Content-Type', 'application/json')
 
         self.finish(json.dumps({
@@ -99,9 +99,9 @@ class HandlerBase(web.RequestHandler):
         }))
 
     def get_request(self, RequestSchema):
-        ''' Unmarshal and validate a JSON request
+        '''Unmarshal and validate a JSON request
 
-        Parameters:
+        Args:
         - `RequestSchema` - a type of the request to validate against
         '''
 
@@ -121,7 +121,7 @@ class HandlerBase(web.RequestHandler):
 
 
 class TestHandler(HandlerBase):
-    ''' Test Endpoint Handler '''
+    '''Test Endpoint Handler'''
 
     def get(self):
         ''' Return empty success result
@@ -140,7 +140,7 @@ class TestHandler(HandlerBase):
 
 
 class UavSessionRequestHandler(HandlerBase):
-    ''' UAV Session Endpoint Handler '''
+    '''UAV Session Endpoint Handler'''
 
     def post(self):
         ''' Returns new connection credentials
@@ -191,6 +191,7 @@ class UavSessionRequestHandler(HandlerBase):
             self.fail(AerialConnectionSessionResponseFailed, {
                 'USS': 'flight_not_approved'
             })
+
             return
 
         session = {
@@ -207,7 +208,7 @@ class UavSessionRequestHandler(HandlerBase):
 
 
 def handlers():
-    ''' Return a full set of URLSpec '''
+    '''Return a full set of URLSpec. '''
 
     return [
         (r'/test', TestHandler),
@@ -216,7 +217,7 @@ def handlers():
 
 
 async def main():
-    ''' Asynchronious entry point. '''
+    '''Asynchronious entry point. '''
     config_file = Path(os.getenv('C2NG_CONFIG_FILE', '/c2ng/config/config.yaml'))
     # TODO: Validate config
     config = yaml.safe_load(config_file.read_text())

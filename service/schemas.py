@@ -1,7 +1,7 @@
 #   SPDX-License-Identifier: MIT
 #   Copyright 2023 Flyvercity
 
-''' Input/Output Data Object Schemas '''
+'''Input/Output Data Object Schemas'''
 
 from marshmallow import Schema, fields, validate
 
@@ -55,7 +55,7 @@ class AerialConnectionSessionResponse(Schema):
     )
 
     private_key = fields.String(
-        data_key='SessionPrivateKey', 
+        data_key='SessionPrivateKey',
         description='Session private key in encrypt own traffic (hex)',
         required=True
     )
