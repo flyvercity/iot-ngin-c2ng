@@ -73,6 +73,7 @@ def main():
     uav.add_argument('-i', '--uasid', help='UAS CAA ID', default='droneid')
     uss = sp.add_parser('uss', help='USSP Simulator')
     uss.add_argument('-p', '--port', type=int, default=DEFAULT_USS_PORT)
+    uss.add_argument('-D', '--disapprove', action='store_true', default=False)
     args = parser.parse_args()
     lg.basicConfig(level=lg.DEBUG if args.verbose else lg.INFO)
     Handler(args).handle()

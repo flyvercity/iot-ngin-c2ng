@@ -21,7 +21,7 @@ class ApproveHandler(web.RequestHandler):
 
         data = {
             'UasID': uasid,
-            'Approved': True
+            'Approved': not self.settings['disapprove']
         }
 
         self.finish(json.dumps(data) + '\n')
@@ -37,7 +37,7 @@ def handlers():
 
 async def start(args):
     port = args.port
-    app = web.Application(handlers())
+    app = web.Application(handlers(), disapprove=args.disapprove)
     lg.info(f'USS SIM :: Listening for requests on {port}')
     app.listen(port)
     await asyncio.Event().wait()

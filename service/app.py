@@ -191,6 +191,7 @@ class UavSessionRequestHandler(HandlerBase):
             self.fail(AerialConnectionSessionResponseFailed, {
                 'USS': 'flight_not_approved'
             })
+            return
 
         session = {
             'UasID': uasid,
