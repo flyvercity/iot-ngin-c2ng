@@ -57,7 +57,10 @@ class Handler:
         self.dump(r)
 
     def uav(self):
-        uas_sim.request(self)
+        uas_sim.request_uav(self)
+
+    def adx(self):
+        uas_sim.request_adx(self)
 
     def uss(self):
         uss_sim.run(self.args)
@@ -69,11 +72,17 @@ def main():
     parser.add_argument('-u', '--url', help='C2NG service URL', default='http://localhost:9090')
     sp = parser.add_subparsers(dest='command', required=True, metavar='CMD')
     sp.add_parser('test', help='Test a connection with the service')
+
     uav = sp.add_parser('uav', help='Command on behalf of UAV')
     uav.add_argument('-i', '--uasid', help='UAS CAA ID', default='droneid')
+
+    adx = sp.add_parser('adx', help='Command on behalf of UAV')
+    adx.add_argument('-i', '--uasid', help='UAS CAA ID', default='droneid')
+
     uss = sp.add_parser('uss', help='USSP Simulator')
     uss.add_argument('-p', '--port', type=int, default=DEFAULT_USS_PORT)
     uss.add_argument('-D', '--disapprove', action='store_true', default=False)
+
     args = parser.parse_args()
     lg.basicConfig(level=lg.DEBUG if args.verbose else lg.INFO)
     Handler(args).handle()

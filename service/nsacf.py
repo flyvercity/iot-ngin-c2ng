@@ -19,7 +19,7 @@ class NSACF:
     def get_ue_network_creds(self, imsi: str):
         '''Get next network credentials for a UE.
 
-        Parameters:
+        Args:
         - `imsi` - unique UE identified
 
         Returns:
@@ -40,11 +40,11 @@ class NSACF:
 
         raise RuntimeError('Not implemented exception')
 
-    def get_ground_network_creds(self, uid):
+    def get_adx_network_creds(self, uid):
         '''Get next network credentials for an ADX client.
 
-        Parameters:
-        - `uid` - uniqie client identifier
+        Args:
+        - `uid` - unique client identifier
 
         Returns:
 

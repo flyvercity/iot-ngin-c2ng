@@ -34,6 +34,7 @@ class ValidationErrorSchema(ErrorSchema):
 
 
 class AerialConnectionSessionRequest(Schema):
+    # TODO: Check reference time
     ReferenceTime = fields.Integer(
         description='UNIX Timestamp',
         required=True
@@ -59,4 +60,30 @@ class AerialConnectionSessionResponseFailed(ErrorSchema):
 class AerialConnectionSessionResponse(BaseSuccessSchema):
     IP = fields.IP(required=True, description='Own IP address for aerial connection.')
     GatewayIP = fields.IP(required=True, description='Gateway IP for aerial connection.')
+    Cached = fields.Boolean(required=True)
+
+
+class AdxConnectionSessionRequest(Schema):
+    # TODO: Check reference time
+    ReferenceTime = fields.Integer(
+        description='UNIX Timestamp',
+        required=True
+    )
+
+    UasID = fields.String()
+
+
+class AdxConnectionSessionResponseErrors(Schema):
+    USS = fields.String(required=True, validate=validate.OneOf([
+        'here_defined_the_errors'
+    ]))
+
+
+class AdxConnectionSessionResponseFailed(ErrorSchema):
+    Errors = fields.Nested(AdxConnectionSessionResponseErrors, required=True)
+
+
+class AdxConnectionSessionResponse(BaseSuccessSchema):
+    IP = fields.IP(required=True, description='Own IP address for the ADX connection.')
+    GatewayIP = fields.IP(required=True, description='Gateway IP for ADX connection.')
     Cached = fields.Boolean(required=True)

@@ -9,12 +9,21 @@ from datetime import datetime
 DEFAULT_SAFETY_MARGIN = 300
 
 
-def request(ctx):
-    query = {
+def post(ctx, path, query):
+    response = ctx.request(path, method='POST', body=query)
+    ctx.dump(response)
+
+
+def request_uav(ctx):
+    post(ctx, '/uav/session', {
         'ReferenceTime': datetime.now().timestamp(),
         'UasID': ctx.args.uasid,
         'IMSI': '123456989012345'
-    }
+    })
 
-    response = ctx.request('/uav/session', method='POST', body=query)
-    ctx.dump(response)
+
+def request_adx(ctx):
+    post(ctx, '/adx/session', {
+        'ReferenceTime': datetime.now().timestamp(),
+        'UasID': ctx.args.uasid,
+    })

@@ -6,7 +6,8 @@ Project: C2NG Trusted Uncrewed Aviation Systems Command and Control for IoT-NGIN
 
 # Development Environment
 
-## Dependencies
+Development dependencies:
 
 * docker
 * docker-compose
+* python 3.10 with dependencies from `requirements.txt` and `requirements.dev.txt`

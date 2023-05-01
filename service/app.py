@@ -18,7 +18,9 @@ from schemas import (
     ValidationErrorSchema,
     AerialConnectionSessionRequest,
     AerialConnectionSessionResponseFailed,
-    AerialConnectionSessionResponse
+    AerialConnectionSessionResponse,
+    AdxConnectionSessionRequest,
+    AdxConnectionSessionResponse
 )
 
 from uss import UssInterface
@@ -196,16 +198,14 @@ class UavSessionRequestHandler(HandlerBase):
 
             return
 
-        session = self.mongo.get_session(uasid)
-
-        if not session:
+        if not (session := self.mongo.get_session(uasid)):
             lg.info(f'Initializing new session for {uasid}')
             session = {'UasID': uasid}
 
         if 'UavIP' not in session:
             uav_creds = self.nsacf.get_ue_network_creds(request['IMSI'])
             session['UavIP'] = uav_creds['IP']
-            session['UavGateway'] = uav_creds['Gateway']
+            session['UavGatewayIP'] = uav_creds['Gateway']
             self.mongo.put_session(session)
             cached = False
         else:
@@ -213,11 +213,69 @@ class UavSessionRequestHandler(HandlerBase):
 
         response = {
             'IP': session['UavIP'],
-            'GatewayIP': session['UavGateway'],
+            'GatewayIP': session['UavGatewayIP'],
             'Cached': cached
         }
 
         self.respond(AerialConnectionSessionResponse, response)
+
+
+class AdxSessionRequestHandler(HandlerBase):
+    '''Aviation Data Exchange Network Session Endpoint Handler'''
+
+    def post(self):
+        ''' Returns new connection credentials
+        ---
+        summary: Request a new session for an ADX client (RPS or USS services)
+
+        requestBody:
+            description: ADX Connectivity Session Request
+            required: True
+            content:
+                application/json:
+                    schema:
+                        AdxConnectionSessionRequest
+
+        responses:
+            200:
+                description: Success payload containing session information
+                content:
+                    application/json:
+                        schema:
+                            AdxConnectionSessionResponse
+            400:
+                description: Payload containing error description
+                content:
+                    application/json:
+                        schema:
+                            AdxConnectionSessionResponseFailed
+        '''
+
+        if not (request := self.get_request(AdxConnectionSessionRequest)):
+            return
+
+        uasid = request['UasID']
+
+        if not (session := self.mongo.get_session(uasid)):
+            lg.info(f'Initializing new session (ADX) for {uasid}')
+            session = {'UasID': uasid}
+
+        if 'AdxIP' not in session:
+            adx_cred = self.nsacf.get_adx_network_creds(uasid)
+            session['AdxIP'] = adx_cred['IP']
+            session['AdxGatewayIP'] = adx_cred['Gateway']
+            self.mongo.put_session(session)
+            cached = False
+        else:
+            cached = True
+
+        response = {
+            'IP': session['AdxIP'],
+            'GatewayIP': session['AdxGatewayIP'],
+            'Cached': cached
+        }
+
+        self.respond(AdxConnectionSessionResponse, response)
 
 
 def handlers():
@@ -225,7 +283,8 @@ def handlers():
 
     return [
         (r'/test', TestHandler),
-        (r'/uav/session', UavSessionRequestHandler)
+        (r'/uav/session', UavSessionRequestHandler),
+        (r'/adx/session', AdxSessionRequestHandler)
     ]
 
 
