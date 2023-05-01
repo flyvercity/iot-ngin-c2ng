@@ -1,0 +1,103 @@
+openapi: 3.0.2
+info:
+  description: Documentation for the Command-and-Control NextGen API
+  title: C2NG API Definition
+  version: 1.0.0
+components:
+  schemas:
+    AerialConnectionSessionRequest:
+      properties:
+        ReferenceTime:
+          description: UNIX Timestamp
+          type: integer
+        UasID:
+          description: CAA UAS ID
+          type: string
+        UssMetadata:
+          type: object
+      required:
+      - ReferenceTime
+      - UasID
+      type: object
+    AerialConnectionSessionResponse:
+      properties:
+        GatewayIP:
+          description: IP (v4 or v6) for the reliable connection gateway
+        IP:
+          description: Own IP (v4 or v6) for the reliable connection
+        SessionPrivateKey:
+          description: Session private key in encrypt own traffic (hex)
+          type: string
+        SessionPublicKey:
+          description: Session key to decrypt RPS traffic (hex)
+          type: string
+      required:
+      - GatewayIP
+      - IP
+      - SessionPrivateKey
+      - SessionPublicKey
+      type: object
+    AerialConnectionSessionResponseErrors:
+      properties:
+        USS:
+          enum:
+          - provider_unavailable
+          - flight_not_approved
+          type: string
+      required:
+      - USS
+      type: object
+    AerialConnectionSessionResponseFailed:
+      properties:
+        Errors:
+          $ref: '#/components/schemas/AerialConnectionSessionResponseErrors'
+        Message:
+          type: string
+        Success:
+          enum:
+          - false
+          type: boolean
+      required:
+      - Errors
+      type: object
+    BaseSuccess:
+      properties:
+        Success:
+          enum:
+          - true
+          type: boolean
+      type: object
+paths:
+  /test:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseSuccess'
+          description: Minimum success response
+      summary: Return empty success result
+  /uav/session:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AerialConnectionSessionRequest'
+        description: Aerial Connectivity Session Request
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AerialConnectionSessionResponse'
+          description: Success payload containing session information
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AerialConnectionSessionResponseFailed'
+          description: Payload containing error description
+      summary: Request a new session for UAV

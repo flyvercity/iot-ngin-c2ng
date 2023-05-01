@@ -129,6 +129,7 @@ class TestHandler(HandlerBase):
         summary: Return empty success result
         responses:
             200:
+                description: Minimum success response
                 content:
                     application/json:
                         schema:

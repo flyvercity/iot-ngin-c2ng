@@ -67,16 +67,12 @@ class AerialConnectionSessionResponse(Schema):
     )
 
 
+class AerialConnectionSessionResponseErrors(Schema):
+    USS = fields.String(required=True, validate=validate.OneOf([
+        'provider_unavailable',
+        'flight_not_approved'
+    ]))
+
+
 class AerialConnectionSessionResponseFailed(ErrorSchema):
-    Errors = fields.Nested(
-        {
-            'USS': fields.String(
-                required=True,
-                validate=validate.OneOf([
-                    'provider_unavailable',
-                    'flight_not_approved'
-                ])
-            )
-        },
-        required=True
-    )
+    Errors = fields.Nested(AerialConnectionSessionResponseErrors, required=True)
