@@ -24,5 +24,11 @@ class Mongo:
 
     def put_session(self, session: dict):
         '''Put a session object into collection '''
-        session.update({'_id': session['UasID']})
-        self._client.c2ng.c2session.insert_one(session)
+        sid = session['UasID']
+        session.update({'_id': sid})
+
+        self._client.c2ng.c2session.replace_one(
+            {'_id': sid},
+            session,
+            upsert=True
+        )
