@@ -1,7 +1,7 @@
 #   SPDX-License-Identifier: MIT
 #   Copyright 2023 Flyvercity
 
-'''UAV and RPR Simulators'''
+'''UA and RPR Simulators'''
 
 from datetime import datetime
 
@@ -14,8 +14,8 @@ def post(ctx, path, query):
     ctx.dump(response)
 
 
-def request_uav(ctx):
-    post(ctx, '/uav/session', {
+def request_ua(ctx):
+    post(ctx, '/ua/session', {
         'ReferenceTime': datetime.now().timestamp(),
         'UasID': ctx.args.uasid,
         'IMSI': '123456989012345'

@@ -56,8 +56,8 @@ class Handler:
         r = self.request('/test')
         self.dump(r)
 
-    def uav(self):
-        uas_sim.request_uav(self)
+    def ua(self):
+        uas_sim.request_ua(self)
 
     def adx(self):
         uas_sim.request_adx(self)
@@ -73,10 +73,10 @@ def main():
     sp = parser.add_subparsers(dest='command', required=True, metavar='CMD')
     sp.add_parser('test', help='Test a connection with the service')
 
-    uav = sp.add_parser('uav', help='Command on behalf of UAV')
-    uav.add_argument('-i', '--uasid', help='UAS CAA ID', default='droneid')
+    ua = sp.add_parser('ua', help='Command on behalf of UA')
+    ua.add_argument('-i', '--uasid', help='UAS CAA ID', default='droneid')
 
-    adx = sp.add_parser('adx', help='Command on behalf of UAV')
+    adx = sp.add_parser('adx', help='Command on behalf of UA')
     adx.add_argument('-i', '--uasid', help='UAS CAA ID', default='droneid')
 
     uss = sp.add_parser('uss', help='USSP Simulator')

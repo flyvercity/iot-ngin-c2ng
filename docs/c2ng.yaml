@@ -159,7 +159,7 @@ paths:
                 $ref: '#/components/schemas/BaseSuccess'
           description: Minimum success response
       summary: Return empty success result
-  /uav/session:
+  /ua/session:
     post:
       requestBody:
         content:
@@ -181,4 +181,4 @@ paths:
               schema:
                 $ref: '#/components/schemas/AerialConnectionSessionResponseFailed'
           description: Payload containing error description
-      summary: Request a new session for UAV
+      summary: Request a new session for the UA

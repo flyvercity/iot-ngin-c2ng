@@ -1,4 +1,4 @@
-# Next Generation UAV Command-and-Control
+# Next Generation UAS Command-and-Control
 
 Project: C2NG Trusted Uncrewed Aviation Systems Command and Control for IoT-NGIN Open Call 2.
 

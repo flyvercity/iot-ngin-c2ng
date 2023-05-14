@@ -15,10 +15,10 @@ Document schema:
 ```json
 {
     "UasID": "string",
-    "UavID": "string",
+    "UaID": "string",
 
-    "UavIP": "string: IPv4 or IPv6 address",
-    "UavGatewayIP": "string: IPv4 or IPv6 address",
+    "UaIP": "string: IPv4 or IPv6 address",
+    "UaGatewayIP": "string: IPv4 or IPv6 address",
 
     "AdxIP": "string: IPv4 or IPv6 address",
     "AdxGatewayIP": "string: IPv4 or IPv6 address"

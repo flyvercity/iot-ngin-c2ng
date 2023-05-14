@@ -145,13 +145,13 @@ class TestHandler(HandlerBase):
         self.respond()
 
 
-class UavSessionRequestHandler(HandlerBase):
-    '''UAV Session Endpoint Handler'''
+class UaSessionRequestHandler(HandlerBase):
+    '''UA Session Endpoint Handler'''
 
     def post(self):
         ''' Returns new connection credentials
         ---
-        summary: Request a new session for UAV
+        summary: Request a new session for UA
 
         requestBody:
             description: Aerial Connectivity Session Request
@@ -204,16 +204,16 @@ class UavSessionRequestHandler(HandlerBase):
             lg.info(f'Initializing new session for {uasid}')
             session = {'UasID': uasid}
 
-        uav_creds = self.nsacf.get_ue_network_creds(request['IMSI'])
-        session['UavIP'] = uav_creds['IP']
-        session['UavGatewayIP'] = uav_creds['Gateway']
+        ua_creds = self.nsacf.get_ue_network_creds(request['IMSI'])
+        session['UaIP'] = ua_creds['IP']
+        session['UaGatewayIP'] = ua_creds['Gateway']
         sec_creds = self.secman.gen_client_credentials(f'{uasid}::UA', 'secret')
-        session['UavCertificate'] = sec_creds.cert()
+        session['UaCertificate'] = sec_creds.cert()
         self.mongo.put_session(session)
 
         response = {
-            'IP': session['UavIP'],
-            'GatewayIP': session['UavGatewayIP'],
+            'IP': session['UaIP'],
+            'GatewayIP': session['UaGatewayIP'],
             'EncryptedPrivateKey': sec_creds.key()
         }
 
@@ -281,7 +281,7 @@ def handlers():
 
     return [
         (r'/test', TestHandler),
-        (r'/uav/session', UavSessionRequestHandler),
+        (r'/ua/session', UaSessionRequestHandler),
         (r'/adx/session', AdxSessionRequestHandler)
     ]
 
