@@ -5,37 +5,93 @@ info:
   version: 1.0.0
 components:
   schemas:
+    AdxConnectionSessionRequest:
+      properties:
+        ReferenceTime:
+          description: UNIX Timestamp
+          type: integer
+        UasID:
+          type: string
+      required:
+      - ReferenceTime
+      type: object
+    AdxConnectionSessionResponse:
+      properties:
+        Cached:
+          type: boolean
+        GatewayIP:
+          description: Gateway IP for ADX connection.
+        IP:
+          description: Own IP address for the ADX connection.
+        Success:
+          description: Success flag
+          enum:
+          - true
+          type: boolean
+      required:
+      - Cached
+      - GatewayIP
+      - IP
+      type: object
+    AdxConnectionSessionResponseErrors:
+      properties:
+        USS:
+          enum:
+          - here_defined_the_errors
+          type: string
+      required:
+      - USS
+      type: object
+    AdxConnectionSessionResponseFailed:
+      properties:
+        Errors:
+          $ref: '#/components/schemas/AdxConnectionSessionResponseErrors'
+        Message:
+          type: string
+        Success:
+          description: Failure flag.
+          enum:
+          - false
+          type: boolean
+      required:
+      - Errors
+      type: object
     AerialConnectionSessionRequest:
       properties:
+        IMSI:
+          description: UE IMSI ID
+          type: string
+        Metadata:
+          description: Opaque object to pass to USSP
+          type: object
         ReferenceTime:
           description: UNIX Timestamp
           type: integer
         UasID:
           description: CAA UAS ID
           type: string
-        UssMetadata:
-          type: object
       required:
+      - IMSI
       - ReferenceTime
       - UasID
       type: object
     AerialConnectionSessionResponse:
       properties:
+        Cached:
+          type: boolean
         GatewayIP:
-          description: IP (v4 or v6) for the reliable connection gateway
+          description: Gateway IP for aerial connection.
         IP:
-          description: Own IP (v4 or v6) for the reliable connection
-        SessionPrivateKey:
-          description: Session private key in encrypt own traffic (hex)
-          type: string
-        SessionPublicKey:
-          description: Session key to decrypt RPS traffic (hex)
-          type: string
+          description: Own IP address for aerial connection.
+        Success:
+          description: Success flag
+          enum:
+          - true
+          type: boolean
       required:
+      - Cached
       - GatewayIP
       - IP
-      - SessionPrivateKey
-      - SessionPublicKey
       type: object
     AerialConnectionSessionResponseErrors:
       properties:
@@ -54,6 +110,7 @@ components:
         Message:
           type: string
         Success:
+          description: Failure flag.
           enum:
           - false
           type: boolean
@@ -63,11 +120,35 @@ components:
     BaseSuccess:
       properties:
         Success:
+          description: Success flag
           enum:
           - true
           type: boolean
       type: object
 paths:
+  /adx/session:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdxConnectionSessionRequest'
+        description: ADX Connectivity Session Request
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdxConnectionSessionResponse'
+          description: Success payload containing session information
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdxConnectionSessionResponseFailed'
+          description: Payload containing error description
+      summary: Request a new session for an ADX client (RPS or USS services)
   /test:
     get:
       responses:
