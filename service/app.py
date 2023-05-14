@@ -26,6 +26,7 @@ from schemas import (
 from uss import UssInterface
 from mongo import Mongo
 from nsacf import NSACF
+from secman import SecMan
 
 
 DEFAULT_LISTEN_PORT = 9090
@@ -300,13 +301,15 @@ async def main():
     mongo = Mongo(config['mongo'])
     uss = UssInterface(config['uss'])
     nsacf = NSACF(config['nsacf'])
+    secman = SecMan(config['security'])
 
     app = web.Application(
         handlers(),
         config=config,
         mongo=mongo,
         uss=uss,
-        nsacf=nsacf
+        nsacf=nsacf,
+        secman=secman
     )
 
     lg.info(f'C2NG :: Listening for requests on {port}')

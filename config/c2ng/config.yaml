@@ -8,3 +8,5 @@ mongo:
   uri: mongodb://root:example@mongo:27017/
 nsacf:
   simulated: true
+security:
+  certificate: /c2ng/config/service.pem
