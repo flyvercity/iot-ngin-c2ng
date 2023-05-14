@@ -26,7 +26,7 @@ from schemas import (
 from uss import UssInterface
 from mongo import Mongo
 from nsacf import NSACF
-from secman import SecMan
+from secman import SecMan 
 
 
 DEFAULT_LISTEN_PORT = 9090
@@ -40,6 +40,7 @@ class HandlerBase(web.RequestHandler):
         self.uss = self.settings['uss']  # type: UssInterface
         self.mongo = self.settings['mongo']  # type: Mongo
         self.nsacf = self.settings['nsacf']  # type: NSACF
+        self.secman = self.settings['secman']  # type: SecMan
 
     def _return(self, ResponseSchema: type, response: dict):
         '''Validate and return a response.
@@ -203,19 +204,17 @@ class UavSessionRequestHandler(HandlerBase):
             lg.info(f'Initializing new session for {uasid}')
             session = {'UasID': uasid}
 
-        if 'UavIP' not in session:
-            uav_creds = self.nsacf.get_ue_network_creds(request['IMSI'])
-            session['UavIP'] = uav_creds['IP']
-            session['UavGatewayIP'] = uav_creds['Gateway']
-            self.mongo.put_session(session)
-            cached = False
-        else:
-            cached = True
+        uav_creds = self.nsacf.get_ue_network_creds(request['IMSI'])
+        session['UavIP'] = uav_creds['IP']
+        session['UavGatewayIP'] = uav_creds['Gateway']
+        sec_creds = self.secman.gen_client_credentials(f'{uasid}::UA', 'secret')
+        session['UavCertificate'] = sec_creds.cert()
+        self.mongo.put_session(session)
 
         response = {
             'IP': session['UavIP'],
             'GatewayIP': session['UavGatewayIP'],
-            'Cached': cached
+            'EncryptedPrivateKey': sec_creds.key()
         }
 
         self.respond(AerialConnectionSessionResponse, response)
@@ -261,19 +260,17 @@ class AdxSessionRequestHandler(HandlerBase):
             lg.info(f'Initializing new session (ADX) for {uasid}')
             session = {'UasID': uasid}
 
-        if 'AdxIP' not in session:
-            adx_cred = self.nsacf.get_adx_network_creds(uasid)
-            session['AdxIP'] = adx_cred['IP']
-            session['AdxGatewayIP'] = adx_cred['Gateway']
-            self.mongo.put_session(session)
-            cached = False
-        else:
-            cached = True
+        adx_cred = self.nsacf.get_adx_network_creds(uasid)
+        session['AdxIP'] = adx_cred['IP']
+        session['AdxGatewayIP'] = adx_cred['Gateway']
+        sec_creds = self.secman.gen_client_credentials(f'{uasid}::ADX', 'secret')
+        session['AdxCertificate'] = sec_creds.cert()
+        self.mongo.put_session(session)
 
         response = {
             'IP': session['AdxIP'],
             'GatewayIP': session['AdxGatewayIP'],
-            'Cached': cached
+            'EncryptedPrivateKey': sec_creds.key()
         }
 
         self.respond(AdxConnectionSessionResponse, response)

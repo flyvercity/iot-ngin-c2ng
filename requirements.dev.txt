@@ -1,2 +1,2 @@
 flake8==6.0.0
-pipx==1.2.0
+python-dotenv==1.0.0

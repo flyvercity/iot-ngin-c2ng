@@ -60,7 +60,10 @@ class AerialConnectionSessionResponseFailed(ErrorSchema):
 class AerialConnectionSessionResponse(BaseSuccessSchema):
     IP = fields.IP(required=True, description='Own IP address for aerial connection.')
     GatewayIP = fields.IP(required=True, description='Gateway IP for aerial connection.')
-    Cached = fields.Boolean(required=True)
+
+    EncryptedPrivateKey = fields.String(
+        required=True, description='Session private key encrypted with client secret'
+    )
 
 
 class AdxConnectionSessionRequest(Schema):
@@ -86,4 +89,7 @@ class AdxConnectionSessionResponseFailed(ErrorSchema):
 class AdxConnectionSessionResponse(BaseSuccessSchema):
     IP = fields.IP(required=True, description='Own IP address for the ADX connection.')
     GatewayIP = fields.IP(required=True, description='Gateway IP for ADX connection.')
-    Cached = fields.Boolean(required=True)
+
+    EncryptedPrivateKey = fields.String(
+        required=True, description='Session private key encrypted with client secret'
+    )

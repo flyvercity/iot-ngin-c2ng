@@ -39,7 +39,12 @@ def generate_openapi_file(file: Path):
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument('-f', '--file', help='Target file to write specification', required=True)
+
+    parser.add_argument(
+        '-f', '--file',
+        help='Target file to write specification', default='docs/c2ng.yaml'
+    )
+
     args = parser.parse_args()
     generate_openapi_file(Path(args.file))
 

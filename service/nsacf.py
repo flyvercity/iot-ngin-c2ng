@@ -10,7 +10,7 @@ class NSACF:
     def __init__(self, config: dict):
         '''Constructor.
 
-        Parameters:
+        Args:
         - `config` - `nsacf` section of the configuration file
         '''
 
