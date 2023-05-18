@@ -2,17 +2,16 @@
 #   Copyright 2023 Flyvercity
 
 '''This module defines a base class for all API handlers'''
-
 import logging as lg
 import json
 
 import tornado.web as web
 from marshmallow.exceptions import ValidationError
 
-from uss import UssInterface
-from mongo import Mongo
-from nsacf import NSACF
-from secman import SecMan
+from uss import UssInterface  # noqa
+from mongo import Mongo  # noqa
+from nsacf import NSACF  # noqa
+from secman import SecMan  # noqa
 
 from schemas import (
     BaseSuccessSchema,

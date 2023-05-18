@@ -12,3 +12,6 @@ security:
   certificate: /c2ng/config/service.pem
   private: /c2ng/config/private.pem
   default-ttl: 3600
+keycloak:
+  base: http://host.docker.internal:8080
+  realm: c2ng

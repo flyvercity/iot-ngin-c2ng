@@ -1,28 +1,30 @@
 #   SPDX-License-Identifier: MIT
 #   Copyright 2023 Flyvercity
 
-''' CLI Tools to manage the Service and simulators '''
-
-import requests
-import json
+'''CLI Tools to manage the Service and simulators'''
+import os
 import logging as lg
 from argparse import ArgumentParser
+
+from dotenv import load_dotenv
 
 import uas_sim
 import uss_sim
 
 
 DEFAULT_USS_PORT = 9091
+'''Default port for the USS simulator'''
 
 
 class Handler:
+    '''Command dispatcher'''
+
     def __init__(self, args):
         self.args = args
 
-    def dump(self, data):
-        print(json.dumps(data, indent=4))
-
     def handle(self):
+        '''Dispatch a CLI command'''
+
         try:
             func = getattr(self, self.args.command)
             func()
@@ -30,46 +32,39 @@ class Handler:
         except UserWarning as exc:
             print(f'Command failed: {exc}')
 
-    def request(self, path: str, method='GET', body={}, qsp={}) -> dict:
-        url = self.args.url + path
-        r = requests.request(method=method, url=url, json=body, params=qsp)
-
-        reply = r.json()
-
-        if 'Success' not in reply:
-            raise UserWarning(f'Malformed reply: {r.text}')
-
-        if not reply['Success']:
-            if 'Errors' not in reply:
-                raise UserWarning(f'Malformed failure reply: {r.text}')
-
-            errors = reply['Errors']
-
-            if message := reply.get('Message'):
-                print(f'Error message from service: {message}')
-
-            raise UserWarning(errors)
-
-        return reply
-
-    def test(self):
-        r = self.request('/test')
-        self.dump(r)
-
     def ua(self):
+        '''Simulate a request on behalf of a drone'''
         uas_sim.request_ua(self)
 
     def adx(self):
+        '''Simulate a request on behalf of a ground element (e.g., RPS)'''
         uas_sim.request_adx(self)
 
     def uss(self):
+        ''' Start USS simulator'''
         uss_sim.run(self.args)
 
 
 def main():
+    '''C2NG CLI Tool entry point.'''
     parser = ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose logging')
-    parser.add_argument('-u', '--url', help='C2NG service URL', default='http://localhost:9090')
+
+    parser.add_argument(
+        '-u', '--url', help='C2NG service URL',
+        default='http://localhost:9090'
+    )
+
+    parser.add_argument(
+        '-A', '--auth', help='Address of the OIDC server (by default, KeyCloak)',
+        default='http://localhost:8080/'
+    )
+
+    parser.add_argument(
+        '-P', '--password', help='OIDC Authentication password',
+        default=os.getenv('C2NG_UA_DEFAULT_PASSWORD')
+    )
+
     sp = parser.add_subparsers(dest='command', required=True, metavar='CMD')
     sp.add_parser('test', help='Test a connection with the service')
 
@@ -89,4 +84,5 @@ def main():
 
 
 if __name__ == '__main__':
+    load_dotenv()
     main()

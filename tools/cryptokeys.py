@@ -54,7 +54,7 @@ def main():
     issuer = get_subject('root.c2ng')
     service_sscert = gen_ss_cert(service_key, issuer)
 
-    passphrase = os.getenv('C2NG_PRIVATE_PASSPHRASE').encode()
+    passphrase = os.getenv('C2NG_UAS_CLIENT_SECRET').encode()
 
     Path(args.private).write_bytes(
         service_key.private_bytes(

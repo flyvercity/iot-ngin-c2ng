@@ -17,37 +17,16 @@ from mongo import Mongo
 from nsacf import NSACF
 from secman import SecMan
 
-from handlers.base import HandlerBase
 from handlers.sesssion import UaSessionRequestHandler, AdxSessionRequestHandler
 from handlers.certificate import UaCertificateHandler, AdxCertificateHandler
 
 DEFAULT_LISTEN_PORT = 9090
 
 
-class TestHandler(HandlerBase):
-    '''Test Endpoint Handler'''
-
-    def get(self):
-        ''' Return empty success result
-        ---
-        summary: Return empty success result
-        responses:
-            200:
-                description: Minimum success response
-                content:
-                    application/json:
-                        schema:
-                            BaseSuccessSchema
-        '''
-
-        self.respond()
-
-
 def handlers():
     '''Return a full set of URLSpec. '''
 
     return [
-        (r'/test', TestHandler),
         (r'/ua/session', UaSessionRequestHandler),
         (r'/adx/session', AdxSessionRequestHandler),
         (r'/certificate/ua/([^/]+)', UaCertificateHandler),

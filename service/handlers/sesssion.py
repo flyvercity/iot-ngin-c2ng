@@ -2,7 +2,6 @@
 #   Copyright 2023 Flyvercity
 
 '''Service Main Module'''
-
 import logging as lg
 
 from schemas import (
@@ -13,10 +12,10 @@ from schemas import (
     AdxConnectionSessionResponse,
 )
 
-from handlers.base import HandlerBase
+from handlers.auth import AuthHandler
 
 
-class UaSessionRequestHandler(HandlerBase):
+class UaSessionRequestHandler(AuthHandler):
     '''UA Session Endpoint Handler'''
 
     def post(self):
@@ -93,7 +92,7 @@ class UaSessionRequestHandler(HandlerBase):
         self.respond(AerialConnectionSessionResponse, response)
 
 
-class AdxSessionRequestHandler(HandlerBase):
+class AdxSessionRequestHandler(AuthHandler):
     '''Aviation Data Exchange Network Session Endpoint Handler'''
 
     def post(self):

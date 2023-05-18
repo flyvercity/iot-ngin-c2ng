@@ -83,7 +83,7 @@ class SecMan:
         self._config = config
         self._root_cert = x509.load_pem_x509_certificate(Path(config['certificate']).read_bytes())
         lg.info(f'Certificate loaded: {self._root_cert.serial_number}')
-        passphrase = os.getenv('C2NG_PRIVATE_PASSPHRASE').encode()
+        passphrase = os.getenv('C2NG_UAS_CLIENT_SECRET').encode()
 
         self._private_key = load_pem_private_key(
             Path(config['private']).read_bytes(),

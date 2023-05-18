@@ -9,10 +9,10 @@ from schemas import (
     CertificateRequestResponseFailed
 )
 
-from handlers.base import HandlerBase
+from handlers.auth import AuthHandler
 
 
-class CertificateHandlerBase(HandlerBase):
+class CertificateHandlerBase(AuthHandler):
     '''Peer Certificate Request Base Endpoints Handler'''
 
     def _certificate_field(self) -> str:
