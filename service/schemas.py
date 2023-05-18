@@ -78,7 +78,7 @@ class AdxConnectionSessionRequest(Schema):
 
 class AdxConnectionSessionResponseErrors(Schema):
     USS = fields.String(required=True, validate=validate.OneOf([
-        'here_defined_the_errors'
+        'here_define_the_errors'
     ]))
 
 
@@ -94,3 +94,23 @@ class AdxConnectionSessionResponse(BaseSuccessSchema):
         required=True, description='Session private key encrypted with client secret'
     )
 
+
+class CertificateRequestResponseErrors(Schema):
+    UasID = fields.String(validate=validate.OneOf([
+        'not_found',
+    ]))
+
+    Session = fields.String(validate=validate.OneOf([
+        'session_not_found',
+        'peer_not_connected'
+    ]))
+
+
+class CertificateRequestResponseFailed(ErrorSchema):
+    Errors = fields.Nested(CertificateRequestResponseErrors, required=True)
+
+
+class CertificateRequestResponse(BaseSuccessSchema):
+    Certificate = fields.String(
+        required=True, description='Certificate with a public key as a PEM string'
+    )

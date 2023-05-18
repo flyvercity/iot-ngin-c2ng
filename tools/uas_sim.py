@@ -14,6 +14,11 @@ def post(ctx, path, query):
     ctx.dump(response)
 
 
+def get(ctx, path, qsp):
+    response = ctx.request(path, method='GET', qsp=qsp)
+    ctx.dump(response)
+
+
 def request_ua(ctx):
     post(ctx, '/ua/session', {
         'ReferenceTime': datetime.now().timestamp(),
@@ -21,9 +26,17 @@ def request_ua(ctx):
         'IMSI': '123456989012345'
     })
 
+    get(ctx, '/certificate/adx', qsp={
+        'UasID': ctx.args.uasid
+    })
+
 
 def request_adx(ctx):
     post(ctx, '/adx/session', {
         'ReferenceTime': datetime.now().timestamp(),
         'UasID': ctx.args.uasid,
+    })
+
+    get(ctx, '/certificate/ua', qsp={
+        'UasID': ctx.args.uasid
     })

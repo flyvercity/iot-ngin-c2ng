@@ -19,8 +19,10 @@ Document schema:
 
     "UaIP": "string: IPv4 or IPv6 address",
     "UaGatewayIP": "string: IPv4 or IPv6 address",
+    "UaCertificate": "string: PEM",
 
     "AdxIP": "string: IPv4 or IPv6 address",
-    "AdxGatewayIP": "string: IPv4 or IPv6 address"
+    "AdxGatewayIP": "string: IPv4 or IPv6 address",
+    "AdxCertificate": "string: PEM"
 }
 ```

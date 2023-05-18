@@ -30,9 +30,9 @@ class Handler:
         except UserWarning as exc:
             print(f'Command failed: {exc}')
 
-    def request(self, path: str, method='GET', body={}) -> dict:
+    def request(self, path: str, method='GET', body={}, qsp={}) -> dict:
         url = self.args.url + path
-        r = requests.request(method=method, url=url, json=body)
+        r = requests.request(method=method, url=url, json=body, params=qsp)
 
         reply = r.json()
 
