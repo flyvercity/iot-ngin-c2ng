@@ -14,8 +14,8 @@ def post(ctx, path, query):
     ctx.dump(response)
 
 
-def get(ctx, path, qsp):
-    response = ctx.request(path, method='GET', qsp=qsp)
+def get(ctx, path):
+    response = ctx.request(path, method='GET')
     ctx.dump(response)
 
 
@@ -26,9 +26,7 @@ def request_ua(ctx):
         'IMSI': '123456989012345'
     })
 
-    get(ctx, '/certificate/adx', qsp={
-        'UasID': ctx.args.uasid
-    })
+    get(ctx, f'/certificate/adx/{ctx.args.uasid}')
 
 
 def request_adx(ctx):
@@ -37,6 +35,4 @@ def request_adx(ctx):
         'UasID': ctx.args.uasid,
     })
 
-    get(ctx, '/certificate/ua', qsp={
-        'UasID': ctx.args.uasid
-    })
+    get(ctx, f'/certificate/ua/{ctx.args.uasid}')

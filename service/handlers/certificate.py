@@ -2,6 +2,7 @@
 #   Copyright 2023 Flyvercity
 
 '''Service Main Module'''
+import logging as lg
 
 from schemas import (
     CertificateRequestResponse,
@@ -14,12 +15,11 @@ from handlers.base import HandlerBase
 class CertificateHandlerBase(HandlerBase):
     '''Peer Certificate Request Base Endpoints Handler'''
 
-    def _certificate_field() -> str:
+    def _certificate_field(self) -> str:
         '''Abstract method, an override shall return a field in the Session Mongo Object'''
-
         raise RuntimeError('This method shall be overriden')
 
-    def get(self):
+    def get(self, uasid):
         ''' Returns new connection credentials
         ---
         summary: Request a new session for an ADX client (RPS or USS services)
@@ -47,8 +47,6 @@ class CertificateHandlerBase(HandlerBase):
                             CertificateRequestResponseFailed
         '''
 
-        uasid = self.request.query_arguments.get('UasID')
-
         if not uasid:
             self.fail(CertificateRequestResponseFailed, {
                 'UasID': 'not_found'
@@ -57,6 +55,7 @@ class CertificateHandlerBase(HandlerBase):
             return
 
         if not (session := self.mongo.get_session(uasid)):
+            lg.info(f'Session not found for {uasid}')
             self.fail(CertificateRequestResponseFailed, {
                 'Session': 'session_not_found'
             })
@@ -80,7 +79,7 @@ class CertificateHandlerBase(HandlerBase):
 class UaCertificateHandler(CertificateHandlerBase):
     '''UA Certificate Request Base Endpoints Handler'''
 
-    def _certificate_field() -> str:
+    def _certificate_field(self) -> str:
         '''Returns "UaCertificate"'''
         return 'UaCertificate'
 
@@ -88,6 +87,6 @@ class UaCertificateHandler(CertificateHandlerBase):
 class AdxCertificateHandler(CertificateHandlerBase):
     '''ADX Certificate Request Base Endpoints Handler'''
 
-    def _certificate_field() -> str:
+    def _certificate_field(self) -> str:
         '''Returns "AdxCertificate"'''
         return 'AdxCertificate'

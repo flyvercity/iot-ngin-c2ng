@@ -74,6 +74,8 @@ class UaSessionRequestHandler(HandlerBase):
         if not (session := self.mongo.get_session(uasid)):
             lg.info(f'Initializing new session for {uasid}')
             session = {'UasID': uasid}
+        else:
+            lg.info(f'The session exist for {uasid}')
 
         ua_creds = self.nsacf.get_ue_network_creds(request['IMSI'])
         session['UaIP'] = ua_creds['IP']
@@ -130,6 +132,8 @@ class AdxSessionRequestHandler(HandlerBase):
         if not (session := self.mongo.get_session(uasid)):
             lg.info(f'Initializing new session (ADX) for {uasid}')
             session = {'UasID': uasid}
+        else:
+            lg.info(f'The session exist for {uasid}')
 
         adx_cred = self.nsacf.get_adx_network_creds(uasid)
         session['AdxIP'] = adx_cred['IP']

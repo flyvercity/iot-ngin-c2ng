@@ -50,8 +50,8 @@ def handlers():
         (r'/test', TestHandler),
         (r'/ua/session', UaSessionRequestHandler),
         (r'/adx/session', AdxSessionRequestHandler),
-        (r'/certificate/ua', UaCertificateHandler),
-        (r'/certificate/adx', AdxCertificateHandler)
+        (r'/certificate/ua/([^/]+)', UaCertificateHandler),
+        (r'/certificate/adx/([^/]+)', AdxCertificateHandler)
     ]
 
 
