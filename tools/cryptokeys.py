@@ -1,3 +1,7 @@
+#   SPDX-License-Identifier: MIT
+#   Copyright 2023 Flyvercity
+
+'''A CLI tool for pre-configuration of root security credentials'''
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -6,6 +10,7 @@ from dotenv import load_dotenv
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 
 from cryptography.hazmat.primitives.serialization import (
     Encoding, PrivateFormat, BestAvailableEncryption
@@ -13,10 +18,19 @@ from cryptography.hazmat.primitives.serialization import (
 
 from service.secman import generate_pk, get_x509_subject
 
-SERVCE_CERTIFICATE_LIFESPAN_DAYS = 365
+
+SERVICE_CERTIFICATE_LIFESPAN_DAYS = 365
+''' A lifetime of the root certificate.'''
 
 
-def gen_ss_cert(service_key, issuer):
+def gen_ss_cert(service_key: RSAPrivateKey, issuer: x509.Name):
+    '''Generates a self-signed certificate.
+
+    Args:
+    - service_key: generated private key of the service itself
+    - issuer: own X.509 name to be used both as the issuer and the subject
+    '''
+
     subject = issuer
 
     cert = x509.CertificateBuilder().subject_name(
@@ -30,13 +44,14 @@ def gen_ss_cert(service_key, issuer):
     ).not_valid_before(
         datetime.utcnow()
     ).not_valid_after(
-        datetime.utcnow() + timedelta(days=SERVCE_CERTIFICATE_LIFESPAN_DAYS)
+        datetime.utcnow() + timedelta(days=SERVICE_CERTIFICATE_LIFESPAN_DAYS)
     ).sign(service_key, hashes.SHA256())
 
     return cert
 
 
 def main():
+    '''Tool entry point.'''
     parser = ArgumentParser()
 
     parser.add_argument(

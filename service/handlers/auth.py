@@ -35,6 +35,7 @@ class AuthHandler(HandlerBase):
             config = self.settings['config']['keycloak']
             base = config['base']
             realm = config['realm']
+            # TODO: cache these
             wkurl = f'{base}/realms/{realm}/protocol/openid-connect/certs'
             wkinfo = requests.get(wkurl).json()
             sig_keys = filter(lambda key: key['use'] == 'sig', wkinfo['keys'])

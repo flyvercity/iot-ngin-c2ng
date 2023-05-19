@@ -26,7 +26,7 @@ def generate_pk():
     return rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
 
-def get_x509_subject(name):
+def get_x509_subject(name: str):
     '''Construct X.509 Subject.
 
     Args:

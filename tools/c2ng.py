@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 import uas_sim
 import uss_sim
+import oath_admin as oath_admin
 
 
 DEFAULT_USS_PORT = 9091
@@ -34,15 +35,19 @@ class Handler:
 
     def ua(self):
         '''Simulate a request on behalf of a drone'''
-        uas_sim.request_ua(self)
+        uas_sim.request_ua(self.args)
 
     def adx(self):
         '''Simulate a request on behalf of a ground element (e.g., RPS)'''
-        uas_sim.request_adx(self)
+        uas_sim.request_adx(self.args)
 
     def uss(self):
-        ''' Start USS simulator'''
+        '''Start USS simulator'''
         uss_sim.run(self.args)
+
+    def keycloak(self):
+        '''Configure the KeyCloak service'''
+        oath_admin.configure_oauth(self.args)
 
 
 def main():
@@ -56,13 +61,8 @@ def main():
     )
 
     parser.add_argument(
-        '-A', '--auth', help='Address of the OIDC server (by default, KeyCloak)',
+        '-a', '--auth', help='Address of the OIDC server (by default, KeyCloak)',
         default='http://localhost:8080/'
-    )
-
-    parser.add_argument(
-        '-P', '--password', help='OIDC Authentication password',
-        default=os.getenv('C2NG_UA_DEFAULT_PASSWORD')
     )
 
     sp = parser.add_subparsers(dest='command', required=True, metavar='CMD')
@@ -71,12 +71,34 @@ def main():
     ua = sp.add_parser('ua', help='Command on behalf of UA')
     ua.add_argument('-i', '--uasid', help='UAS CAA ID', default='droneid')
 
+    ua.add_argument(
+        '-p', '--password', help='UA OIDC Authentication password',
+        default=os.getenv('C2NG_UA_DEFAULT_PASSWORD')
+    )
+
     adx = sp.add_parser('adx', help='Command on behalf of UA')
     adx.add_argument('-i', '--uasid', help='UAS CAA ID', default='droneid')
+
+    adx.add_argument(
+        '-p', '--password', help='ADX OIDC Authentication password',
+        default=os.getenv('C2NG_ADX_DEFAULT_PASSWORD')
+    )
 
     uss = sp.add_parser('uss', help='USSP Simulator')
     uss.add_argument('-p', '--port', type=int, default=DEFAULT_USS_PORT)
     uss.add_argument('-D', '--disapprove', action='store_true', default=False)
+
+    keycloak = sp.add_parser('keycloak', help='OAuth service administration tool')
+
+    keycloak.add_argument(
+        '-u', '--user', help='KeyCloak administrator user',
+        default=os.getenv('KEYCLOAK_ADMIN')
+    )
+
+    keycloak.add_argument(
+        '-p', '--password', help='KeyCloak authentication password',
+        default=os.getenv('KEYCLOAK_ADMIN_PASSWORD')
+    )
 
     args = parser.parse_args()
     lg.basicConfig(level=lg.DEBUG if args.verbose else lg.INFO)
