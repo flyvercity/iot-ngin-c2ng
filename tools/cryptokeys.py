@@ -11,7 +11,7 @@ from cryptography.hazmat.primitives.serialization import (
     Encoding, PrivateFormat, BestAvailableEncryption
 )
 
-from service.secman import generate_pk, get_subject
+from service.secman import generate_pk, get_x509_subject
 
 SERVCE_CERTIFICATE_LIFESPAN_DAYS = 365
 
@@ -51,7 +51,7 @@ def main():
 
     args = parser.parse_args()
     service_key = generate_pk()
-    issuer = get_subject('root.c2ng')
+    issuer = get_x509_subject('root.c2ng')
     service_sscert = gen_ss_cert(service_key, issuer)
 
     passphrase = os.getenv('C2NG_UAS_CLIENT_SECRET').encode()

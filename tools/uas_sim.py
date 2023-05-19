@@ -21,8 +21,8 @@ def dump(data):
 def request(ctx, method: str, path: str, body={}, qsp={}) -> dict:
     keycloak_openid = KeycloakOpenID(
         server_url=ctx.args.auth,
-        client_id="ua-access",
         realm_name="c2ng",
+        client_id="c2-access",
         client_secret_key=os.getenv('C2NG_UAS_CLIENT_SECRET')
     )
 

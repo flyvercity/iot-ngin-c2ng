@@ -85,11 +85,18 @@ class HandlerBase(web.RequestHandler):
         '''Produces an exception response'''
         self.set_header('Content-Type', 'application/json')
 
-        self.finish(json.dumps({
-            'Success': False,
-            'Code': status_code,
-            'Errors': 'Internal Server Error'
-        }))
+        if status_code == 403:
+            self.finish(json.dumps({
+                'Success': False,
+                'Code': status_code,
+                'Errors': 'Access denied'
+            }))
+        else:
+            self.finish(json.dumps({
+                'Success': False,
+                'Code': status_code,
+                'Errors': 'Internal Server Error'
+            }))
 
     def get_request(self, RequestSchema):
         '''Unmarshal and validate a JSON request
