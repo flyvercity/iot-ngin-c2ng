@@ -2,6 +2,7 @@
 # Copyright 2023 Flyvercity
 
 '''CLI USSP Endpoint Simulator.'''
+import os
 import logging as lg
 import json
 import asyncio
@@ -9,6 +10,13 @@ import asyncio
 import requests
 import tornado.web as web
 from jose import jwk, jwt
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+C2NG_DEFAULT_USS_PORT = os.getenv('C2NG_DEFAULT_USS_PORT')
+'''Default port for the USS simulator'''
 
 
 class AuthHandler(web.RequestHandler):
@@ -99,3 +107,9 @@ async def start(args: dict):
 def run(args):
     '''Simulator sync entry point.'''
     asyncio.run(start(args))
+
+
+def add_arg_subparsers(sp):
+    uss = sp.add_parser('uss', help='USSP Simulator')
+    uss.add_argument('-p', '--port', type=int, default=C2NG_DEFAULT_USS_PORT)
+    uss.add_argument('-D', '--disapprove', action='store_true', default=False)

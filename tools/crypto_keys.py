@@ -20,15 +20,15 @@ from service.secman import generate_pk, get_x509_subject
 
 
 SERVICE_CERTIFICATE_LIFESPAN_DAYS = 365
-''' A lifetime of the root certificate.'''
+'''A lifetime of the root certificate.'''
 
 
 def gen_ss_cert(service_key: RSAPrivateKey, issuer: x509.Name):
     '''Generates a self-signed certificate.
 
     Args:
-    - service_key: generated private key of the service itself
-    - issuer: own X.509 name to be used both as the issuer and the subject
+    - `service_key`: generated private key of the service itself
+    - `issuer`: own X.509 name to be used both as the issuer and the subject
     '''
 
     subject = issuer

@@ -1,6 +1,7 @@
 # Detailed Documentation
 
 
+* `ME_CONFIG_MONGODB_URL` access URL for MongoDB (MongoExpress uses it)
 
 ## Regenerating the OpenAPI Specification
 

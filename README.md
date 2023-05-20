@@ -16,7 +16,7 @@ Development dependencies:
 
 ## Environment Variables
 
-Copy `.env.template` to `.env` and configure the variables:
+Copy `.env.template` to `.env` and set your value to the following variables:
 
 * `KEYCLOAK_ADMIN` sets a KeyCloak service admin username
 * `KEYCLOAK_ADMIN_PASSWORD` sets a KeyCloak service admin password (keep strictly secret for production deployments)
@@ -24,7 +24,6 @@ Copy `.env.template` to `.env` and configure the variables:
 * `MONGO_INITDB_ROOT_PASSWORD` sets a password for MongoDB
 * `ME_CONFIG_MONGODB_ADMINUSERNAME` sets a username for MongoExpress
 * `ME_CONFIG_MONGODB_ADMINPASSWORD` sets a password for MongoExpress
-* `ME_CONFIG_MONGODB_URL` access URL for MongoDB (MongoExpress uses it)
 * `C2NG_UAS_CLIENT_SECRET` client secret for UA and ADX users authentication
 * `C2NG_UA_DEFAULT_PASSWORD` a default password for UA users 
 * `C2NG_ADX_DEFAULT_PASSWORD` a default password for ADX users

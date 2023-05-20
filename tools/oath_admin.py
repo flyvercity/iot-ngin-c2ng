@@ -6,6 +6,10 @@ import os
 
 from keycloak import KeycloakAdmin
 from keycloak import KeycloakOpenIDConnection
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 def configure_oauth(args: dict):
@@ -64,7 +68,7 @@ def configure_oauth(args: dict):
 
     # TODO: remove demo user on default
     droneid_def = {
-        'username': 'droneid',
+        'username': os.getenv('C2NG_SIM_DRONE_ID'),
         'enabled': True,
         'credentials': [
             {
@@ -75,3 +79,17 @@ def configure_oauth(args: dict):
     }
 
     admin.create_user(droneid_def, exist_ok=True)
+
+
+def add_arg_subparsers(sp):
+    keycloak = sp.add_parser('keycloak', help='OAuth service administration tool')
+
+    keycloak.add_argument(
+        '-u', '--user', help='KeyCloak administrator user',
+        default=os.getenv('KEYCLOAK_ADMIN')
+    )
+
+    keycloak.add_argument(
+        '-p', '--password', help='KeyCloak authentication password',
+        default=os.getenv('KEYCLOAK_ADMIN_PASSWORD')
+    )
