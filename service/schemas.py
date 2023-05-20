@@ -1,8 +1,7 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
-'''Input/Output Data Object Schemas'''
-
+'''This module defines Input/Output Data Object Schemas.'''
 from marshmallow import Schema, fields, validate
 
 

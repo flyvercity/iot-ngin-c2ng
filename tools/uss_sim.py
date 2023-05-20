@@ -1,7 +1,7 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
-'''USSP Endpoint Simulator'''
+'''CLI USSP Endpoint Simulator.'''
 import logging as lg
 import json
 import asyncio

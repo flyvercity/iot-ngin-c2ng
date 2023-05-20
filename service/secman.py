@@ -1,8 +1,7 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
-'''Security Credentials Manager'''
-
+'''This module defines Security Credentials Manager.'''
 import os
 from datetime import datetime, timedelta
 from pathlib import Path

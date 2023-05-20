@@ -1,7 +1,7 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
-'''This module defines a base class for all API handlers'''
+'''This module defines a base class for all API handlers.'''
 import logging as lg
 import json
 

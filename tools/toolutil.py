@@ -1,7 +1,7 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
-'''CLI Utility Functions'''
+'''CLI Utility Functions.'''
 import json
 from pygments import highlight
 from pygments.lexers.jsonnet import JsonnetLexer

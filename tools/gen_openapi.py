@@ -1,6 +1,7 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
+'''This tool generates OpenAPI specification out of the code.'''
 import yaml
 from pathlib import Path
 from argparse import ArgumentParser

@@ -1,8 +1,7 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
-'''Interface with MongoDB'''
-
+'''This module implements interface with MongoDB.'''
 from pymongo import MongoClient
 
 

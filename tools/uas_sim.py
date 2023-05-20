@@ -1,7 +1,7 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
-'''UA and RPR Simulators'''
+'''CLI UA and RPS Simulators.'''
 import os
 from datetime import datetime
 

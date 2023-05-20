@@ -1,5 +1,5 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
 '''This module handles API authentication against OAuth.'''
 import logging as lg

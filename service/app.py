@@ -1,8 +1,7 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
-'''Service Main Module'''
-
+'''This is the main service module.'''
 import os
 import logging as lg
 import yaml

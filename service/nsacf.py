@@ -1,7 +1,7 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
-'''Interface with Network Slice Admission Control Function'''
+'''This module implements an interface with Network Slice Admission Control Function.'''
 
 
 class NSACF:

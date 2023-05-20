@@ -1,7 +1,7 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
-'''Service Main Module'''
+'''This module implements session handlers.'''
 import logging as lg
 
 from schemas import (

@@ -1,7 +1,7 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
-'''CLI Tools to manage the KeyCloak OAuth service'''
+'''CLI Tools to manage the KeyCloak OAuth service.'''
 import os
 
 from keycloak import KeycloakAdmin

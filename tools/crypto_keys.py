@@ -1,7 +1,7 @@
-#   SPDX-License-Identifier: MIT
-#   Copyright 2023 Flyvercity
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
 
-'''A CLI tool for pre-configuration of root security credentials'''
+'''A CLI tool for pre-configuration of root security credentials.'''
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
