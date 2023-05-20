@@ -47,6 +47,22 @@ def configure_oauth(args: dict):
 
     admin.create_client(c2_access_def, skip_exists=True)
 
+    uss_access_def = {
+        'clientId': 'uss-access',
+        'enabled': True,
+        "clientAuthenticatorType": "client-secret",
+        "secret": os.getenv('C2NG_USS_CLIENT_SECRET'),
+        'standardFlowEnabled': False,
+        'implicitFlowEnabled': False,
+        'directAccessGrantsEnabled': False,
+        'serviceAccountsEnabled': True,
+        'publicClient': False,
+        'protocol': 'openid-connect'
+    }
+
+    admin.create_client(uss_access_def, skip_exists=True)
+
+    # TODO: remove demo user on default
     droneid_def = {
         'username': 'droneid',
         'enabled': True,
@@ -58,5 +74,4 @@ def configure_oauth(args: dict):
         ]
     }
 
-    # TODO: remove demo user on default
     admin.create_user(droneid_def, exist_ok=True)
