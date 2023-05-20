@@ -5,6 +5,7 @@
 import os
 import logging as lg
 from argparse import ArgumentParser
+import queue
 
 from dotenv import load_dotenv
 
@@ -51,6 +52,19 @@ class Handler:
         oath_admin.configure_oauth(self._args)
 
 
+def setup_logging(args):
+    log_que = queue.Queue(-1)
+    queue_handler = lg.handlers.QueueHandler(log_que)
+    log_handler = lg.StreamHandler()
+    queue_listener = lg.handlers.QueueListener(log_que, log_handler)
+    queue_listener.start()
+
+    lg.basicConfig(
+        level=lg.DEBUG if args.verbose else lg.INFO,
+        format="%(asctime)s  %(message)s", handlers=[queue_handler]
+    )
+
+
 def main():
     '''C2NG CLI Tool entry point.'''
     parser = ArgumentParser()
@@ -76,7 +90,7 @@ def main():
     uss_sim.add_arg_subparsers(sp)
     oath_admin.add_arg_subparsers(sp)
     args = parser.parse_args()
-    lg.basicConfig(level=lg.DEBUG if args.verbose else lg.INFO)
+    setup_logging(args)
     Handler(args).handle()
 
 

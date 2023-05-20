@@ -190,7 +190,13 @@ class SimC2Subsystem:
                 time.sleep(10)
                 self._reset()
 
-    def _send(self, message: bytes, address: tuple):
+    def _secure(self):
+        return False
+
+    def _construct_sec_packet(self, message: bytes):
+        if not self._secure():
+            return message
+
         encrypted = self._peer_public_key.encrypt(
             message,
             padding.OAEP(
@@ -214,10 +220,12 @@ class SimC2Subsystem:
             'Signature': base64.b64encode(signature).decode()
         }
 
-        self._outsocket.sendto(json.dumps(packet).encode(), address)
+        return json.dumps(packet).encode()
 
-    def _receive(self) -> bytes:
-        packet_bytes, addr = self._insocket.recvfrom(RECEIVE_BUFFER)
+    def _deconstruct_sec_packet(self, packet_bytes) -> bytes:
+        if not self._secure():
+            return packet_bytes
+
         packet = json.loads(packet_bytes.decode())
         encrypted = base64.b64decode(packet['Message'])
         signature = base64.b64decode(packet['Signature'])
@@ -240,7 +248,16 @@ class SimC2Subsystem:
             )
         )
 
-        return message, addr
+        return message
+
+    def _send(self, message: bytes, address: tuple):
+        packet_bytes = self._construct_sec_packet(message)
+        self._outsocket.sendto(packet_bytes, address)
+
+    def _receive(self):
+        packet_bytes, addr = self._insocket.recvfrom(RECEIVE_BUFFER)
+        message = self._deconstruct_sec_packet(packet_bytes)
+        return (message, addr)
 
 
 class SimUaC2Subsystem(SimC2Subsystem):
@@ -272,10 +289,12 @@ class SimUaC2Subsystem(SimC2Subsystem):
 
     def _work_cycle(self):
         '''Implements `_work_cycle` for the UA simulator.'''
+        counter = 0
 
         while True:
             print('sending here')
-            message = 'test'
+            message = f'packet #{counter}'
+            counter += 1
             self._send(message.encode(), ('127.0.0.1', self._out_port()))
             time.sleep(1)
 
