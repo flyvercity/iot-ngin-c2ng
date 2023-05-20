@@ -16,7 +16,7 @@ class AuthHandler(HandlerBase):
 
     def prepare(self):
         super().prepare()
-        self.get_current_user()
+        self._current_user = self.get_current_user()
 
     def get_current_user(self):
         '''Using this method for authentication'''
@@ -47,6 +47,8 @@ class AuthHandler(HandlerBase):
             )
 
             lg.info(f'User authorized: {payload["preferred_username"]}')
+            return payload
+
         except Exception as exc:
             lg.warn(f'Authentication failed: {exc}')
             raise web.HTTPError(403, reason=str(exc))

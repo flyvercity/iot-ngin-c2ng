@@ -79,7 +79,7 @@ class UaSessionRequestHandler(AuthHandler):
         ua_creds = self.nsacf.get_ue_network_creds(request['IMSI'])
         session['UaIP'] = ua_creds['IP']
         session['UaGatewayIP'] = ua_creds['Gateway']
-        sec_creds = self.secman.gen_client_credentials(f'{uasid}::UA', 'secret')
+        sec_creds = self.secman.gen_client_credentials(f'{uasid}::UA')
         session['UaCertificate'] = sec_creds.cert()
         self.mongo.put_session(session)
 
@@ -137,7 +137,7 @@ class AdxSessionRequestHandler(AuthHandler):
         adx_cred = self.nsacf.get_adx_network_creds(uasid)
         session['AdxIP'] = adx_cred['IP']
         session['AdxGatewayIP'] = adx_cred['Gateway']
-        sec_creds = self.secman.gen_client_credentials(f'{uasid}::ADX', 'secret')
+        sec_creds = self.secman.gen_client_credentials(f'{uasid}::ADX')
         session['AdxCertificate'] = sec_creds.cert()
         self.mongo.put_session(session)
 

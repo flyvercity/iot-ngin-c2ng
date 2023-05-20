@@ -8,16 +8,24 @@ import time
 import traceback
 import logging as lg
 import socket
+import base64
+import json
 
 import requests
-
-import tool_util as u
 from keycloak import KeycloakOpenID
 from dotenv import load_dotenv
+from cryptography import x509
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
 
+import tool_util as u
+
+
+RECEIVE_BUFFER = 1024
+'''Maximum size of the UDP receive buffer.'''
 
 load_dotenv()
-
 
 C2NG_SIM_DRONE_ID = os.getenv('C2NG_SIM_DRONE_ID')
 C2NG_DEFAULT_UA_UDP_PORT = os.getenv('C2NG_DEFAULT_UA_UDP_PORT')
@@ -78,13 +86,28 @@ class SimC2Subsystem:
         - `args`: CLI arguments
         '''
         self._args = args
+        self._insocket = None
+        self._outsocket = None
+        self._reset()
+
+    def _reset(self):
+        lg.info('Reset')
         self._session_info = None
-        self._cert_info = None
+        self._private_key = None
+        self._peer_cert_info = None
+        self._peer_public_key = None
+
+    def _reset_insocket(self):
+        if self._insocket:
+            self._insocket.close()
+            self._insocket = None
+
+        self._insocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def __enter__(self):
         '''Implements context manager's 'enter' method. Binds sockets.'''
         self._outsocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self._insocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._reset_insocket()
         return self
 
     def __exit__(self, *args):
@@ -127,14 +150,29 @@ class SimC2Subsystem:
                     ip = self._session_info['IP']
                     port = self._in_port()
                     lg.info(f'Binding to {ip}:{port}')
+                    self._reset_insocket()
                     self._insocket.bind((ip, port))
 
-                if not self._cert_info:
+                    # NB: using known client secret as passphase
+                    client_secret = os.getenv('C2NG_UAS_CLIENT_SECRET')
+
+                    self._private_key = load_pem_private_key(
+                        self._session_info['EncryptedPrivateKey'].encode(),
+                        client_secret.encode()
+                    )
+
+                if not self._peer_cert_info:
                     lg.info('Requesting peer certificate')
-                    self._cert_info = self._request_peer_certificate()
+                    self._peer_cert_info = self._request_peer_certificate()
 
                     if self._args.verbose:
-                        u.pprint(self._cert_info)
+                        u.pprint(self._peer_cert_info)
+
+                    cert = x509.load_pem_x509_certificate(
+                        self._peer_cert_info['Certificate'].encode()
+                    )
+
+                    self._peer_public_key = cert.public_key()
 
                 self._work_cycle()
 
@@ -145,16 +183,64 @@ class SimC2Subsystem:
             except UserWarning as warn:
                 lg.warn(str(warn))
                 time.sleep(5)
-                lg.info('Restarting')
 
             except Exception:
                 traceback.print_exc()
                 lg.info('Pause...')
                 time.sleep(10)
-                lg.info('Restarting')
+                self._reset()
 
-    def _send(self, message):
-        pass
+    def _send(self, message: bytes, address: tuple):
+        encrypted = self._peer_public_key.encrypt(
+            message,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+
+        signature = self._private_key.sign(
+            encrypted,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+
+        packet = {
+            'Message': base64.b64encode(encrypted).decode(),
+            'Signature': base64.b64encode(signature).decode()
+        }
+
+        self._outsocket.sendto(json.dumps(packet).encode(), address)
+
+    def _receive(self) -> bytes:
+        packet_bytes, addr = self._insocket.recvfrom(RECEIVE_BUFFER)
+        packet = json.loads(packet_bytes.decode())
+        encrypted = base64.b64decode(packet['Message'])
+        signature = base64.b64decode(packet['Signature'])
+
+        self._peer_public_key.verify(
+            signature, encrypted,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+
+        message = self._private_key.decrypt(
+            encrypted,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+
+        return message, addr
 
 
 class SimUaC2Subsystem(SimC2Subsystem):
@@ -189,6 +275,8 @@ class SimUaC2Subsystem(SimC2Subsystem):
 
         while True:
             print('sending here')
+            message = 'test'
+            self._send(message.encode(), ('127.0.0.1', self._out_port()))
             time.sleep(1)
 
 
@@ -197,6 +285,7 @@ class SimAdxC2Subsystem(SimC2Subsystem):
 
     def _request_session(self):
         '''Implements `_request_session` for the RPS simulator.'''
+
         session_info = request(self._args, 'POST', '/adx/session', {
             'ReferenceTime': datetime.now().timestamp(),
             'UasID': self._args.uasid,
@@ -219,9 +308,11 @@ class SimAdxC2Subsystem(SimC2Subsystem):
 
     def _work_cycle(self):
         '''Implements `_work_cycle` for the RPS simulator.'''
+
         while True:
-            print('sending here')
-            time.sleep(1)
+            print('receiving here')
+            message, _addr = self._receive()
+            print('MESSAGE', message.decode())
 
 
 def add_arg_subparsers(sp):

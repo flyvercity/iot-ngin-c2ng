@@ -21,7 +21,7 @@ from cryptography.hazmat.primitives.serialization import (
 
 
 def generate_pk():
-    '''Generate key-pair with standard parameters'''
+    '''Generate key-pair with standard parameters.'''
     return rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
 
@@ -29,7 +29,7 @@ def get_x509_subject(name: str):
     '''Construct X.509 Subject.
 
     Args:
-    - name: What to use as 'common name'
+    - `name`: What to use as 'common name'
     '''
     subject = x509.Name([
         x509.NameAttribute(NameOID.COUNTRY_NAME, 'IL'),
@@ -91,7 +91,10 @@ class SecMan:
 
         lg.info('Private key loaded')
 
-    def gen_client_credentials(self, client_id, client_secret):
+    def gen_client_credentials(self, client_id):
+        # TODO: find out how to use individual key for each user
+        oauth_client_id = os.getenv('C2NG_UAS_CLIENT_SECRET')
+
         client_key = generate_pk()
         subject = get_x509_subject(f'{client_id}.c2ng')
         ttl = self._config['default-ttl']
@@ -110,7 +113,7 @@ class SecMan:
             datetime.utcnow() + timedelta(seconds=ttl)
         ).sign(self._private_key, hashes.SHA256())
 
-        return SecCredentials(cert, client_key, client_secret)
+        return SecCredentials(cert, client_key, oauth_client_id)
 
     def validate_client_cert(service_cert, client_cert):
         client_cert.verify_directly_issued_by(service_cert)
