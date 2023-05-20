@@ -12,14 +12,19 @@ from handlers.base import HandlerBase
 
 
 class AuthHandler(HandlerBase):
-    '''Base for all handlers for authenticated requests'''
+    '''Base for all handlers for authenticated requests.'''
 
     def prepare(self):
+        '''Authenticate on request prepare.'''
         super().prepare()
         self._current_user = self.get_current_user()
 
     def get_current_user(self):
-        '''Using this method for authentication'''
+        '''Using this method for authentication.
+
+        Returns:
+            User's JWT token payload.
+        '''
 
         try:
             auth_header = self.request.headers.get('Authentication', '')

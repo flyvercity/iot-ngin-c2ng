@@ -5,13 +5,13 @@
 
 
 class NSACF:
-    '''NSACF API'''
+    '''NSACF API Implementation.'''
 
     def __init__(self, config: dict):
         '''Constructor.
 
         Args:
-        - `config` - `nsacf` section of the configuration file
+        - `config` contains `nsacf` section of the configuration file.
         '''
 
         self._config = config
@@ -20,7 +20,7 @@ class NSACF:
         '''Get next network credentials for a UE.
 
         Args:
-        - `imsi` - unique UE identified
+        - `imsi` unique UE identifier.
 
         Returns:
 
@@ -44,7 +44,7 @@ class NSACF:
         '''Get next network credentials for an ADX client.
 
         Args:
-        - `uid` - unique client identifier
+        - `uid` unique client identifier.
 
         Returns:
 

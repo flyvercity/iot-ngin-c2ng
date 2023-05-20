@@ -6,3 +6,6 @@ generate:
 
 keys:
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service/ python tools/crypto_keys.py
+
+darglint:
+	darglint service/*.py service/handlers/*.py tools/*.py

@@ -9,11 +9,12 @@ components:
       properties:
         ReferenceTime:
           description: UNIX Timestamp
-          type: integer
+          type: number
         UasID:
           type: string
       required:
       - ReferenceTime
+      - UasID
       type: object
     AdxConnectionSessionResponse:
       properties:
@@ -67,7 +68,7 @@ components:
           type: object
         ReferenceTime:
           description: UNIX Timestamp
-          type: integer
+          type: number
         UasID:
           description: CAA UAS ID
           type: string
@@ -119,6 +120,14 @@ components:
       required:
       - Errors
       type: object
+    BaseSuccess:
+      properties:
+        Success:
+          description: Success flag
+          enum:
+          - true
+          type: boolean
+      type: object
     CertificateRequestResponse:
       properties:
         Certificate:
@@ -157,6 +166,66 @@ components:
           type: boolean
       required:
       - Errors
+      type: object
+    GeoPointWGS84:
+      properties:
+        Altitude:
+          description: Geodetic altitude in meters
+          type: number
+        Latitude:
+          description: Latitude in degress
+          type: number
+        Longitude:
+          description: Longitude in degress
+          type: number
+      required:
+      - Altitude
+      - Latitude
+      - Longitude
+      type: object
+    SignalStatsReportRequest:
+      properties:
+        RSRP:
+          description: Reference Signal Received Power
+          type: integer
+        Radio:
+          description: Current radio access mode
+          enum:
+          - 4glte
+          - 5gnr
+          type: string
+        ReferenceTime:
+          description: UNIX Timestamp
+          type: number
+        UasID:
+          type: string
+        Waypoint:
+          allOf:
+          - $ref: '#/components/schemas/GeoPointWGS84'
+          description: Reference Position
+      required:
+      - RSRP
+      - Radio
+      - ReferenceTime
+      - UasID
+      - Waypoint
+      type: object
+    ValidationError:
+      properties:
+        Errors:
+          additionalProperties:
+            items:
+              type: string
+            type: array
+          description: Error identifier dict
+          type: object
+        Message:
+          type: string
+        Success:
+          description: Failure flag.
+          enum:
+          - false
+          type: boolean
       type: object
 paths:
   /adx/session:
@@ -228,6 +297,30 @@ paths:
                 $ref: '#/components/schemas/CertificateRequestResponseFailed'
           description: Payload containing error description
       summary: Request a new session for an ADX client (RPS or USS services)
+  /signal:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalStatsReportRequest'
+        description: A measurement sample object.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseSuccess'
+          description: Sample is successfully received.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+          description: Payload containing error description.
+      summary: Receives a sample of signal measurements from a UA with reference time
+        and position.
   /ua/session:
     post:
       requestBody:
