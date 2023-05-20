@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright 2023 Flyvercity
 
-'''CLI Tools to manage the Service and simulators'''
+'''CLI Tools to manage the Service and simulators.'''
 import os
 import logging as lg
 from argparse import ArgumentParser

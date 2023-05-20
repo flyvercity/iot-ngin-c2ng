@@ -7,7 +7,7 @@ from datetime import datetime
 
 import requests
 
-import toolutil as u
+import tool_util as u
 from keycloak import KeycloakOpenID
 
 
