@@ -17,8 +17,9 @@ components:
       type: object
     AdxConnectionSessionResponse:
       properties:
-        Cached:
-          type: boolean
+        EncryptedPrivateKey:
+          description: Session private key encrypted with client secret
+          type: string
         GatewayIP:
           description: Gateway IP for ADX connection.
         IP:
@@ -29,7 +30,7 @@ components:
           - true
           type: boolean
       required:
-      - Cached
+      - EncryptedPrivateKey
       - GatewayIP
       - IP
       type: object
@@ -37,7 +38,7 @@ components:
       properties:
         USS:
           enum:
-          - here_defined_the_errors
+          - here_define_the_errors
           type: string
       required:
       - USS
@@ -77,8 +78,9 @@ components:
       type: object
     AerialConnectionSessionResponse:
       properties:
-        Cached:
-          type: boolean
+        EncryptedPrivateKey:
+          description: Session private key encrypted with client secret
+          type: string
         GatewayIP:
           description: Gateway IP for aerial connection.
         IP:
@@ -89,7 +91,7 @@ components:
           - true
           type: boolean
       required:
-      - Cached
+      - EncryptedPrivateKey
       - GatewayIP
       - IP
       type: object
@@ -117,13 +119,44 @@ components:
       required:
       - Errors
       type: object
-    BaseSuccess:
+    CertificateRequestResponse:
       properties:
+        Certificate:
+          description: Certificate with a public key as a PEM string
+          type: string
         Success:
           description: Success flag
           enum:
           - true
           type: boolean
+      required:
+      - Certificate
+      type: object
+    CertificateRequestResponseErrors:
+      properties:
+        Session:
+          enum:
+          - session_not_found
+          - peer_not_connected
+          type: string
+        UasID:
+          enum:
+          - not_found
+          type: string
+      type: object
+    CertificateRequestResponseFailed:
+      properties:
+        Errors:
+          $ref: '#/components/schemas/CertificateRequestResponseErrors'
+        Message:
+          type: string
+        Success:
+          description: Failure flag.
+          enum:
+          - false
+          type: boolean
+      required:
+      - Errors
       type: object
 paths:
   /adx/session:
@@ -149,16 +182,52 @@ paths:
                 $ref: '#/components/schemas/AdxConnectionSessionResponseFailed'
           description: Payload containing error description
       summary: Request a new session for an ADX client (RPS or USS services)
-  /test:
+  /certificate/adx/{uasid}:
     get:
+      parameters:
+      - description: UAS ID for which to fetch the peer's certificate
+        in: path
+        name: UasID
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BaseSuccess'
-          description: Minimum success response
-      summary: Return empty success result
+                $ref: '#/components/schemas/CertificateRequestResponse'
+          description: Success payload containing peer's certificate
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateRequestResponseFailed'
+          description: Payload containing error description
+      summary: Request a new session for an ADX client (RPS or USS services)
+  /certificate/ua/{uasid}:
+    get:
+      parameters:
+      - description: UAS ID for which to fetch the peer's certificate
+        in: path
+        name: UasID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateRequestResponse'
+          description: Success payload containing peer's certificate
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateRequestResponseFailed'
+          description: Payload containing error description
+      summary: Request a new session for an ADX client (RPS or USS services)
   /ua/session:
     post:
       requestBody:
@@ -181,4 +250,4 @@ paths:
               schema:
                 $ref: '#/components/schemas/AerialConnectionSessionResponseFailed'
           description: Payload containing error description
-      summary: Request a new session for the UA
+      summary: Request a new session for UA
