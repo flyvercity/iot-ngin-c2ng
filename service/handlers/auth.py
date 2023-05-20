@@ -1,7 +1,7 @@
 #   SPDX-License-Identifier: MIT
 #   Copyright 2023 Flyvercity
 
-'''This handles API authentication against KeyCloak'''
+'''This module handles API authentication against OAuth.'''
 import logging as lg
 
 import requests
@@ -32,7 +32,7 @@ class AuthHandler(HandlerBase):
             if not auth_header or not bearer:
                 raise web.HTTPError(401, reason='Unauthorized')
 
-            config = self.settings['config']['keycloak']
+            config = self.settings['config']['oauth']['keycloak']
             base = config['base']
             realm = config['realm']
             # TODO: cache these
@@ -46,7 +46,7 @@ class AuthHandler(HandlerBase):
                 algorithms='RS256', options={'verify_aud': False}
             )
 
-            lg.info(f'User authorized: {payload}')
+            lg.info(f'User authorized: {payload["preferred_username"]}')
         except Exception as exc:
             lg.warn(f'Authentication failed: {exc}')
             raise web.HTTPError(403, reason=str(exc))

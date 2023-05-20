@@ -2,8 +2,17 @@ service:
   port: 9090
 logging:
   verbose: false
+oauth:
+  keycloak:
+    base: http://host.docker.internal:8080
+    realm: c2ng
 uss:
   endpoint: http://host.docker.internal:9091
+  oauth:
+    keycloak:
+      base: http://host.docker.internal:8080
+      realm: c2ng
+      auth-client-id: uss-access
 mongo:
   uri: mongodb://root:example@mongo:27017/
 nsacf:
@@ -12,6 +21,3 @@ security:
   certificate: /c2ng/config/service.pem
   private: /c2ng/config/private.pem
   default-ttl: 3600
-keycloak:
-  base: http://host.docker.internal:8080
-  realm: c2ng
