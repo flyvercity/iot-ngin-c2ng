@@ -18,23 +18,25 @@ from secman import SecMan
 
 from handlers.sesssion import UaSessionRequestHandler, AdxSessionRequestHandler
 from handlers.certificate import UaCertificateHandler, AdxCertificateHandler
+from handlers.signal import SignalStatsHandler
 
 DEFAULT_LISTEN_PORT = 9090
 
 
 def handlers():
-    '''Return a full set of URLSpec. '''
+    '''Return a full set of URLSpec.'''
 
     return [
         (r'/ua/session', UaSessionRequestHandler),
         (r'/adx/session', AdxSessionRequestHandler),
         (r'/certificate/ua/([^/]+)', UaCertificateHandler),
-        (r'/certificate/adx/([^/]+)', AdxCertificateHandler)
+        (r'/certificate/adx/([^/]+)', AdxCertificateHandler),
+        (r'/signal', SignalStatsHandler)
     ]
 
 
 async def main():
-    '''Asynchronious entry point. '''
+    '''Asynchronious entry point.'''
     config_file = Path(os.getenv('C2NG_CONFIG_FILE', '/c2ng/config/config.yaml'))
     # TODO: Validate config
     config = yaml.safe_load(config_file.read_text())

@@ -296,6 +296,19 @@ class SimUaC2Subsystem(SimC2Subsystem):
             message = f'packet #{counter}'
             counter += 1
             self._send(message.encode(), ('127.0.0.1', self._out_port()))
+
+            request(self._args, 'POST', '/signal', body={
+                'ReferenceTime': datetime.now().timestamp(),
+                'UasID': self._args.uasid,
+                'Radio': '5gnr',
+                'Waypoint': {
+                    'Latitude': 35.0,
+                    'Longitude': 35.0,
+                    'Altitude': 100.0
+                },
+                'RSRP': -99
+            })
+
             time.sleep(1)
 
 

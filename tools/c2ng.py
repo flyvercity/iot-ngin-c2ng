@@ -53,6 +53,11 @@ class Handler:
 
 
 def setup_logging(args):
+    '''Setup realtime logging parameters.
+
+    Args:
+    - `args`: CLI parameters.'''
+
     log_que = queue.Queue(-1)
     queue_handler = lg.handlers.QueueHandler(log_que)
     log_handler = lg.StreamHandler()

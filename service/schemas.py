@@ -34,7 +34,7 @@ class ValidationErrorSchema(ErrorSchema):
 
 class AerialConnectionSessionRequest(Schema):
     # TODO: Check reference time
-    ReferenceTime = fields.Integer(
+    ReferenceTime = fields.Float(
         description='UNIX Timestamp',
         required=True
     )
@@ -67,12 +67,12 @@ class AerialConnectionSessionResponse(BaseSuccessSchema):
 
 class AdxConnectionSessionRequest(Schema):
     # TODO: Check reference time
-    ReferenceTime = fields.Integer(
+    ReferenceTime = fields.Float(
         description='UNIX Timestamp',
         required=True
     )
 
-    UasID = fields.String()
+    UasID = fields.String(required=True)
 
 
 class AdxConnectionSessionResponseErrors(Schema):
@@ -113,3 +113,30 @@ class CertificateRequestResponse(BaseSuccessSchema):
     Certificate = fields.String(
         required=True, description='Certificate with a public key as a PEM string'
     )
+
+
+class GeoPointWGS84(Schema):
+    Latitude = fields.Float(description='Latitude in degress', required=True)
+    Longitude = fields.Float(description='Longitude in degress', required=True)
+    Altitude = fields.Float(description='Geodetic altitude in meters', required=True)
+
+
+class SignalStatsReportRequest(Schema):
+    ReferenceTime = fields.Float(
+        description='UNIX Timestamp',
+        required=True
+    )
+
+    UasID = fields.String(required=True)
+
+    Radio = fields.String(
+        validate=validate.OneOf([
+            '4glte',
+            '5gnr'
+        ]),
+        description='Current radio access mode',
+        required=True
+    )
+
+    Waypoint = fields.Nested(GeoPointWGS84, description='Reference Position', required=True)
+    RSRP = fields.Integer(description='Reference Signal Received Power', required=True)
