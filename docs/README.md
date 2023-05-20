@@ -1,10 +1,19 @@
 # Detailed Documentation
 
+## Config variables
 
 * `ME_CONFIG_MONGODB_URL` access URL for MongoDB (MongoExpress uses it)
 
-## Regenerating the OpenAPI Specification
+## Makefile
+
+### Regenerating the OpenAPI Specification
 
 To extract OpenAPI 3 service specification from code, run:
 
-```bash make generate```
+```sh
+make generate
+```
+
+## darglint
+
+darglint
