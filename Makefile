@@ -16,7 +16,7 @@ docbuild/title.pdf: docs/title.tex
 	pdflatex -output-directory=docbuild docs/title.tex
 
 docbuild/body.pdf: docs/README.md docs/DATABASE.md
-	pandoc --toc docs/README.md docs/DATABASE.md -o docbuild/body.pdf
+	(cd docs; pandoc --toc README.md DATABASE.md -o ../docbuild/body.pdf)
 
 D2.C2NG.pdf: docbuild/title.pdf docbuild/body.pdf
 	python -m fitz join -o D2.C2NG.pdf \
