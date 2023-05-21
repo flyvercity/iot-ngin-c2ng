@@ -10,6 +10,7 @@ ___Project: C2NG Trusted Uncrewed Aviation Systems Command and Control for IoT-N
 
 Development dependencies:
 
+* `make`
 * `docker`
 * `docker-compose`
 * `python 3.10` and `pip`. Virtual environment recommended.
@@ -62,8 +63,23 @@ Configure authentication server:
 python tools/c2ng.py keycloak
 ```
 
-*Note: the CLI tool `c2ng.py` has other capabilities. For further help, run:*
+_Note: the CLI tool `c2ng.py` has other capabilities. For further help, run:_
 
 ```sh
 python tools/c2ng.py -h
+```
+
+## Building Documentation
+
+Install additional dependencies:
+
+* `LaTeX`:
+  * for Linux, use TeX Live (<https://tug.org/texlive/>)
+  * for Windows, use MikTeX (<https://miktex.org/download>)
+* `pandoc` (<https://pandoc.org/installing.html>)
+
+To build `D2.C2NG.pdf` (MVP documentation), execute
+
+```sh
+make docs
 ```
