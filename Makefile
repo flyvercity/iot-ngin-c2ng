@@ -29,15 +29,17 @@ images := $(wildcard docs/*.png)
 gen_markdowns := $(wildcard docbuild/*.md)
 
 docbuild/body.pdf: $(markdowns) $(gen_markdowns) $(images)
-	(cd docs; pandoc -s -V papersize:a4 --toc -o ../docbuild/body.pdf \
+	(cd docs; pandoc -s -V papersize:a4 \
+		-F mermaid-filter --toc -o ../docbuild/body.pdf \
 		README.md \
 		DATABASE.md \
 		../docbuild/app.md \
 	)
 
-D2.C2NG.pdf: docbuild/title.pdf docbuild/body.pdf
-	python -m fitz join -o D2.C2NG.pdf \
+docbuild/release/D2.C2NG.pdf: docbuild/title.pdf docbuild/body.pdf
+	mkdir -p docbuild/release
+	python -m fitz join -o docbuild/release/D2.C2NG.pdf \
 						   docbuild/title.pdf \
 						   docbuild/body.pdf
 
-docs: D2.C2NG.pdf
+docs: docbuild/release/D2.C2NG.pdf

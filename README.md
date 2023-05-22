@@ -1,6 +1,4 @@
-# UAS Command-and-Control Connectivity Service
-
-___Project: C2NG Trusted Uncrewed Aviation Systems Command and Control for IoT-NGIN Open Call 2.___
+# Getting Started with UAS Next Generation C2 Connectivity Service
 
 [Detailed Documentation](docs/README.md)
 
@@ -78,8 +76,40 @@ Install additional dependencies:
   * for Windows, use MikTeX (<https://miktex.org/download>)
 * `pandoc` (<https://pandoc.org/installing.html>)
 
+### Mermaid Filter
+
+Install `nodejs` and `npm` is not present (assuming Debian-based distros):
+
+```sh
+sudo apt-get install nodejs npm
+```
+
+Then install the filter with:
+
+```sh
+npm install --global mermaid-filter
+```
+
+If the filter fails, try installing some dependencies:
+
+```sh
+sudo apt-get install libnss3-dev
+```
+
+If it still fails, add more dependencies:
+
+```sh
+sudo apt-get install -y gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget libgbm-dev
+```
+
+## Building the Deliverable
+
 To build `D2.C2NG.pdf` (MVP documentation), execute
 
 ```sh
 make docs
 ```
+
+## Disclaimer
+
+IoT UAS C2 is a sub-project funded via the [IoT-NGIN project](https://iot-ngin.eu) Open Call. IoT-NGIN has received funding from the European Union’s Horizon 2020 research and innovation programme (Grant Agreement No 957246).
