@@ -97,7 +97,24 @@ sequenceDiagram
 
 ### Expected Encryption Description Procedure
 
-
+```mermaid
+flowchart
+    Message --> CP
+    subgraph CP [Construct Packet]
+        direction TB
+        Encrypt(Encrypt with peer's public key) --> Sign
+        Sign(Sign with out private key) --> Marshal
+    end
+    CP --> Transmit
+    Transmit --> DP
+    subgraph DP [Deconstruct Packet]
+        direction TB
+        Unmarshal --> Verify
+        Verify(Verify a signature with peer's public key) --> Decrypt
+        Decrypt(Decrypt with our private key)
+    end
+    DP --> RM(Message)
+```
 
 ### Handlers Structure
 

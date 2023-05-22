@@ -33,8 +33,8 @@ class HandlerBase(web.RequestHandler):
         '''Validate and return a response.
 
         Args:
-        - `ResponseSchema` a schema of the response, subclass of `Schema`.
-        - `response` a dict with formattable data.
+            ResponseSchema: a schema of the response, subclass of `Schema`.
+            response: a dict with formattable data.
         '''
 
         self.set_header('Content-Type', 'application/json')

@@ -14,12 +14,13 @@ keys:
 darglint: $(src)
 	darglint service/*.py service/handlers/*.py tools/*.py
 
-autogen: $(src)
+.autogen: $(src)
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service:`pwd`/tools lazydocs \
 		--src-base-url=https://github.com/flyvercity/iot-ngin-c2ng/blob/main/ \
 		--output-path ./docbuild \
 		service \
 		tools
+	touch .autogen
 
 docbuild/title.pdf: docs/title.tex
 	pdflatex -output-directory=docbuild docs/title.tex
@@ -27,7 +28,7 @@ docbuild/title.pdf: docs/title.tex
 markdowns := $(wildcard docs/*.md)
 images := $(wildcard docs/*.png)
 
-docbuild/body.pdf: autogen $(markdowns) $(images)
+docbuild/body.pdf: .autogen $(markdowns) $(images)
 	(cd docs; pandoc -s \
 		-V papersize:a4 -V geometry:margin=1in \
 		-F mermaid-filter --toc -o ../docbuild/body.pdf \
