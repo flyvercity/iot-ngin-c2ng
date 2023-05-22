@@ -19,7 +19,7 @@ This service has three primary functions:
 
 There are two types of users of the service:
 
-* Aerial Connection Users are flying objects equipped with 5G UE
+* Aerial Connection Users are flying objects equipped with 5G UE 
 
 ## Application Architecture
 

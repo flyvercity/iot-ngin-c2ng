@@ -18,6 +18,7 @@ darglint: $(src)
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service:`pwd`/tools lazydocs \
 		--src-base-url=https://github.com/flyvercity/iot-ngin-c2ng/blob/main/ \
 		--output-path ./docbuild \
+		--no-watermark \
 		service \
 		tools
 	touch .autogen
@@ -27,8 +28,11 @@ docbuild/title.pdf: docs/title.tex
 
 markdowns := $(wildcard docs/*.md)
 images := $(wildcard docs/*.png)
+revision := $(shell git describe --always)
+deliverable := docbuild/release/D2.C2NG.$(revision).pdf
 
 docbuild/body.pdf: .autogen $(markdowns) $(images)
+	echo "_Revision $(revision)_" > docbuild/release.md
 	(cd docs; pandoc -s \
 		-V papersize:a4 -V geometry:margin=1in \
 		-F mermaid-filter --toc -o ../docbuild/body.pdf \
@@ -38,12 +42,13 @@ docbuild/body.pdf: .autogen $(markdowns) $(images)
 		ADMINISTRATION.md \
 		REFERENCE.md \
 		../docbuild/app.md \
+		../docbuild/release.md \
 	)
 
-docbuild/release/D2.C2NG.pdf: docbuild/title.pdf docbuild/body.pdf
+$(deliverable): docbuild/title.pdf docbuild/body.pdf
 	mkdir -p docbuild/release
-	python -m fitz join -o docbuild/release/D2.C2NG.pdf \
+	python -m fitz join -o $(deliverable) \
 						   docbuild/title.pdf \
 						   docbuild/body.pdf
 
-docs: docbuild/release/D2.C2NG.pdf
+docs: $(deliverable)
