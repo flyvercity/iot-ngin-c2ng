@@ -1,4 +1,4 @@
-# System Administration Tasks
+# II. System Administration Tasks
 
 ## Configuration
 
@@ -122,14 +122,10 @@ make generate
 ### Simulation Deployment
 
 ```mermaid
----
-title: Application Architecture
----
 flowchart
     UA-Client -- 9090/tcp --> C2NG
     ADX-Client -- 9090/tcp --> C2NG
     C2NG -- 8080/tcp --> KeyCloak
-    C2NG --> 
     C2NG -- 27017/tcp --> MongoDB
     C2NG -- 8086/tcp --> InfluxDB
 ```

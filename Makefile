@@ -34,7 +34,9 @@ docbuild/body.pdf: .autogen $(markdowns) $(images)
 		-F mermaid-filter --toc -o ../docbuild/body.pdf \
 		GLOSSARY.md \
 		GENERAL.md \
+		START.md \
 		ADMINISTRATION.md \
+		REFERENCE.md \
 		../docbuild/app.md \
 	)
 

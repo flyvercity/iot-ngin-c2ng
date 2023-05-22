@@ -1,6 +1,7 @@
-# General System Description
+# I. General System Description
 
-___Project: C2NG Trusted Uncrewed Aviation Systems Command and Control for IoT-NGIN Open Call 2.___
+___Project: C2NG Trusted Uncrewed Aviation Systems  
+Command and Control for IoT-NGIN Open Call 2.___
 
 ## Disclaimer
 
@@ -10,7 +11,21 @@ IoT UAS C2 is a sub-project funded via the [IoT-NGIN project](https://iot-ngin.e
 
 The trusted UAS Next-Generation Command-and-Control (C2NG) Service enables reliable and compliant connectivity between uncrewed aircraft (UA) a.k.a. drones and remote pilot stations (RPS). Any UA under consideration is assumed to be equipped with 5G modules and antennae. RPS may also use 5G connectivity, but not necessarily. All data exchanges are assumed to be based on TCP/IP protocol suite. In contrast with generic Internet connectivity, a reliable connection between the vehicle and the RPS is herein referred to as the “aerial connection”.
 
+This service has three primary functions:
+
+* manage reliability of connection by interacting with 5G network functions.
+* support security by managing security credentials and implementing Aerial Connection Authorization with Uncrewed Traffic Management Systems.
+* monitor performance and compliance by signal data acquisition and analysis.
+
+There are two types of users of the service:
+
+* Aerial Connection Users are flying objects equipped with 5G UE
+
 ## Application Architecture
+
+The Application is based on containerized services and comprises three open source basic components (KeyCloak, MongoDB, and InfluxDB) and the core software service (C2NG). Besides the core software, a CLI tool was developed to control all administrative task, simulation and demostration.
+
+KeyCloak is an open source implementation OIDC protocol and
 
 ```mermaid
 flowchart
@@ -154,12 +169,10 @@ Databse name: `c2ng`
 
 ## Session Collection
 
-Name: `c2session`
+Name: `c2session`  
+Key: `UasID`  
 
-Key: `UasID`
-
-Document schema:
-
+Document schema:  
 ```json
 {
     "UasID": "string",
