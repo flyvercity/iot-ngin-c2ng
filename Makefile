@@ -9,11 +9,10 @@ generate:
 keys:
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service/ python tools/crypto_keys.py
 
+# Documentation
+
 darglint: $(src)
 	darglint service/*.py service/handlers/*.py tools/*.py
-
-
-# Documentation
 
 autogen: $(src)
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service:`pwd`/tools lazydocs \

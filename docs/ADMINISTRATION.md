@@ -95,9 +95,19 @@ Parameters:
 
 ## Enrollment
 
+__TBD__
+
 ## Makefile
 
-### Regenerating the OpenAPI Specification
+### Image Generation
+
+__TBD__
+
+### Cryptograhic Keys Generation
+
+__TBD__
+
+### OpenAPI Specification Regenerating
 
 To extract OpenAPI 3 service specification from code, run:
 
@@ -105,20 +115,23 @@ To extract OpenAPI 3 service specification from code, run:
 make generate
 ```
 
-## darglint
-
-darglint
-
 ![test](xpng.png)
 
-# mermaid sample
+## Running Simulation
+
+### Simulation Deployment
 
 ```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
+---
+title: Application Architecture
+---
+flowchart
+    UA-Client -- 9090/tcp --> C2NG
+    ADX-Client -- 9090/tcp --> C2NG
+    C2NG -- 8080/tcp --> KeyCloak
+    C2NG --> 
+    C2NG -- 27017/tcp --> MongoDB
+    C2NG -- 8086/tcp --> InfluxDB
 ```
 
-## Running Simulation
+__TBD__
