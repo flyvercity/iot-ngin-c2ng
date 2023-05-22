@@ -32,26 +32,66 @@ These environment variable are used to configure third-party containers and set 
 
 #### `service` Section
 
+This section configures access to the services itself.
+
 Parameters:
 
-* `port` is a TCP port for service to listen to incoming HTTP requests
+* `port` is a TCP port for service to listen to incoming HTTP requests.
 
 #### `logging` Section
 
+This section configure the logging facility.
+
 Parameters:
 
-* `verbose` controls whether the logging mechanism shall be more verbose. If `true`, the level is set to `DEBUG`, otherwise to `INFO`
+* `verbose` controls whether the logging mechanism shall be more verbose. If `true`, the level is set to `DEBUG`, otherwise to `INFO`.
 
 #### `oath` Section
 
 This section controls what OIDC server to user to authenticate users again. This version can only contain a single subsection called `keycloak`, with the following parameters:
 
-* `base` is the base URL of the server
-* `realm` is the KeyCloak's realm that contains the enrolled UAV as users
+* `base` is the base URL of the server.
+* `realm` is the KeyCloak's realm that contains the enrolled UAV as users.
 
 #### `uss` Section
 
-Configures how the service reaches the USS 
+This section configures how the service reaches the USSP flight authorization endpoint or a simulator:
+
+* `endpoint` set a URL of the authorization server.
+* `oauth` subsection contain authentication and authorization information. This version suport KeyCloak authentication server, under `keycloak` subsection.
+
+KeyCloak authentication parameters:
+
+* `base` is the base URL server. Note that it does not have to be identical to the [own](#oath-section) server.
+* `realm` is the Keycloak realm to authenticate against.
+* `auth-client-id` is a the value used as a client identifier in the Client Credentials Grant flow.
+
+#### `mongo` Section
+
+This section controls  inteface with MongoDB server:
+
+Parameters:
+
+* `uri` is a base URI of the server.
+
+#### `nsacf` Section
+
+This section controls interface with NSACF in the Network Core.
+
+Parameters:
+
+* `simulated` is set to `true` for simulations with an internal NSACF simulator.
+* `uri` is a base URL of the Function.
+
+#### `security` Section
+
+This section controls link security and encryption mechanism.
+
+Parameters:
+
+* `certificate` set the path to a file with the root X.509 certificate of the service in the PEM format.
+* `private` set the path to a file with the root private key in the PEM format.
+* `defaul-ttl` set the Time-to-Live parameter of the core certificate.
 
 ## Enrollment
 
@@ -80,3 +120,5 @@ graph TD;
     B-->D;
     C-->D;
 ```
+
+## Running Simulation

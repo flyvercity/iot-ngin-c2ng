@@ -34,7 +34,6 @@ docbuild/body.pdf: autogen $(markdowns) $(images)
 		GLOSSARY.md \
 		GENERAL.md \
 		ADMINISTRATION.md \
-		DATABASE.md \
 		../docbuild/app.md \
 	)
 
