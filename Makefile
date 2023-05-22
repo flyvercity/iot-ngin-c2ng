@@ -1,3 +1,5 @@
+src := $(wildcard service/*.py service/handlers/*.py tools/*py)
+
 build: 
 	docker build -t c2ng:latest .
 
@@ -7,14 +9,13 @@ generate:
 keys:
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service/ python tools/crypto_keys.py
 
-darglint:
+darglint: $(src)
 	darglint service/*.py service/handlers/*.py tools/*.py
 
 
 # Documentation
-src := $(wildcard service/*.py service/handlers/*.py tools/*py)
 
-autogen: src
+autogen: $(src)
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service:`pwd`/tools lazydocs \
 		--src-base-url=https://github.com/flyvercity/iot-ngin-c2ng/blob/main/ \
 		--output-path ./docbuild \
@@ -26,12 +27,13 @@ docbuild/title.pdf: docs/title.tex
 
 markdowns := $(wildcard docs/*.md)
 images := $(wildcard docs/*.png)
-gen_markdowns := $(wildcard docbuild/*.md)
 
-docbuild/body.pdf: $(markdowns) $(gen_markdowns) $(images)
+docbuild/body.pdf: autogen $(markdowns) $(images)
 	(cd docs; pandoc -s -V papersize:a4 \
 		-F mermaid-filter --toc -o ../docbuild/body.pdf \
-		README.md \
+		GLOSSARY.md \
+		GENERAL.md \
+		ADMINISTRATION.md \
 		DATABASE.md \
 		../docbuild/app.md \
 	)

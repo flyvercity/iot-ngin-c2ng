@@ -24,7 +24,11 @@ DEFAULT_LISTEN_PORT = 9090
 
 
 def handlers():
-    '''Return a full set of URLSpec.'''
+    '''Defines the HTTP endpoints.
+
+    Returns:
+        A list of URL specifications.
+    '''
 
     return [
         (r'/ua/session', UaSessionRequestHandler),

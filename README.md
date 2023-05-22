@@ -25,7 +25,6 @@ Copy `.env.template` to `.env` and set your value to the following variables:
 * `ME_CONFIG_MONGODB_ADMINPASSWORD` sets a password for MongoExpress
 * `C2NG_UAS_CLIENT_SECRET` client secret for UA and ADX users authentication
 * `C2NG_UA_DEFAULT_PASSWORD` a default password for UA users 
-* `C2NG_ADX_DEFAULT_PASSWORD` a default password for ADX users
 * `C2NG_USS_CLIENT_SECRET` client secret for service to service authentication for USS simulator service (`c2ng` to `uss`)
 
 ## Launch Sequence
@@ -109,7 +108,3 @@ To build `D2.C2NG.pdf` (MVP documentation), execute
 ```sh
 make docs
 ```
-
-## Disclaimer
-
-IoT UAS C2 is a sub-project funded via the [IoT-NGIN project](https://iot-ngin.eu) Open Call. IoT-NGIN has received funding from the European Union’s Horizon 2020 research and innovation programme (Grant Agreement No 957246).
