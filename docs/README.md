@@ -19,3 +19,13 @@ make generate
 darglint
 
 ![test](xpng.png)
+
+# mermaid sample
+
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```

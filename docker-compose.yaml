@@ -36,12 +36,27 @@ services:
 
   influxdb:
     image: influxdb
+    env_file:
+      - .env
     volumes:
       - influx:/var/lib/influxdb2
     ports:
       - 8086:8086
     networks:
       - c2ng
+
+  influxdb_cli:
+    image: influxdb
+    links:
+      - influxdb
+    env_file:
+      - .env
+    volumes:
+      - influx:/var/lib/influxdb2
+    entrypoint: ["./entrypoint.sh"]
+    restart: on-failure:10
+    depends_on:
+      - influxdb
 
   c2ng:
     image: c2ng
