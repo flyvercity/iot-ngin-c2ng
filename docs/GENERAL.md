@@ -18,43 +18,100 @@ flowchart
     subgraph Application
         direction TB
         C2NG --> NSACF
-        C2NG ---> MongoDB
-        C2NG ---> InfluxDB
+        C2NG --> MongoDB
+        C2NG --> InfluxDB
     end
-    Application ----> KeyCloak
+    Application --> KeyCloak
 ```
+
+__TDB__
 
 ## Repository Structure
 
 __TDB__
 
+# API Definition
+
+__TBD__
+
 ## C2NG Service Architecture
 
 ```mermaid
 flowchart
-    subgraph Components
-        NSACF
-        SecMan
-        USS
-        Mongo
-        Influx
-    end
-    subgraph API-Handlers
-        direction TB
-        Base --> Auth
-        Auth --> Sessions
-        Auth --> Certificates
-        Auth --> Signal
-    end
     Tornado --> App
-    App --> Components
-    App --> API-Handlers
+    App --> Sessions
+    App --> Certificates
+    App --> Signal
+    Sessions --> USS
+    Sessions --> NSACF
+    Sessions --> SecMan
+    Certificates --> SecMan
+    Signal --> Influx
 ```
-
-## Security Credentials
 
 __TDB__
 
+## Security Credentials
+
+```mermaid
+flowchart BT
+    Session-Ua-Cert --> Session-Ua-Private-Key
+    Session-Ua-Cert --> Root-Cert
+    Session-Adx-Cert --> Session-Adx-Private-Key
+    Root-Cert --> Root-Private-Key
+    Session-Adx-Cert --> Root-Cert
+```
+
+### Security Credentials Exchange Procedure
+
+User = UA | ADX
+
+```mermaid
+sequenceDiagram
+    User ->> KeyCloak: Get Token
+    KeyCloak -->> User: Access Token
+    User ->> +C2NG: Request Session
+    C2NG ->> NSACF: Request Admission
+    NSACF -->> C2NG: IP/Gateway
+    C2NG ->> SecMan: Request Session credentials
+    SecMan -->> C2NG: Session Public/Private Keys
+    C2NG -->> -User: IP/Gateway, Certificate
+```
+
+__TDB__
+
+### Expected User Interaction
+
+```mermaid
+sequenceDiagram
+    UA ->> C2NG: Request Session
+    ADX ->> C2NG: Request Session
+    UA ->> C2NG: Request Peer Certificate
+    ADX ->> С2NG: Request Peer Certificate
+    ADX ->> C2NS: Request UA Address
+    ADX ->> UA: Connect
+    ADX -->> UA: Send Encrypted/Signed C2 Payload
+    UA -->> ADX: Reply for Encrypted/Signed C2 Payload
+    ADX ->> UA: Disconnect
+```
+
+### Expected Encryption Description Procedure
+
+
+
+### Handlers Structure
+
+```mermaid
+classDiagram
+    BaseHandler <|-- AuthHandler
+    AuthHandler <|-- SessionRequest
+    SessionRequest <|-- UaSessionRequest
+    SessionRequest <|-- AdxSessionRquest
+    AuthHandler <|-- Certificates
+    AuthHandler <|-- Signal
+```
+
+__TDB__
 
 ## CLI Tools
 
@@ -64,6 +121,8 @@ flowchart
     c2ng-cli --> gen-open-api
     c2ng-cli --> oauth-admin
 ```
+
+__TDB__
 
 
 ## Logging

@@ -28,7 +28,8 @@ markdowns := $(wildcard docs/*.md)
 images := $(wildcard docs/*.png)
 
 docbuild/body.pdf: autogen $(markdowns) $(images)
-	(cd docs; pandoc -s -V papersize:a4 \
+	(cd docs; pandoc -s \
+		-V papersize:a4 -V geometry:margin=1in \
 		-F mermaid-filter --toc -o ../docbuild/body.pdf \
 		GLOSSARY.md \
 		GENERAL.md \
