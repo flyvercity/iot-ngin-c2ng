@@ -12,13 +12,20 @@ class Mongo:
         '''Constructor.
 
         Args:
-        - `config`: `mongo` section of the configuration dict
+            config: `mongo` section of the configuration dict
         '''
 
         self._client = MongoClient(config['uri'])
 
     def get_session(self, sid: str) -> dict | None:
-        '''Fetch a session from a collection.'''
+        '''Fetch a session from a collection.
+
+        Args:
+            sid: session identifier.
+
+        Returns:
+            A session JSON object.
+        '''
         return self._client.c2ng.c2session.find_one({'_id': sid})
 
     def put_session(self, session: dict):
