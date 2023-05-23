@@ -36,6 +36,8 @@ Flight experiment is set up in cooperation with Sky-Drones Technologies Ltd.
 
 __TBD__
 
+<iframe src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d22546.726302145213!2d-0.28324212869120474!3d51.70426319192164!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sen!2sil!4v1684857176837!5m2!1sen!2sil" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
 ### Flight Experiment Equipment
 
 * Sky-Drones X700 Platform
