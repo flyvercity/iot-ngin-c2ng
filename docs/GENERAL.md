@@ -105,17 +105,14 @@ The are two layers in the application:
 * "backbone" service interfaces comprises `USS`, `NSACF`, `Mongo`, and `Influx` class. Besides that, this layer also contain the Security Manager component responsible to manage session security credentials.
 
 Main service dependencies are:
-apispec
-apispec-webframeworks==0.5.2
-marshmallow==3.19.0
-requests==2.28.2
-tornado==6.3.1
-pymongo==4.3.3
-cryptography==40.0.2
-python-jose==3.3.0
-python-keycloak==2.16.3
-Pygments==2.15.1
 
+* `marshmallow` - a data serialization library for handling user interactions and API generation.
+* `tornado` - a webs service framework.
+* `pymongo` - an interface with MongoDB.
+* `cryptography` - a set of crytographic primitives for key generating, signing, and encryption.
+* `python-jose` - a set of functions work with JWT tokens.
+* `python-keycloak` - an interface to KeyCloak.
+* `influxdb-client-python - an inferface to InfluxDB.
 
 ## Security Credentials
 

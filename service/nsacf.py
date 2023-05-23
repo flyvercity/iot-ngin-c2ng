@@ -11,7 +11,7 @@ class NSACF:
         '''Constructor.
 
         Args:
-        - `config` contains `nsacf` section of the configuration file.
+            config: contains `nsacf` section of the configuration file.
         '''
 
         self._config = config
