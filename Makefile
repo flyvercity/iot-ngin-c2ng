@@ -53,7 +53,6 @@ docbuild/body.pdf: .autogen $(markdowns) $(images) docbuild/openapi.md
 		../docbuild/secman.md \
 		../docbuild/uss.md \
 		../docbuild/nsacf.md \
-		../docbuild/schemas.md \
 		../docbuild/mongo.md \
 		../docbuild/influx.md \
 		../docbuild/c2ng.md \

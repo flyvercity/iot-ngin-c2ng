@@ -40,7 +40,7 @@ InfluxDB is a timeseries database used to collect signal characteristics reporte
 
 C2NG designates the service itself. C2NG is a web service and exposes the API described in the [API Definition](#api-definition) sections.
 
-The following diagram present a schematic view of the C2NG application architecture.
+The following diagram presents a schematic view of the C2NG application architecture.
 
 ```mermaid
 flowchart
@@ -78,7 +78,7 @@ The short description
 * `/address/ua/(uas_id)` - request an address of the UA user (to be used by an ADX user).
 * `/signal` - an endpoint where the UA users report signal telemetry.
 
-OpenAPI v.3 defition files contains an exhaustive description of the API see [Part V. API Reference](./c2ng.yaml) (generated from [`c2ng.yaml`](./c2ng.yaml)). This information is extracted from Marshmellow definitions in the `module schemas` (see [Part IV. Module Reference](./REFERENCE.md)).
+OpenAPI v.3 defition files contains an exhaustive description of the API see [Part V. API Reference](./c2ng.yaml) (generated from [`c2ng.yaml`](./c2ng.yaml)). This information is extracted from Marshmellow definitions in a special [module `schemas`](../service/schemas.py).
 
 ## C2NG Service Architecture
 
@@ -104,6 +104,19 @@ The are two layers in the application:
 * user-facing interfaces comprise `Sessions`, `Certificates`, `Signal` request handlers.
 * "backbone" service interfaces comprises `USS`, `NSACF`, `Mongo`, and `Influx` class. Besides that, this layer also contain the Security Manager component responsible to manage session security credentials.
 
+Main service dependencies are:
+apispec
+apispec-webframeworks==0.5.2
+marshmallow==3.19.0
+requests==2.28.2
+tornado==6.3.1
+pymongo==4.3.3
+cryptography==40.0.2
+python-jose==3.3.0
+python-keycloak==2.16.3
+Pygments==2.15.1
+
+
 ## Security Credentials
 
 The service uses a hierarchy of security credentials that links session public keys of the users with the root private key of the service itself, enabling a chain of validation. The keys relate to each other is depicted by the following diagram:
@@ -119,7 +132,7 @@ flowchart BT
 
 The root private key and certificate are generated during the deployment and configuration process, session keys are generated every time what a new reliable connectivity session is requested by a user.
 
-#### 
+#### Session Establishment
 
 The main use case of the service is the Session Establishment procedure reflected on the following diagram:
 
@@ -138,7 +151,7 @@ sequenceDiagram
 
 Session Establishment involves three main interfaces: with USSP to check flight authorization, NSACF to admit the users in a slice; and internal Security Manager (`SenMan`) to generate, store, and distribute session security credentials.
 
-### Expected User Interaction
+#### Expected User Interaction
 
 The following diagram reflect a typical procedure of mutual UA and ADX user login, security credentials exchange, and communications procedure.
 

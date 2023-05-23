@@ -20,16 +20,18 @@ class NSACF:
         '''Get next network credentials for a UE.
 
         Args:
-        - `imsi` unique UE identifier.
+            imsi: unique UE identifier.
 
         Returns:
+            JSON object::
 
-        ```json
-            {
-                "IP": "<address>",
-                "Gateway": "<address>"
-            }
-        ```
+                {
+                    "IP": "<address>",
+                    "Gateway": "<address>"
+                }
+
+        Raises:
+            RuntimeError: if NSACF endpoint is not implemented
         '''
 
         if self._config.get('simulated'):
@@ -40,20 +42,23 @@ class NSACF:
 
         raise RuntimeError('Not implemented exception')
 
-    def get_adx_network_creds(self, uid):
+    def get_adx_network_creds(self, uid: str):
         '''Get next network credentials for an ADX client.
 
         Args:
-        - `uid` unique client identifier.
+            uid: unique ID
 
         Returns:
+            JSON object::
 
-        ```json
-            {
-                "IP": "<address>",
-                "Gateway": "<address>"
-            }
-        ```
+                {
+                    "IP": "<address>",
+                    "Gateway": "<address>"
+                }
+
+        Raises:
+            RuntimeError: if NSACF endpoint is not implemented
+
         '''
 
         if self._config.get('simulated'):
