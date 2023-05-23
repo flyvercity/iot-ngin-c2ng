@@ -40,6 +40,7 @@ docbuild/body.pdf: .autogen $(markdowns) $(images)
 		GENERAL.md \
 		START.md \
 		ADMINISTRATION.md \
+		EXPERIMENTS.md \
 		REFERENCE.md \
 		../docbuild/app.md \
 		../docbuild/release.md \

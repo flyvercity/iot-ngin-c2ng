@@ -115,8 +115,6 @@ To extract OpenAPI 3 service specification from code, run:
 make generate
 ```
 
-![test](xpng.png)
-
 ## Running Simulation
 
 ### Simulation Deployment
