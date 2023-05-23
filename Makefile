@@ -31,11 +31,18 @@ images := $(wildcard docs/*.png)
 revision := $(shell git describe --always)
 deliverable := docbuild/release/D2.C2NG.$(revision).pdf
 
-docbuild/body.pdf: .autogen $(markdowns) $(images)
+docbuild/openapi.md: docs/c2ng.yaml
+	echo "# V. API Reference\n\n" > docbuild/openapi.md
+	echo "\`\`\`yaml\n" >> docbuild/openapi.md
+	cat docs/c2ng.yaml >> docbuild/openapi.md
+	echo "\`\`\`\n" >> docbuild/openapi.md
+
+docbuild/body.pdf: .autogen $(markdowns) $(images) docbuild/openapi.md
 	echo "_Revision $(revision)_" > docbuild/release.md
 	(cd docs; pandoc -s \
 		-V papersize:a4 -V geometry:margin=1in \
-		-F mermaid-filter --toc -o ../docbuild/body.pdf \
+		-F mermaid-filter  \
+		--toc -o ../docbuild/body.pdf \
 		GLOSSARY.md \
 		GENERAL.md \
 		START.md \
@@ -44,6 +51,7 @@ docbuild/body.pdf: .autogen $(markdowns) $(images)
 		REFERENCE.md \
 		../docbuild/app.md \
 		../docbuild/release.md \
+		../docbuild/openapi.md \
 	)
 
 $(deliverable): docbuild/title.pdf docbuild/body.pdf
