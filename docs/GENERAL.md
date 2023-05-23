@@ -24,7 +24,7 @@ This service has three primary functions:
 There are two types of users of the service:
 
 * Aerial Connection Users are flying objects equipped with 5G UE and requiring to establish a reliable connection. Generally these are Aerial Vehicles a.k.a. drones. These also may include Wireless RPS (remote pilot stations) a.k.a. GCS (ground control stations).
-* ADX Users are stationary enti
+* ADX Users are stationary entities that connect to aerial users via the Aviation Data Exchange Network. These are generally fixed ground control center workstations.
 
 ## Application Architecture
 
@@ -40,7 +40,9 @@ InfluxDB is a timeseries database used to collect signal characteristics reporte
 
 C2NG designates the service itself. C2NG is a web service and exposes the API described in the [API Definition](#api-definition) sections.
 
-```{.mermaid caption="Application Architecture"}
+The following diagram present a schematic view of the C2NG application architecture.
+
+```mermaid
 flowchart
     UAS-Client --> Application
     subgraph Application
@@ -80,9 +82,11 @@ OpenAPI v.3 defition files contains an exhaustive description of the API see [Pa
 
 ## C2NG Service Architecture
 
-The C2NG service is implemented in Python as a standalone Web Service based on Tornado framework. The service has modular architecture and separates core logic from external interfaces. The implementation is largely object-oriented. Web frontend followes
+The C2NG service is implemented in Python as a standalone Web Service based on Tornado framework. The service has modular architecture and separates core logic from external interfaces. The implementation is largely object-oriented. Web frontend follows the guidelines of the framework. 
 
-```{.mermaid caption="C2NG Service Architecture"}
+The following diagram present a schematic view of the C2NG service architecture.
+
+```mermaid
 flowchart
     Tornado --> App
     App --> Sessions
@@ -95,11 +99,16 @@ flowchart
     Signal --> Influx
 ```
 
-__TDB__
+The are two layers in the application:
+
+* user-facing interfaces comprise `Sessions`, `Certificates`, `Signal` request handlers.
+* "backbone" service interfaces comprises `USS`, `NSACF`, `Mongo`, and `Influx` class. Besides that, this layer also contain the Security Manager component responsible to manage session security credentials.
 
 ## Security Credentials
 
-```{.mermaid caption="Security Credentials Hierarchy"}
+The service uses a hierarchy of security credentials that links session public keys of the users with the root private key of the service itself, enabling a chain of validation. The keys relate to each other is depicted by the following diagram:
+
+```mermaid
 flowchart BT
     Session-Ua-Cert --> Session-Ua-Private-Key
     Session-Ua-Cert --> Root-Cert
@@ -108,15 +117,18 @@ flowchart BT
     Session-Adx-Cert --> Root-Cert
 ```
 
-### Security Credentials Exchange Procedure
+The root private key and certificate are generated during the deployment and configuration process, session keys are generated every time what a new reliable connectivity session is requested by a user.
 
-User = UA | ADX
+#### 
 
-```{.mermaid caption="Application Architecture"}
+The main use case of the service is the Session Establishment procedure reflected on the following diagram:
+
+```mermaid
 sequenceDiagram
     User ->> KeyCloak: Get Token
     KeyCloak -->> User: Access Token
     User ->> +C2NG: Request Session
+    C2NG ->> USS: Request Authorization
     C2NG ->> NSACF: Request Admission
     NSACF -->> C2NG: IP/Gateway
     C2NG ->> SecMan: Request Session credentials
@@ -124,11 +136,13 @@ sequenceDiagram
     C2NG -->> -User: IP/Gateway, Certificate
 ```
 
-__TDB__
+Session Establishment involves three main interfaces: with USSP to check flight authorization, NSACF to admit the users in a slice; and internal Security Manager (`SenMan`) to generate, store, and distribute session security credentials.
 
 ### Expected User Interaction
 
-```{.mermaid caption="Expected User Interaction"}
+The following diagram reflect a typical procedure of mutual UA and ADX user login, security credentials exchange, and communications procedure.
+
+```mermaid
 sequenceDiagram
     UA ->> C2NG: Request Session
     ADX ->> C2NG: Request Session
@@ -141,9 +155,11 @@ sequenceDiagram
     ADX ->> UA: Disconnect
 ```
 
-### Expected Encryption Procedure
+#### Expected Encryption Procedure
 
-```{.mermaid caption="Expected Encryption Procedure"}
+While information exchange itself is a function of users and it does not involve the service itself, the logic of the applications calls user for a sequence of actions as depicted on the following diagram:
+
+```mermaid
 flowchart
     Message --> CP
     subgraph CP [Construct Packet]
@@ -162,32 +178,18 @@ flowchart
     DP --> RM(Message)
 ```
 
-## CLI Tools
-
-```mermaid
-flowchart
-    c2ng-cli --> crypto-keys
-    c2ng-cli --> gen-open-api
-    c2ng-cli --> oauth-admin
-```
-
-__TDB__
-
-
-## Logging
-
-__TDB__
+The `Transmit` action of the diagram assumes that the data are transmitter using network credentials assigned to a user.
 
 # MongoDB Logical Schema
 
-__TDB__
-
-Databse name: `c2ng`
+The service uses a single MongoDB with potentially multiple collections. Database name is `c2ng`.
 
 ## Session Collection
 
+This is a primary collection where the service stores the current status of the slice-bounded connectivity session together with security credentials.
+
 Name: `c2session`  
-Key: `UasID`  
+Key: `UasID`
 
 Document schema:  
 ```json

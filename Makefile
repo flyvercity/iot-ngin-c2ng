@@ -29,7 +29,7 @@ docbuild/title.pdf: docs/title.tex
 markdowns := $(wildcard docs/*.md)
 images := $(wildcard docs/*.png)
 revision := $(shell git describe --always)
-deliverable := docbuild/release/D2.C2NG.$(revision).pdf
+deliverable := docbuild/release/D2.C2NG.pdf
 
 docbuild/openapi.md: docs/c2ng.yaml
 	echo "# V. API Reference\n\n" > docbuild/openapi.md
@@ -50,6 +50,16 @@ docbuild/body.pdf: .autogen $(markdowns) $(images) docbuild/openapi.md
 		EXPERIMENTS.md \
 		REFERENCE.md \
 		../docbuild/app.md \
+		../docbuild/secman.md \
+		../docbuild/uss.md \
+		../docbuild/nsacf.md \
+		../docbuild/schemas.md \
+		../docbuild/mongo.md \
+		../docbuild/influx.md \
+		../docbuild/c2ng.md \
+		../docbuild/crypto_keys.md \
+		../docbuild/gen_openapi.md \
+		../docbuild/oath_admin.md \
 		../docbuild/release.md \
 		../docbuild/openapi.md \
 	)
