@@ -1,19 +1,36 @@
 # SPDX-License-Identifier: MIT
 # Copyright 2023 Flyvercity
 
-'''This module defines USSP interface.'''
+'''This module defines the USSP interface.'''
 import os
 import logging as lg
+from typing import Tuple
 
 import requests  # TODO: asynchronize it
 from keycloak import KeycloakOpenID
 
 
 class UssInterface:
+    '''USSP API Implementation'''
     def __init__(self, config) -> None:
+        '''Constructor.
+
+        Args:
+            config: the `uss` section of the configuration file.
+        '''
+
         self.config = config
 
-    def request(self, uasid):
+    def request(self, uasid) -> Tuple[bool, str]:
+        '''Requests a flight authorization for the USSP.
+
+        Args:
+            uasid: Logical UAS identifier.
+
+        Returns:
+            A tuple with a boolean authorization flag and an error string (if any).
+        '''
+
         try:
             oauth = self.config['oauth']['keycloak']
 

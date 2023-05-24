@@ -6,12 +6,23 @@ from marshmallow import Schema, fields, validate
 
 
 def uasid():
-    '''Generate standard UAS ID field.'''
+    '''Generate standard UAS ID field.
+
+    Returns:
+        A field specification for UAS Logical ID.
+    '''
     return fields.String(required=True, description='CAA UAS ID')
 
 
-def validate_imsi(value):
-    '''Validate standard 3GPP IMSI number.'''
+def validate_imsi(value: str):
+    '''Validate standard 3GPP IMSI number.
+
+    Args:
+        value: input value to validate.
+
+    Returns:
+        A corresponding validator function.
+    '''
     return validate.Regexp('[0-9]{14,15}')
 
 

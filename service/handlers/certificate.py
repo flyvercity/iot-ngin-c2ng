@@ -16,11 +16,20 @@ class CertificateHandlerBase(AuthHandler):
     '''Peer Certificate Request Base Endpoints Handler'''
 
     def _certificate_field(self) -> str:
-        '''Abstract method, an override shall return a field in the Session Mongo Object'''
-        raise RuntimeError('This method shall be overriden')
+        '''Abstract method, an override shall return a field in the Session Mongo Object.
+
+        Raises:
+            RuntimeError: always (must be overriden).
+        '''
+
+        raise RuntimeError('This method shall be overriden.')
 
     def get(self, uasid):
-        ''' Returns new connection credentials
+        '''Returns new connection credentials.
+
+        Args:
+            uasid: Logical UAS identifier
+
         ---
         summary: Request a new session for an ADX client (RPS or USS services)
 
@@ -80,7 +89,12 @@ class UaCertificateHandler(CertificateHandlerBase):
     '''UA Certificate Request Base Endpoints Handler'''
 
     def _certificate_field(self) -> str:
-        '''Returns "UaCertificate"'''
+        '''Virtual method override.
+
+        Returns:
+            "UaCertificate"
+        '''
+
         return 'UaCertificate'
 
 
@@ -88,5 +102,10 @@ class AdxCertificateHandler(CertificateHandlerBase):
     '''ADX Certificate Request Base Endpoints Handler'''
 
     def _certificate_field(self) -> str:
-        '''Returns "AdxCertificate"'''
+        '''Virtual method override.
+
+        Returns:
+            "AdxCertificate"
+        '''
+
         return 'AdxCertificate'

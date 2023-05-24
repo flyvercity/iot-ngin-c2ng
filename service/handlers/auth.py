@@ -24,6 +24,9 @@ class AuthHandler(HandlerBase):
 
         Returns:
             User's JWT token payload.
+
+        Raises:
+            HTTPError: A HTTP 404 unauthorized exception.
         '''
 
         try:

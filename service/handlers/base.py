@@ -35,6 +35,9 @@ class HandlerBase(web.RequestHandler):
         Args:
             ResponseSchema: a schema of the response, subclass of `Schema`.
             response: a dict with formattable data.
+
+        Raises:
+            RuntimeError: on a attempt to return a malformed response.
         '''
 
         self.set_header('Content-Type', 'application/json')
@@ -56,8 +59,8 @@ class HandlerBase(web.RequestHandler):
         '''Successful response with optional data
 
         Args:
-        - `ResponseSchema` a schema of the successful response, subclass of `BaseSuccessSchema`.
-        - `data` JSON-formattable response.
+            ResponseSchema: a schema of the successful response, subclass of `BaseSuccessSchema`.
+            data: JSON-formattable response.
         '''
 
         self.set_status(200)
@@ -68,9 +71,9 @@ class HandlerBase(web.RequestHandler):
         '''Produces a graceful failure response.
 
         Args:
-        - `ResponseSchema` a schema of the erroneous response, subclass of `ErrorSchema`.
-        - `errors` a dict with structured error.
-        - `message` an optional human readable message.
+            ResponseSchema: a schema of the erroneous response, subclass of `ErrorSchema`.
+            errors: a dict with structured error.
+            message: an optional human readable message.
         '''
 
         self.set_status(400)
@@ -85,7 +88,8 @@ class HandlerBase(web.RequestHandler):
         '''Produces an exception response.
 
         Args:
-        - `status_code` HTTP status code.
+            status_code: HTTP status code.
+            kwargs: unused here.
         '''
         self.set_header('Content-Type', 'application/json')
 
@@ -106,7 +110,10 @@ class HandlerBase(web.RequestHandler):
         '''Unmarshal and validate a JSON request.
 
         Args:
-        - `RequestSchema` a type of the request to validate against.
+            RequestSchema: a type of the request to validate against.
+
+        Returns:
+            A validated request JSON object.
         '''
 
         try:
