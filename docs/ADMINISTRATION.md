@@ -93,19 +93,41 @@ Parameters:
 * `private` set the path to a file with the root private key in the PEM format.
 * `defaul-ttl` set the Time-to-Live parameter of the core certificate.
 
-## Enrollment
-
-__TBD__
-
 ## Makefile
 
 ### Image Generation
 
-__TBD__
+To build the C2NG web service image, run:
+
+```sh
+make build
+```
 
 ### Cryptograhic Keys Generation
 
-__TBD__
+To generate root cryptographic keys, run:
+
+```sh
+make keys
+```
+
+This command generates two files:
+
+* `config/c2ng/private.pem` - a service root private key, and
+* `config/c2ng/service.pem` - a service root certificate with a public key.
+
+### Keycloak Automatic Configuration
+
+The KeyCloak service must be configured to match configuration procedures the service uses:
+
+* user authentication using the Direct Access Grant;
+* C2NP service to USSP simulator (or an operational USSP) authentication.
+
+This can be done through KeyCloak's user interface, but there is also a automatic procedure as a part of CLI tools. Use the following command to run:
+
+```sh
+python tools/c2ng.py keycloak
+```
 
 ### OpenAPI Specification Regenerating
 
@@ -114,18 +136,3 @@ To extract OpenAPI 3 service specification from code, run:
 ```sh
 make generate
 ```
-
-## Running Simulation
-
-### Simulation Deployment
-
-```mermaid
-flowchart
-    UA-Client -- 9090/tcp --> C2NG
-    ADX-Client -- 9090/tcp --> C2NG
-    C2NG -- 8080/tcp --> KeyCloak
-    C2NG -- 27017/tcp --> MongoDB
-    C2NG -- 8086/tcp --> InfluxDB
-```
-
-__TBD__

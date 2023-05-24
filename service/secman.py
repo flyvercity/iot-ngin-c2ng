@@ -21,7 +21,12 @@ from cryptography.hazmat.primitives.serialization import (
 
 
 def generate_pk():
-    '''Generate key-pair with standard parameters.'''
+    '''Generate key-pair with standard parameters.
+
+    Returns:
+        A newly generated RSA key pair.
+    '''
+
     return rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
 
@@ -29,8 +34,12 @@ def get_x509_subject(name: str):
     '''Construct X.509 Subject.
 
     Args:
-    - `name`: What to use as 'common name'
+        name: What to use as 'common name'.
+
+    Returns:
+        A constructed X509 issuer/subject name.
     '''
+
     subject = x509.Name([
         x509.NameAttribute(NameOID.COUNTRY_NAME, 'IL'),
         x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, 'HaSharon'),
@@ -47,21 +56,31 @@ class SecCredentials:
 
     def __init__(self, cert: x509.Certificate, key: rsa.RSAPrivateKey, client_secret: str):
         '''Constructor
+
         Args:
-        - cert: X509 client certificate
-        - key: client session key
-        - client_secret: static client secret used to encrypt session keys
+            cert: X509 client certificate
+            key: client session key
+            client_secret: static client secret used to encrypt session keys
         '''
+
         self._cert = cert
         self._key = key
         self._client_secret = client_secret
 
     def cert(self):
-        '''Returns a certificate with a public key as a PEM string'''
+        '''Get a certificate string.
+
+        Returns:
+            A certificate with a public key as a PEM string.
+        '''
         return self._cert.public_bytes(Encoding.PEM).decode()
 
     def key(self):
-        '''Returns an encrypted session private key as a PEM string'''
+        '''Get a private key.
+
+        Returns:
+            An encrypted session private key as a PEM string.
+        '''
         return self._key.private_bytes(
             Encoding.PEM,
             PrivateFormat.TraditionalOpenSSL,
@@ -76,7 +95,7 @@ class SecMan:
         '''Creates an instance of the manager and loads root credentials
 
         Args:
-        - `config` - `security` section of the configuration file
+            config: `security` section of the configuration file
         '''
 
         self._config = config
@@ -92,6 +111,14 @@ class SecMan:
         lg.info('Private key loaded')
 
     def gen_client_credentials(self, client_id):
+        '''Generates session security credentials.
+
+        Args:
+            client_id: UA or ADX user logical identifier.
+
+        Returns:
+            `SecCredentials` object.
+        '''
         # TODO: find out how to use individual key for each user
         oauth_client_id = os.getenv('C2NG_UAS_CLIENT_SECRET')
 

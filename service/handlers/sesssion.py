@@ -16,7 +16,7 @@ from handlers.auth import AuthHandler
 
 
 class UaSessionRequestHandler(AuthHandler):
-    '''UA Session Endpoint Handler'''
+    '''UA Session Endpoint Handler.'''
 
     def post(self):
         ''' Returns new connection credentials

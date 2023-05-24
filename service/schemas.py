@@ -6,12 +6,23 @@ from marshmallow import Schema, fields, validate
 
 
 def uasid():
-    '''Generate standard UAS ID field.'''
+    '''Generate standard UAS ID field.
+
+    Returns:
+        A field specification for UAS Logical ID.
+    '''
     return fields.String(required=True, description='CAA UAS ID')
 
 
-def validate_imsi(value):
-    '''Validate standard 3GPP IMSI number.'''
+def validate_imsi(value: str):
+    '''Validate standard 3GPP IMSI number.
+
+    Args:
+        value: input value to validate.
+
+    Returns:
+        A corresponding validator function.
+    '''
     return validate.Regexp('[0-9]{14,15}')
 
 
@@ -139,4 +150,24 @@ class SignalStatsReportRequest(Schema):
     )
 
     Waypoint = fields.Nested(GeoPointWGS84, description='Reference Position', required=True)
+    Roll = fields.Integer(description='Aircraft Roll (degrees)')
+    Pitch = fields.Integer(description='Aircraft Pitch (degrees)')
+    Yaw = fields.Integer(description='Aircraft Yaw (degrees)')
+
+    VNorth = fields.Float(description='Aircraft North Velocity (meters per second)')
+    VEast = fields.Float(description='Aircraft Eest Velocity (meters per second)')
+    VDown = fields.Float(description='Aircraft Downward Velocity (meters per second)')
+    VAir = fields.Float(description='Aircraft Air Speed (meters per second)')
+    Baro = fields.Float(description='Aircraft Barometric Altitude')
+    Heading = fields.Float(description='Aircraft True Heading (degrees)')
+
     RSRP = fields.Integer(description='Reference Signal Received Power', required=True)
+    RSRP = fields.Integer(description='Reference Signal Received Power', required=True)
+    RSRQ = fields.Integer(description='Reference Signal Received Quality', required=True)
+    RSSI = fields.Integer(description='Received Signal Strength Indicator', required=True)
+    SINR = fields.Integer(description='Signal to Interference & Noise Ratio', required=True)
+
+    HeartbeatLoss = fields.Boolean(description='Heartbeat Loss Flag', required=True)
+    RTT = fields.Integer(description='Round-Trip Time (ms)')
+    Cell = fields.String(description='Aircraft Serving physical cell identifier', required=True)
+    FrequencyBand = fields.String(description='Aircraft Serving Frequency Band Identification')

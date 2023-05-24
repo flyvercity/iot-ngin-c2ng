@@ -185,8 +185,35 @@ components:
       type: object
     SignalStatsReportRequest:
       properties:
+        Baro:
+          description: Aircraft Barometric Altitude
+          type: number
+        Cell:
+          description: Aircraft Serving physical cell identifier
+          type: string
+        FrequencyBand:
+          description: Aircraft Serving Frequency Band Identification
+          type: string
+        Heading:
+          description: Aircraft True Heading (degrees)
+          type: number
+        HeartbeatLoss:
+          description: Heartbeat Loss Flag
+          type: boolean
+        Pitch:
+          description: Aircraft Pitch (degrees)
+          type: integer
         RSRP:
           description: Reference Signal Received Power
+          type: integer
+        RSRQ:
+          description: Reference Signal Received Quality
+          type: integer
+        RSSI:
+          description: Received Signal Strength Indicator
+          type: integer
+        RTT:
+          description: Round-Trip Time (ms)
           type: integer
         Radio:
           description: Current radio access mode
@@ -197,16 +224,42 @@ components:
         ReferenceTime:
           description: UNIX Timestamp
           type: number
+        Roll:
+          description: Aircraft Roll (degrees)
+          type: integer
+        SINR:
+          description: Signal to Interference & Noise Ratio
+          type: integer
         UasID:
           type: string
+        VAir:
+          description: Aircraft Air Speed (meters per second)
+          type: number
+        VDown:
+          description: Aircraft Downward Velocity (meters per second)
+          type: number
+        VEast:
+          description: Aircraft Eest Velocity (meters per second)
+          type: number
+        VNorth:
+          description: Aircraft North Velocity (meters per second)
+          type: number
         Waypoint:
           allOf:
           - $ref: '#/components/schemas/GeoPointWGS84'
           description: Reference Position
+        Yaw:
+          description: Aircraft Yaw (degrees)
+          type: integer
       required:
+      - Cell
+      - HeartbeatLoss
       - RSRP
+      - RSRQ
+      - RSSI
       - Radio
       - ReferenceTime
+      - SINR
       - UasID
       - Waypoint
       type: object

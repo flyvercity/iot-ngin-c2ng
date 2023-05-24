@@ -2,7 +2,7 @@
 
 [Full Documentation](docs/README.md)
 
-[External Service Interface Specification](docs/c2ng.yaml)
+[External Service Interface Specification](./c2ng.yaml)
 
 ## Development Environment
 

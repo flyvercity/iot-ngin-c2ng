@@ -29,13 +29,20 @@ docbuild/title.pdf: docs/title.tex
 markdowns := $(wildcard docs/*.md)
 images := $(wildcard docs/*.png)
 revision := $(shell git describe --always)
-deliverable := docbuild/release/D2.C2NG.$(revision).pdf
+deliverable := docbuild/release/D2.C2NG.pdf
 
-docbuild/body.pdf: .autogen $(markdowns) $(images)
+docbuild/openapi.md: docs/c2ng.yaml
+	echo "# V. API Reference\n\n" > docbuild/openapi.md
+	echo "\`\`\`yaml\n" >> docbuild/openapi.md
+	cat docs/c2ng.yaml >> docbuild/openapi.md
+	echo "\`\`\`\n" >> docbuild/openapi.md
+
+docbuild/body.pdf: .autogen $(markdowns) $(images) docbuild/openapi.md
 	echo "_Revision $(revision)_" > docbuild/release.md
 	(cd docs; pandoc -s \
 		-V papersize:a4 -V geometry:margin=1in \
-		-F mermaid-filter --toc -o ../docbuild/body.pdf \
+		-F mermaid-filter  \
+		--toc -o ../docbuild/body.pdf \
 		GLOSSARY.md \
 		GENERAL.md \
 		START.md \
@@ -43,6 +50,15 @@ docbuild/body.pdf: .autogen $(markdowns) $(images)
 		EXPERIMENTS.md \
 		REFERENCE.md \
 		../docbuild/app.md \
+		../docbuild/secman.md \
+		../docbuild/uss.md \
+		../docbuild/nsacf.md \
+		../docbuild/mongo.md \
+		../docbuild/c2ng.md \
+		../docbuild/crypto_keys.md \
+		../docbuild/gen_openapi.md \
+		../docbuild/oath_admin.md \
+		../docbuild/openapi.md \
 		../docbuild/release.md \
 	)
 

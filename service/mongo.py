@@ -29,7 +29,11 @@ class Mongo:
         return self._client.c2ng.c2session.find_one({'_id': sid})
 
     def put_session(self, session: dict):
-        '''Put a session object into collection.'''
+        '''Put a session object into collection.
+
+        Args:
+            session: a session JSON object.
+        '''
         sid = session['UasID']
         session.update({'_id': sid})
 
