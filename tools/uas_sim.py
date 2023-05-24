@@ -194,6 +194,8 @@ class SimC2Subsystem:
         return False
 
     def _construct_sec_packet(self, message: bytes):
+        lg.info('Encrypting and signing the packet')
+
         if not self._secure():
             return message
 
@@ -223,6 +225,8 @@ class SimC2Subsystem:
         return json.dumps(packet).encode()
 
     def _deconstruct_sec_packet(self, packet_bytes) -> bytes:
+        lg.info('Verifying and decrypting the packet')
+
         if not self._secure():
             return packet_bytes
 
@@ -252,9 +256,11 @@ class SimC2Subsystem:
 
     def _send(self, message: bytes, address: tuple):
         packet_bytes = self._construct_sec_packet(message)
+        lg.info('Transmitting')
         self._outsocket.sendto(packet_bytes, address)
 
     def _receive(self):
+        lg.info('Receiving')
         packet_bytes, addr = self._insocket.recvfrom(RECEIVE_BUFFER)
         message = self._deconstruct_sec_packet(packet_bytes)
         return (message, addr)
@@ -292,8 +298,8 @@ class SimUaC2Subsystem(SimC2Subsystem):
         counter = 0
 
         while True:
-            print('sending here')
-            message = f'packet #{counter}'
+            message = f'Heartbeat #{counter}'
+            print('MESSAGE:', message)
             counter += 1
             self._send(message.encode(), ('127.0.0.1', self._out_port()))
 
@@ -306,7 +312,8 @@ class SimUaC2Subsystem(SimC2Subsystem):
                     'Longitude': 35.0,
                     'Altitude': 100.0
                 },
-                'RSRP': -99
+                'RSRP': -99,
+                'HeartbeatLoss': False
             })
 
             time.sleep(1)
@@ -342,9 +349,8 @@ class SimAdxC2Subsystem(SimC2Subsystem):
         '''Implements `_work_cycle` for the RPS simulator.'''
 
         while True:
-            print('receiving here')
             message, _addr = self._receive()
-            print('MESSAGE', message.decode())
+            print('MESSAGE:', message.decode())
 
 
 def add_arg_subparsers(sp):

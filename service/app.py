@@ -62,6 +62,7 @@ async def main():
         secman=secman
     )
 
+    lg.info('---------- C2NG Restarted ----------')
     lg.info(f'C2NG :: Listening for requests on {port}')
     app.listen(port)
     await asyncio.Event().wait()

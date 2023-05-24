@@ -18,9 +18,21 @@ These environment variable are used to configure third-party containers and set 
 
 #### MongoExpress Configuration
 
-* `ME_CONFIG_MONGODB_ADMINUSERNAME` sets a username
+yME_CONFIG_MONGODB_ADMINUSERNAME` sets a username
 * `ME_CONFIG_MONGODB_ADMINPASSWORD` sets a password
 * `ME_CONFIG_MONGODB_URL` access URL for MongoDB
+
+
+#### InfluxDB Configuration
+
+These enviroment variable are used for containerized Influx only, as a default config.
+
+* `DOCKER_INFLUXDB_INIT_MODE`
+* `DOCKER_INFLUXDB_INIT_USERNAME`
+* `DOCKER_INFLUXDB_INIT_PASSWORD`
+* `DOCKER_INFLUXDB_INIT_ORG`
+* `DOCKER_INFLUXDB_INIT_BUCKET`
+* `OCKER_INFLUXDB_INIT_ADMIN_TOKEN`
 
 #### Core Service Configuration
 

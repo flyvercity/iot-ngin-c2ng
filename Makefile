@@ -38,7 +38,8 @@ docbuild/openapi.md: docs/c2ng.yaml
 	echo "\`\`\`\n" >> docbuild/openapi.md
 
 docbuild/body.pdf: .autogen $(markdowns) $(images) docbuild/openapi.md
-	echo "_Revision $(revision)_" > docbuild/release.md
+	echo "# Document Version Control" > docbuild/release.md
+	echo "_This revision $(revision)_" >> docbuild/release.md
 	(cd docs; pandoc -s \
 		-V papersize:a4 -V geometry:margin=1in \
 		-F mermaid-filter  \
@@ -59,6 +60,7 @@ docbuild/body.pdf: .autogen $(markdowns) $(images) docbuild/openapi.md
 		../docbuild/gen_openapi.md \
 		../docbuild/oath_admin.md \
 		../docbuild/openapi.md \
+		VERIFICATION.md \
 		../docbuild/release.md \
 	)
 
