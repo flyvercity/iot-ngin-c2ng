@@ -54,13 +54,13 @@ Experimental flight localtion: Hemel Hempstead Model Flying Club, Rectory Ln, Sh
 A list of parameters to be captured:
 
 * Reference Time (Unix Epoch)
-* Aircraft Lattitude and Longitude
+* Aircraft Latitude and Longitude
+* Aircraft Geodesic Altitude
 * Aircraft Roll, Pitch, and Yaw
 * Aircraft North and East Velocity
 * Aircraft True Heading
 * Aircraft Downward Velocity
 * Aircraft Air Speed
-* UA-RPS slant range
 * Heartbeat loss flag on,
 * Heartbeat loss flag on RPS
 * Aircraft Barometric Altitude
@@ -68,8 +68,5 @@ A list of parameters to be captured:
 * Aircraft Serving physical cell identifier
 * Aircraft Serving Frequency Band Identification
 * Aircraft Serving RSRP, RSRQ, RSSI, SINR
-* RPS Serving physical cell identifier
-* RPS Serving Frequency Band Identification
-* RPS Serving RSRP, RSRQ, RSSI, SINR
 
 Acquisition format: local CSV files.

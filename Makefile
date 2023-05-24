@@ -54,13 +54,12 @@ docbuild/body.pdf: .autogen $(markdowns) $(images) docbuild/openapi.md
 		../docbuild/uss.md \
 		../docbuild/nsacf.md \
 		../docbuild/mongo.md \
-		../docbuild/influx.md \
 		../docbuild/c2ng.md \
 		../docbuild/crypto_keys.md \
 		../docbuild/gen_openapi.md \
 		../docbuild/oath_admin.md \
-		../docbuild/release.md \
 		../docbuild/openapi.md \
+		../docbuild/release.md \
 	)
 
 $(deliverable): docbuild/title.pdf docbuild/body.pdf
