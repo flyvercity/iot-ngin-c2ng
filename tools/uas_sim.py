@@ -297,8 +297,9 @@ class SimUaC2Subsystem(SimC2Subsystem):
             super().run()
 
         while True:
+            lg.info('Staring signal reporting loop')
             self._report_sim_signal()
-            time.sleep(1)
+            time.sleep(5)
 
     def _request_session(self):
         '''Implements `_request_session` for the UA simulator.
@@ -361,7 +362,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
         '''Send simulated signal characteristics to the Service.'''
         sim_signal_flux = int(15*random())
 
-        request(self._args, 'POST', '/signal', body={
+        response = request(self._args, 'POST', '/signal', body={
             'ReferenceTime': datetime.now().timestamp(),
             'UasID': self._args.uasid,
             'Radio': '5gnr',
@@ -380,13 +381,15 @@ class SimUaC2Subsystem(SimC2Subsystem):
             'VAir': 10.0,
             'Baro': 100.0 + 5.0*random(),
             'Heading': 35 + random(),
-            'RSRP': -99*sim_signal_flux,
-            'RSRQ': -99*sim_signal_flux,
-            'RSSI': -99*sim_signal_flux,
-            'SINR': -99*sim_signal_flux,
+            'RSRP': -99 + sim_signal_flux,
+            'RSRQ': -99 + sim_signal_flux,
+            'RSSI': -99 + sim_signal_flux,
+            'SINR': -99 + sim_signal_flux,
             'HeartbeatLoss': (random() < 0.01),
             'RTT': 50 + int(10*random())
         })
+
+        u.pprint(response)
 
 
 class SimAdxC2Subsystem(SimC2Subsystem):

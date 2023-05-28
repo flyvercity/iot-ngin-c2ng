@@ -46,4 +46,5 @@ class SignalStatsHandler(AuthHandler):
             return
 
         self.influx.write_signal(request['UasID'], request)
+        lg.info(f'Signal data written for {request["UasID"]}')
         self.respond()

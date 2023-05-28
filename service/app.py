@@ -24,6 +24,12 @@ from handlers.signal import SignalStatsHandler
 DEFAULT_LISTEN_PORT = 9090
 
 
+class HomepageHandler(web.RequestHandler):
+    def get(self):
+        self.set_header('Content-Type', 'text/html')
+        self.finish('<html><body><h1>C2NG</h1></body></html>')
+
+
 def handlers():
     '''Defines the HTTP endpoints.
 
@@ -32,6 +38,7 @@ def handlers():
     '''
 
     return [
+        (r'/', HomepageHandler),
         (r'/ua/session', UaSessionRequestHandler),
         (r'/adx/session', AdxSessionRequestHandler),
         (r'/certificate/ua/([^/]+)', UaCertificateHandler),
