@@ -22,3 +22,7 @@ security:
   certificate: /c2ng/config/service.pem
   private: /c2ng/config/private.pem
   default-ttl: 3600
+influx:
+  uri: http://host.docker.internal:8086
+  org: c2ng
+  bucket: aerial-data

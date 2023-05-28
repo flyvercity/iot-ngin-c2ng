@@ -45,6 +45,5 @@ class SignalStatsHandler(AuthHandler):
         if not (request := self.get_request(SignalStatsReportRequest)):
             return
 
-        lg.warn(f'Request {request}')
-
+        self.influx.write_signal(request['UasID'], request)
         self.respond()

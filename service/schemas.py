@@ -162,7 +162,6 @@ class SignalStatsReportRequest(Schema):
     Heading = fields.Float(description='Aircraft True Heading (degrees)')
 
     RSRP = fields.Integer(description='Reference Signal Received Power', required=True)
-    RSRP = fields.Integer(description='Reference Signal Received Power')
     RSRQ = fields.Integer(description='Reference Signal Received Quality')
     RSSI = fields.Integer(description='Received Signal Strength Indicator')
     SINR = fields.Integer(description='Signal to Interference & Noise Ratio')

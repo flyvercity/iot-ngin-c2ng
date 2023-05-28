@@ -12,6 +12,7 @@ from uss import UssInterface  # noqa
 from mongo import Mongo  # noqa
 from nsacf import NSACF  # noqa
 from secman import SecMan  # noqa
+from influx import Influx  # noqa
 
 from schemas import (
     BaseSuccessSchema,
@@ -28,6 +29,7 @@ class HandlerBase(web.RequestHandler):
         self.mongo = self.settings['mongo']  # type: Mongo
         self.nsacf = self.settings['nsacf']  # type: NSACF
         self.secman = self.settings['secman']  # type: SecMan
+        self.influx = self.settings['influx']  # type: Influx
 
     def _return(self, ResponseSchema: type, response: dict):
         '''Validate and return a response.

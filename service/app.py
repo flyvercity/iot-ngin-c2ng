@@ -15,6 +15,7 @@ from uss import UssInterface
 from mongo import Mongo
 from nsacf import NSACF
 from secman import SecMan
+from influx import Influx
 
 from handlers.sesssion import UaSessionRequestHandler, AdxSessionRequestHandler
 from handlers.certificate import UaCertificateHandler, AdxCertificateHandler
@@ -52,6 +53,7 @@ async def main():
     uss = UssInterface(config['uss'])
     nsacf = NSACF(config['nsacf'])
     secman = SecMan(config['security'])
+    influx = Influx(config['influx'])
 
     app = web.Application(
         handlers(),
@@ -59,7 +61,8 @@ async def main():
         mongo=mongo,
         uss=uss,
         nsacf=nsacf,
-        secman=secman
+        secman=secman,
+        influx=influx
     )
 
     lg.info('---------- C2NG Restarted ----------')

@@ -10,6 +10,7 @@ import logging as lg
 import socket
 import base64
 import json
+from random import random
 
 import requests
 from keycloak import KeycloakOpenID
@@ -33,14 +34,20 @@ C2NG_DEFAULT_ADX_UDP_PORT = os.getenv('C2NG_DEFAULT_ADX_UDP_PORT')
 
 
 def request(args, method: str, path: str, body={}, qsp={}) -> dict:
-    '''Make a authenticated request to the service
+    '''Make a authenticated request to the service.
 
     Args:
-    - `args`: CLI arguments
-    - `method`: HTTP method
-    - `path`: relative endpoint path
-    - `body`: JSON object for call payload
-    - `qsp`: a dict with query string parameters
+        args: CLI arguments.
+        method: HTTP method.
+        path: relative endpoint path.
+        body: JSON object for call payload.
+        qsp: a dict with query string parameters.
+
+    Returns:
+        Response as a JSON object.
+
+    Raises:
+        UserWarning: when server's response is malformed.
     '''
 
     keycloak_openid = KeycloakOpenID(
@@ -76,6 +83,7 @@ def request(args, method: str, path: str, body={}, qsp={}) -> dict:
 
 class SimC2Subsystem:
     '''A base class for both UA and RPS simulators.
+
     Implements the Context Manager protocol.
     '''
 
@@ -83,8 +91,9 @@ class SimC2Subsystem:
         '''Constructor.
 
         Args:
-        - `args`: CLI arguments
+            args: CLI arguments.
         '''
+
         self._args = args
         self._insocket = None
         self._outsocket = None
@@ -105,13 +114,22 @@ class SimC2Subsystem:
         self._insocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def __enter__(self):
-        '''Implements context manager's 'enter' method. Binds sockets.'''
+        '''Implements context manager's 'enter' method. Binds sockets.
+
+        Returns:
+            Self.
+        '''
+
         self._outsocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._reset_insocket()
         return self
 
     def __exit__(self, *args):
-        '''Implements context manager's 'exit' method. Closes sockets.'''
+        '''Implements context manager's 'exit' method. Closes sockets.
+
+        Args:
+            args: Standard argument (unused).
+        '''
         self._outsocket.close()
         self._insocket.close()
 
@@ -269,8 +287,28 @@ class SimC2Subsystem:
 class SimUaC2Subsystem(SimC2Subsystem):
     '''UA C2 Subsystem Simulator.'''
 
+    def run(self):
+        '''Run the simulations.
+
+        Overrides the inherited method.
+        '''
+
+        if not self._args.signal_only:
+            super().run()
+
+        while True:
+            self._report_sim_signal()
+            time.sleep(1)
+
     def _request_session(self):
-        '''Implements `_request_session` for the UA simulator.'''
+        '''Implements `_request_session` for the UA simulator.
+
+        Returns:
+            Session info object:
+            * ReferenceTime (str)
+            * UasID (str)
+            * IMSI (str)
+        '''
 
         session_info = request(self._args, 'POST', '/ua/session', body={
             'ReferenceTime': datetime.now().timestamp(),
@@ -281,16 +319,30 @@ class SimUaC2Subsystem(SimC2Subsystem):
         return session_info
 
     def _request_peer_certificate(self):
-        '''Implements `_request_peer_certificate` for the UA simulator.'''
+        '''Implements `_request_peer_certificate` for the UA simulator.
+
+        Returns:
+            Peer's security certificate.
+        '''
+
         cert_info = request(self._args, 'GET', f'/certificate/adx/{self._args.uasid}')
         return cert_info
 
     def _in_port(self) -> int:
-        '''Implements `_in_port` for the UA simulator.'''
+        '''Implements `_in_port` for the UA simulator.
+
+        Returns:
+            Incoming UDP Port.'''
+
         return int(C2NG_DEFAULT_UA_UDP_PORT)
 
     def _out_port(self) -> int:
-        '''Implements `_out_port` for the UA simulator.'''
+        '''Implements `_out_port` for the UA simulator.
+
+        Returns:
+            Outgoing UDP Port.
+        '''
+
         return int(C2NG_DEFAULT_ADX_UDP_PORT)
 
     def _work_cycle(self):
@@ -302,21 +354,39 @@ class SimUaC2Subsystem(SimC2Subsystem):
             print('MESSAGE:', message)
             counter += 1
             self._send(message.encode(), ('127.0.0.1', self._out_port()))
-
-            request(self._args, 'POST', '/signal', body={
-                'ReferenceTime': datetime.now().timestamp(),
-                'UasID': self._args.uasid,
-                'Radio': '5gnr',
-                'Waypoint': {
-                    'Latitude': 35.0,
-                    'Longitude': 35.0,
-                    'Altitude': 100.0
-                },
-                'RSRP': -99,
-                'HeartbeatLoss': False
-            })
-
+            self._report_sim_signal()
             time.sleep(1)
+
+    def _report_sim_signal(self):
+        '''Send simulated signal characteristics to the Service.'''
+        sim_signal_flux = int(15*random())
+
+        request(self._args, 'POST', '/signal', body={
+            'ReferenceTime': datetime.now().timestamp(),
+            'UasID': self._args.uasid,
+            'Radio': '5gnr',
+            'Cell': '1234567890',
+            'Waypoint': {
+                'Latitude': 35.0,
+                'Longitude': 35.0,
+                'Altitude': 100.0
+            },
+            'Roll': 0,
+            'Pitch': 0,
+            'Yaw': 0,
+            'VNorth': 0.0,
+            'VEast': 0.0,
+            'VDown': 0.0,
+            'VAir': 10.0,
+            'Baro': 100.0 + 5.0*random(),
+            'Heading': 35 + random(),
+            'RSRP': -99*sim_signal_flux,
+            'RSRQ': -99*sim_signal_flux,
+            'RSSI': -99*sim_signal_flux,
+            'SINR': -99*sim_signal_flux,
+            'HeartbeatLoss': (random() < 0.01),
+            'RTT': 50 + int(10*random())
+        })
 
 
 class SimAdxC2Subsystem(SimC2Subsystem):
@@ -366,6 +436,11 @@ def add_arg_subparsers(sp):
     ua.add_argument(
         '-P', '--port', help='Incoming UDP port for UA C2 sim',
         type=int, default=C2NG_DEFAULT_UA_UDP_PORT
+    )
+
+    ua.add_argument(
+        '-S', '--signal-only', help='Do not connect, transmit signal only',
+        action='store_true', default=False
     )
 
     adx = sp.add_parser('adx', help='Command on behalf of ADX client (RPS is simulated)')
