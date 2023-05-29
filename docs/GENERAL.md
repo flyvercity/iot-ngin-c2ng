@@ -160,7 +160,7 @@ sequenceDiagram
     ADX ->> C2NG: Request Session
     UA ->> C2NG: Request Peer Certificate
     ADX ->> С2NG: Request Peer Certificate
-    ADX ->> C2NS: Request UA Address
+    ADX ->> 5GNS: Request UA Address
     ADX ->> UA: Connect
     ADX -->> UA: Send Encrypted/Signed C2 Payload
     UA -->> ADX: Reply for Encrypted/Signed C2 Payload
