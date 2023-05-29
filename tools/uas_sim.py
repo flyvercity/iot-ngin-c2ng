@@ -26,6 +26,7 @@ import tool_util as u
 RECEIVE_BUFFER = 1024
 '''Maximum size of the UDP receive buffer.'''
 
+# TODO: Get rid of globals
 load_dotenv()
 
 C2NG_SIM_DRONE_ID = os.getenv('C2NG_SIM_DRONE_ID')
@@ -396,7 +397,11 @@ class SimAdxC2Subsystem(SimC2Subsystem):
     '''RPS C2 Subsystem Simulator.'''
 
     def _request_session(self):
-        '''Implements `_request_session` for the RPS simulator.'''
+        '''Implements `_request_session` for the RPS simulator.
+
+        Returns:
+            Session info JSON object.
+        '''
 
         session_info = request(self._args, 'POST', '/adx/session', {
             'ReferenceTime': datetime.now().timestamp(),
@@ -406,16 +411,29 @@ class SimAdxC2Subsystem(SimC2Subsystem):
         return session_info
 
     def _request_peer_certificate(self):
-        '''Implements `_request_peer_certificate` for the RPS simulator.'''
+        '''Implements `_request_peer_certificate` for the RPS simulator.
+
+        Returns:
+            Peer's certificate info.
+        '''
+
         cert_info = request(self._args, 'GET', f'/certificate/ua/{self._args.uasid}')
         return cert_info
 
     def _in_port(self) -> int:
-        '''Implements `_in_port` for the RPS simulator.'''
+        '''Implements `_in_port` for the RPS simulator.
+
+        Returns:
+            Inbound UDP port.
+        '''
         return int(C2NG_DEFAULT_ADX_UDP_PORT)
 
     def _out_port(self) -> int:
-        '''Implements `_out_port` for the RPS simulator.'''
+        '''Implements `_out_port` for the RPS simulator.
+
+        Returns:
+            Outbound UDP port.
+        '''
         return int(C2NG_DEFAULT_UA_UDP_PORT)
 
     def _work_cycle(self):
@@ -430,7 +448,7 @@ def add_arg_subparsers(sp):
     '''Define command line arguments for this module.
 
     Args:
-    - `sp`: subparsers collection.
+        sp: subparsers collection.
     '''
 
     ua = sp.add_parser('ua', help='Command on behalf of UA')

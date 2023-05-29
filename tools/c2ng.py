@@ -56,7 +56,8 @@ def setup_logging(args):
     '''Setup realtime logging parameters.
 
     Args:
-    - `args`: CLI parameters.'''
+        args: CLI parameters.
+    '''
 
     log_que = queue.Queue(-1)
     queue_handler = lg.handlers.QueueHandler(log_que)
