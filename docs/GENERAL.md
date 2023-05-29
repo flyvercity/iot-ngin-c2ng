@@ -111,10 +111,10 @@ Main service dependencies are:
 * `marshmallow` - a data serialization library for handling user interactions and API generation.
 * `tornado` - a webs service framework.
 * `pymongo` - an interface with MongoDB.
-* `cryptography` - a set of crytographic primitives for key generating, signing, and encryption.
+* `cryptography` - a set of cryptographic primitives for key generating, signing, and encryption.
 * `python-jose` - a set of functions work with JWT tokens.
 * `python-keycloak` - an interface to KeyCloak.
-* `influxdb-client-python - an inferface to InfluxDB.
+* `influxdb-client-python` - an interface to InfluxDB.
 
 ## Security Credentials
 
@@ -163,6 +163,7 @@ sequenceDiagram
     ADX ->> 5GNS: Request UA Address
     ADX ->> UA: Connect
     ADX -->> UA: Send Encrypted/Signed C2 Payload
+    UA -->> C2NG: Signal Quality Reporting
     UA -->> ADX: Reply for Encrypted/Signed C2 Payload
     ADX ->> UA: Disconnect
 ```
