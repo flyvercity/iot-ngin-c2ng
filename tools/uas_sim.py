@@ -210,7 +210,7 @@ class SimC2Subsystem:
                 self._reset()
 
     def _secure(self):
-        return False
+        return True
 
     def _construct_sec_packet(self, message: bytes):
         lg.info('Encrypting and signing the packet')
@@ -296,11 +296,12 @@ class SimUaC2Subsystem(SimC2Subsystem):
 
         if not self._args.signal_only:
             super().run()
+        else:
+            lg.info('Starting signal reporting loop')
 
-        while True:
-            lg.info('Staring signal reporting loop')
-            self._report_sim_signal()
-            time.sleep(5)
+            while True:
+                self._report_sim_signal()
+                time.sleep(5)
 
     def _request_session(self):
         '''Implements `_request_session` for the UA simulator.
@@ -390,7 +391,11 @@ class SimUaC2Subsystem(SimC2Subsystem):
             'RTT': 50 + int(10*random())
         })
 
-        u.pprint(response)
+        if response['Success']:
+            lg.info('Signal reported')
+        else:
+            errors = response['Errors']
+            lg.warn(f'There was an error while sending the signal: {errors}')
 
 
 class SimAdxC2Subsystem(SimC2Subsystem):

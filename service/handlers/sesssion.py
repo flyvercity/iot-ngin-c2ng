@@ -15,7 +15,30 @@ from schemas import (
 from handlers.auth import AuthHandler
 
 
-class UaSessionRequestHandler(AuthHandler):
+class SessionHandlerBase(AuthHandler):
+
+    def delete(self, uasid):
+        '''Terminates a session.
+
+        Args:
+            uasid: Logical UAS identifier
+
+        ---
+        summary: Request a new session for an ADX client (RPS or USS services)
+
+        parameters:
+            -   in: path
+                name: UasID
+                schema:
+                    type: string
+                required: true
+                description: UAS ID for the session
+        '''
+
+        lg.warn(f'Session removal for {uasid}')
+
+
+class UaSessionRequestHandler(SessionHandlerBase):
     '''UA Session Endpoint Handler.'''
 
     def post(self):
@@ -76,23 +99,28 @@ class UaSessionRequestHandler(AuthHandler):
         else:
             lg.info(f'The session exist for {uasid}')
 
-        ua_creds = self.nsacf.get_ue_network_creds(request['IMSI'])
-        session['UaIP'] = ua_creds['IP']
-        session['UaGatewayIP'] = ua_creds['Gateway']
-        sec_creds = self.secman.gen_client_credentials(f'{uasid}::UA')
-        session['UaCertificate'] = sec_creds.cert()
-        self.mongo.put_session(session)
+        if 'UaCertificate' not in session:
+            ua_creds = self.nsacf.get_ue_network_creds(request['IMSI'])
+            session['UaIP'] = ua_creds['IP']
+            session['UaGatewayIP'] = ua_creds['Gateway']
+            sec_creds = self.secman.gen_client_credentials(f'{uasid}::UA')
+            session['UaCertificate'] = sec_creds.cert()
+            # TODO: Introduce the Key ID
+            session['UaKeyID'] = sec_creds.key()
+            self.mongo.put_session(session)
+        else:
+            lg.info(f'The UA endpoint established for {uasid}')
 
         response = {
             'IP': session['UaIP'],
             'GatewayIP': session['UaGatewayIP'],
-            'EncryptedPrivateKey': sec_creds.key()
+            'EncryptedPrivateKey': session['UaKeyID']
         }
 
         self.respond(AerialConnectionSessionResponse, response)
 
 
-class AdxSessionRequestHandler(AuthHandler):
+class AdxSessionRequestHandler(SessionHandlerBase):
     '''Aviation Data Exchange Network Session Endpoint Handler'''
 
     def post(self):
@@ -134,17 +162,22 @@ class AdxSessionRequestHandler(AuthHandler):
         else:
             lg.info(f'The session exist for {uasid}')
 
-        adx_cred = self.nsacf.get_adx_network_creds(uasid)
-        session['AdxIP'] = adx_cred['IP']
-        session['AdxGatewayIP'] = adx_cred['Gateway']
-        sec_creds = self.secman.gen_client_credentials(f'{uasid}::ADX')
-        session['AdxCertificate'] = sec_creds.cert()
-        self.mongo.put_session(session)
+        if 'AdxCertificate' not in session:
+            adx_cred = self.nsacf.get_adx_network_creds(uasid)
+            session['AdxIP'] = adx_cred['IP']
+            session['AdxGatewayIP'] = adx_cred['Gateway']
+            sec_creds = self.secman.gen_client_credentials(f'{uasid}::ADX')
+            session['AdxCertificate'] = sec_creds.cert()
+            # TODO: Introduce the Key ID
+            session['AdxKeyID'] = sec_creds.key()
+            self.mongo.put_session(session)
+        else:
+            lg.info(f'The ADX endpoint established for {uasid}')
 
         response = {
             'IP': session['AdxIP'],
             'GatewayIP': session['AdxGatewayIP'],
-            'EncryptedPrivateKey': sec_creds.key()
+            'EncryptedPrivateKey': session['AdxKeyID']
         }
 
         self.respond(AdxConnectionSessionResponse, response)
