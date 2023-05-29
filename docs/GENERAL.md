@@ -26,6 +26,20 @@ There are two types of users of the service:
 * Aerial Connection Users are flying objects equipped with 5G UE and requiring to establish a reliable connection. Generally these are Aerial Vehicles a.k.a. drones. These also may include Wireless RPS (remote pilot stations) a.k.a. GCS (ground control stations).
 * ADX Users are stationary entities that connect to aerial users via the Aviation Data Exchange Network. These are generally fixed ground control center workstations.
 
+## Primary Interactions
+
+```mermaid
+sequenceDiagram
+    UA ->> C2NG: Request Session
+    C2NG ->> USS: Request Authorization
+    C2NG ->> NSACF: Request UA Addressing
+    ADX ->> C2NG: Request Session
+    C2NG ->> NSACF: Request ADX Addressing
+    UA ->> C2NG: Request Peer Certificate
+    ADX ->> C2NG: Request Peer Certificate and Address
+    UA ->> C2NG: Signal Quality Reporting
+```
+
 ## Application Architecture
 
 The Application is based on containerized services and comprises three open source basic components (KeyCloak, MongoDB, and InfluxDB) and the core software service (C2NG). Besides the core software, a CLI tool was developed to control all administrative task, simulation and demostration.
@@ -157,13 +171,10 @@ The following diagram reflect a typical procedure of mutual UA and ADX user logi
 ```mermaid
 sequenceDiagram
     UA ->> C2NG: Request Session
-    C2NG ->> 5GNS: Request UA Address
-    C2NG ->> SecMan: Request UA Security Credentials
     ADX ->> C2NG: Request Session
-    C2NG ->> 5GNS: Request ADX Address
-    C2NG ->> SecMan: Request ADX Security Credentials
     UA ->> C2NG: Request Peer Certificate
     ADX ->> C2NG: Request Peer Certificate
+    ADX ->> C2NG: Request Peer Address
     ADX ->> UA: Connect
     ADX -->> UA: Send Encrypted/Signed C2 Payload
     UA -->> C2NG: Signal Quality Reporting
