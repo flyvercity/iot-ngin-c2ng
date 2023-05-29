@@ -157,10 +157,13 @@ The following diagram reflect a typical procedure of mutual UA and ADX user logi
 ```mermaid
 sequenceDiagram
     UA ->> C2NG: Request Session
+    C2NG ->> 5GNS: Request UA Address
+    C2NG ->> SecMan: Request UA Security Credentials
     ADX ->> C2NG: Request Session
+    C2NG ->> 5GNS: Request ADX Address
+    C2NG ->> SecMan: Request ADX Security Credentials
     UA ->> C2NG: Request Peer Certificate
-    ADX ->> С2NG: Request Peer Certificate
-    ADX ->> 5GNS: Request UA Address
+    ADX ->> C2NG: Request Peer Certificate
     ADX ->> UA: Connect
     ADX -->> UA: Send Encrypted/Signed C2 Payload
     UA -->> C2NG: Signal Quality Reporting
