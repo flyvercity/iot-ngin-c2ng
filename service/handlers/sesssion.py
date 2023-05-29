@@ -3,6 +3,7 @@
 
 '''This module implements session handlers.'''
 import logging as lg
+from base64 import b64decode as decode, b64encode as encode
 
 from schemas import (
     AerialConnectionSessionRequest,
@@ -106,7 +107,7 @@ class UaSessionRequestHandler(SessionHandlerBase):
             sec_creds = self.secman.gen_client_credentials(f'{uasid}::UA')
             session['UaCertificate'] = sec_creds.cert()
             # TODO: Introduce the Key ID
-            session['UaKeyID'] = sec_creds.key()
+            session['UaKeyID'] = encode(sec_creds.key().encode()).decode()
             self.mongo.put_session(session)
         else:
             lg.info(f'The UA endpoint established for {uasid}')
@@ -114,7 +115,7 @@ class UaSessionRequestHandler(SessionHandlerBase):
         response = {
             'IP': session['UaIP'],
             'GatewayIP': session['UaGatewayIP'],
-            'EncryptedPrivateKey': session['UaKeyID']
+            'EncryptedPrivateKey': decode(session['UaKeyID']).decode()
         }
 
         self.respond(AerialConnectionSessionResponse, response)
@@ -169,7 +170,7 @@ class AdxSessionRequestHandler(SessionHandlerBase):
             sec_creds = self.secman.gen_client_credentials(f'{uasid}::ADX')
             session['AdxCertificate'] = sec_creds.cert()
             # TODO: Introduce the Key ID
-            session['AdxKeyID'] = sec_creds.key()
+            session['AdxKeyID'] = encode(sec_creds.key().encode()).decode()
             self.mongo.put_session(session)
         else:
             lg.info(f'The ADX endpoint established for {uasid}')
@@ -177,7 +178,7 @@ class AdxSessionRequestHandler(SessionHandlerBase):
         response = {
             'IP': session['AdxIP'],
             'GatewayIP': session['AdxGatewayIP'],
-            'EncryptedPrivateKey': session['AdxKeyID']
+            'EncryptedPrivateKey': decode(session['AdxKeyID']).decode()
         }
 
         self.respond(AdxConnectionSessionResponse, response)
