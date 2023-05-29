@@ -59,6 +59,7 @@ def request(args, method: str, path: str, body={}, qsp={}) -> dict:
     )
 
     token = keycloak_openid.token(args.uasid, args.password)
+    lg.info('Token received')
     access_token = token['access_token']
     headers = {'Authentication': f'Bearer {access_token}'}
     url = args.url + path

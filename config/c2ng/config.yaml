@@ -6,6 +6,7 @@ oauth:
   keycloak:
     base: http://host.docker.internal:8080
     realm: c2ng
+    retry-timeout: 5
 uss:
   endpoint: http://host.docker.internal:9091
   oauth:

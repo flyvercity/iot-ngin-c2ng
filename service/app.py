@@ -17,6 +17,7 @@ from nsacf import NSACF
 from secman import SecMan
 from influx import Influx
 
+from handlers.auth import fetch_keycloak_public_certs
 from handlers.sesssion import UaSessionRequestHandler, AdxSessionRequestHandler
 from handlers.certificate import UaCertificateHandler, AdxCertificateHandler
 from handlers.signal import SignalStatsHandler
@@ -55,7 +56,8 @@ async def main():
     port = config['service']['port']
     verbose = config['logging']['verbose']
     lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
-    lg.debug('C2NG :: Starting up')
+    lg.info('---------- Starting up ---------- ')
+    fetch_keycloak_public_certs(config)
     mongo = Mongo(config['mongo'])
     uss = UssInterface(config['uss'])
     nsacf = NSACF(config['nsacf'])
@@ -72,7 +74,7 @@ async def main():
         influx=influx
     )
 
-    lg.info('---------- C2NG Restarted ----------')
+    lg.info('---------- Restarted ----------')
     lg.info(f'C2NG :: Listening for requests on {port}')
     app.listen(port)
     await asyncio.Event().wait()

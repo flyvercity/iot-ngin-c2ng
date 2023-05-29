@@ -47,11 +47,13 @@ flowchart
     UAS-Client --> Application
     subgraph Application
         direction TB
-        C2NG --> NSACF
         C2NG --> MongoDB
         C2NG --> InfluxDB
+        C2NG --> KeyCloak
+        MongoDB --> MongoExpress
     end
-    Application --> KeyCloak
+    Application --> NSACF
+    Application --> USS
 ```
 
 The whole application is a set of Docker containers defined by the Docker Compose Specification [docker-compose.yaml](../docker-compose.yaml) for developement and single-node environments.
@@ -215,4 +217,44 @@ Document schema:
     "AdxGatewayIP": "string: IPv4 or IPv6 address",
     "AdxCertificate": "string: PEM"
 }
+```
+
+# InfluxDB Logical Schema
+
+The service uses a single InfluxDB with potentially multiple bucket. Database name is `aerial-data`.
+
+## `cell-signal` Collection
+
+This is a primary collection where the service stores the 4G/5G signal statistics.
+
+Measurement tags:
+
+```
+UasID String
+Radio String
+Cell String
+FrequencyBand String
+```
+Measurement fields:
+
+```
+Latitude Float
+Longitude Float
+Altitude Float
+Roll Float
+Pitch Float
+Yaw Float
+VNorth Float
+VEast Float
+VDown Float
+VAir Float
+Baro Float
+Heading Float
+RSRP Float
+RSRP Integer
+RSRQ Integer
+RSSI Integer
+SINR Integer
+Heartbeat Boolean
+RTT Integer
 ```
