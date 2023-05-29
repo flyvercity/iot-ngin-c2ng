@@ -30,7 +30,7 @@ There are two types of users of the service:
 
 ```mermaid
 sequenceDiagram
-    UA ->> C2NG: Request Session
+    UA/ADX ->> C2NG: Request Session
     C2NG ->> USS: Request Authorization
     C2NG ->> NSACF: Request UA Addressing
     ADX ->> C2NG: Request Session
