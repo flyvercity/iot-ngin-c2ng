@@ -126,6 +126,27 @@ class CertificateRequestResponse(BaseSuccessSchema):
     )
 
 
+class AddressRequestResponseErrors(Schema):
+    UasID = fields.String(validate=validate.OneOf([
+        'not_found',
+    ]))
+
+    Session = fields.String(validate=validate.OneOf([
+        'session_not_found',
+        'peer_not_connected'
+    ]))
+
+
+class AddressRequestResponseFailed(ErrorSchema):
+    Errors = fields.Nested(AddressRequestResponseErrors, required=True)
+
+
+class AddressRequestResponse(BaseSuccessSchema):
+    Address = fields.IP(
+        required=True, description='IP Address for the peer'
+    )
+
+
 class GeoPointWGS84(Schema):
     Latitude = fields.Float(description='Latitude in degress', required=True)
     Longitude = fields.Float(description='Longitude in degress', required=True)

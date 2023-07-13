@@ -4,14 +4,14 @@ logging:
   verbose: false
 oauth:
   keycloak:
-    base: http://host.docker.internal:8080
+    base: http://oauth:8080
     realm: c2ng
     retry-timeout: 5
 uss:
   endpoint: http://host.docker.internal:9091
   oauth:
     keycloak:
-      base: http://host.docker.internal:8080
+      base: http://oauth:8080
       realm: c2ng
       auth-client-id: uss-access
 mongo:
@@ -24,6 +24,6 @@ security:
   private: /c2ng/config/private.pem
   default-ttl: 3600
 influx:
-  uri: http://host.docker.internal:8086
+  uri: http://influxdb:8086
   org: c2ng
   bucket: aerial-data

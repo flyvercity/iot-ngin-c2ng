@@ -6,6 +6,7 @@ import logging as lg
 from base64 import b64decode as decode, b64encode as encode
 
 from schemas import (
+    BaseSuccessSchema,
     AerialConnectionSessionRequest,
     AerialConnectionSessionResponseFailed,
     AerialConnectionSessionResponse,
@@ -34,9 +35,18 @@ class SessionHandlerBase(AuthHandler):
                     type: string
                 required: true
                 description: UAS ID for the session
+        responses:
+            200:
+                description: Success payload containing session information
+                content:
+                    application/json:
+                        schema:
+                            BaseSuccessSchema
         '''
 
         lg.warn(f'Session removal for {uasid}')
+        # TODO: implement
+        self.respond()
 
 
 class UaSessionRequestHandler(SessionHandlerBase):

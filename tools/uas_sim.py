@@ -106,6 +106,7 @@ class SimC2Subsystem:
         self._session_info = None
         self._private_key = None
         self._peer_cert_info = None
+        self._peer_address = None
         self._peer_public_key = None
 
     def _reset_insocket(self):
@@ -137,6 +138,10 @@ class SimC2Subsystem:
 
     def _request_session(self) -> dict:
         '''Requests a session from the service. Pure virtual method.'''
+        pass
+
+    def _request_peer_address(self) -> dict:
+        '''Requests a certifice for the from the service. Pure virtual method.'''
         pass
 
     def _request_peer_certificate(self) -> dict:
@@ -180,6 +185,12 @@ class SimC2Subsystem:
                         self._session_info['EncryptedPrivateKey'].encode(),
                         client_secret.encode()
                     )
+
+                if not self._peer_address:
+                    lg.info('Requesting peer address')
+                    address_info = self._request_peer_address()
+                    lg.debug(address_info)
+                    self._peer_address = address_info['Address']
 
                 if not self._peer_cert_info:
                     lg.info('Requesting peer certificate')
@@ -322,6 +333,16 @@ class SimUaC2Subsystem(SimC2Subsystem):
 
         return session_info
 
+    def _request_peer_address(self):
+        ''' Implements `_request_peer_address` for the UA simulator.
+
+        Returns:
+            Peer's IP address information.
+        '''
+
+        address_info = request(self._args, 'GET', f'/address/adx/{self._args.uasid}')
+        return address_info
+
     def _request_peer_certificate(self):
         '''Implements `_request_peer_certificate` for the UA simulator.
 
@@ -357,7 +378,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
             message = f'Heartbeat #{counter}'
             print('MESSAGE:', message)
             counter += 1
-            self._send(message.encode(), ('127.0.0.1', self._out_port()))
+            self._send(message.encode(), (self._peer_address, self._out_port()))
             self._report_sim_signal()
             time.sleep(1)
 
@@ -425,6 +446,16 @@ class SimAdxC2Subsystem(SimC2Subsystem):
 
         cert_info = request(self._args, 'GET', f'/certificate/ua/{self._args.uasid}')
         return cert_info
+
+    def _request_peer_address(self):
+        ''' Implements `_request_peer_address` for the RPS simulator.
+
+        Returns:
+            Peer's IP address information.
+        '''
+
+        address_info = request(self._args, 'GET', f'/address/ua/{self._args.uasid}')
+        return address_info
 
     def _in_port(self) -> int:
         '''Implements `_in_port` for the RPS simulator.

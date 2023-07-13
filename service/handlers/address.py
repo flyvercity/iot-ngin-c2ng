@@ -1,21 +1,21 @@
 # SPDX-License-Identifier: MIT
 # Copyright 2023 Flyvercity
 
-'''This module implements certificate requests.'''
+'''This module implements peer address requests.'''
 import logging as lg
 
 from schemas import (
-    CertificateRequestResponse,
-    CertificateRequestResponseFailed
+    AddressRequestResponse,
+    AddressRequestResponseFailed
 )
 
 from handlers.auth import AuthHandler
 
 
-class CertificateHandlerBase(AuthHandler):
-    '''Peer Certificate Request Base Endpoints Handler'''
+class AddressHandlerBase(AuthHandler):
+    '''Peer Address Request Endpoints Handler'''
 
-    def _certificate_field(self) -> str:
+    def _address_field(self) -> str:
         '''Abstract method, an override shall return a field in the Session Mongo Object.
 
         Raises:
@@ -25,13 +25,13 @@ class CertificateHandlerBase(AuthHandler):
         raise RuntimeError('This method shall be overriden.')
 
     def get(self, uasid):
-        '''Returns a security certificate for a peer.
+        '''Returns an IP address for a peer.
 
         Args:
             uasid: Logical UAS identifier
 
         ---
-        summary: Request a current certificate from existing connectivity session.
+        summary: Request a current address from existing connectivity session.
 
         parameters:
             -   in: path
@@ -39,25 +39,25 @@ class CertificateHandlerBase(AuthHandler):
                 schema:
                     type: string
                 required: true
-                description: UAS ID for which to fetch the peer's certificate
+                description: UAS ID for which to fetch the peer's address.
 
         responses:
             200:
-                description: Success payload containing peer's certificate
+                description: Success payload containing peer's address
                 content:
                     application/json:
                         schema:
-                            CertificateRequestResponse
+                            AddressRequestResponse
             400:
                 description: Payload containing error description
                 content:
                     application/json:
                         schema:
-                            CertificateRequestResponseFailed
+                            AddressRequestResponseFailed
         '''
 
         if not uasid:
-            self.fail(CertificateRequestResponseFailed, {
+            self.fail(AddressRequestResponseFailed, {
                 'UasID': 'not_found'
             })
 
@@ -65,47 +65,47 @@ class CertificateHandlerBase(AuthHandler):
 
         if not (session := self.mongo.get_session(uasid)):
             lg.info(f'Session not found for {uasid}')
-            self.fail(CertificateRequestResponseFailed, {
+            self.fail(AddressRequestResponseFailed, {
                 'Session': 'session_not_found'
             })
 
             return
 
-        cert = session.get(self._certificate_field())
+        address = session.get(self._address_field())
 
-        if not cert:
-            self.fail(CertificateRequestResponseFailed, {
+        if not address:
+            self.fail(AddressRequestResponseFailed, {
                 'Session': 'peer_not_connected'
             })
 
             return
 
-        self.respond(CertificateRequestResponse, {
-            'Certificate': cert
+        self.respond(AddressRequestResponse, {
+            'Address': address
         })
 
 
-class UaCertificateHandler(CertificateHandlerBase):
-    '''UA Certificate Request Base Endpoints Handler'''
+class UaAddressHandler(AddressHandlerBase):
+    '''UA Address Request Base Endpoints Handler'''
 
-    def _certificate_field(self) -> str:
+    def _address_field(self) -> str:
         '''Virtual method override.
 
         Returns:
-            "UaCertificate"
+            "UaIP"
         '''
 
-        return 'UaCertificate'
+        return 'UaIP'
 
 
-class AdxCertificateHandler(CertificateHandlerBase):
-    '''ADX Certificate Request Base Endpoints Handler'''
+class AdxAddressHandler(AddressHandlerBase):
+    '''ADX Address Request Base Endpoints Handler'''
 
-    def _certificate_field(self) -> str:
+    def _address_field(self) -> str:
         '''Virtual method override.
 
         Returns:
-            "AdxCertificate"
+            "AdxIP"
         '''
 
-        return 'AdxCertificate'
+        return 'AdxIP'

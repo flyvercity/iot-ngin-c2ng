@@ -5,6 +5,44 @@ info:
   version: 1.0.0
 components:
   schemas:
+    AddressRequestResponse:
+      properties:
+        Address:
+          description: IP Address for the peer
+        Success:
+          description: Success flag
+          enum:
+          - true
+          type: boolean
+      required:
+      - Address
+      type: object
+    AddressRequestResponseErrors:
+      properties:
+        Session:
+          enum:
+          - session_not_found
+          - peer_not_connected
+          type: string
+        UasID:
+          enum:
+          - not_found
+          type: string
+      type: object
+    AddressRequestResponseFailed:
+      properties:
+        Errors:
+          $ref: '#/components/schemas/AddressRequestResponseErrors'
+        Message:
+          type: string
+        Success:
+          description: Failure flag.
+          enum:
+          - false
+          type: boolean
+      required:
+      - Errors
+      type: object
     AdxConnectionSessionRequest:
       properties:
         ReferenceTime:
@@ -252,14 +290,10 @@ components:
           description: Aircraft Yaw (degrees)
           type: integer
       required:
-      - Cell
       - HeartbeatLoss
       - RSRP
-      - RSRQ
-      - RSSI
       - Radio
       - ReferenceTime
-      - SINR
       - UasID
       - Waypoint
       type: object
@@ -281,7 +315,69 @@ components:
           type: boolean
       type: object
 paths:
+  /address/adx/{uasid}:
+    get:
+      parameters:
+      - description: UAS ID for which to fetch the peer's address.
+        in: path
+        name: UasID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressRequestResponse'
+          description: Success payload containing peer's address
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressRequestResponseFailed'
+          description: Payload containing error description
+      summary: Request a current address from existing connectivity session.
+  /address/ua/{uasid}:
+    get:
+      parameters:
+      - description: UAS ID for which to fetch the peer's address.
+        in: path
+        name: UasID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressRequestResponse'
+          description: Success payload containing peer's address
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressRequestResponseFailed'
+          description: Payload containing error description
+      summary: Request a current address from existing connectivity session.
   /adx/session:
+    delete:
+      parameters:
+      - description: UAS ID for the session
+        in: path
+        name: UasID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseSuccess'
+          description: Success payload containing session information
+      summary: Request a new session for an ADX client (RPS or USS services)
     post:
       requestBody:
         content:
@@ -326,7 +422,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CertificateRequestResponseFailed'
           description: Payload containing error description
-      summary: Request a new session for an ADX client (RPS or USS services)
+      summary: Request a current certificate from existing connectivity session.
   /certificate/ua/{uasid}:
     get:
       parameters:
@@ -349,7 +445,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CertificateRequestResponseFailed'
           description: Payload containing error description
-      summary: Request a new session for an ADX client (RPS or USS services)
+      summary: Request a current certificate from existing connectivity session.
   /signal:
     post:
       requestBody:
@@ -375,6 +471,22 @@ paths:
       summary: Receives a sample of signal measurements from a UA with reference time
         and position.
   /ua/session:
+    delete:
+      parameters:
+      - description: UAS ID for the session
+        in: path
+        name: UasID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseSuccess'
+          description: Success payload containing session information
+      summary: Request a new session for an ADX client (RPS or USS services)
     post:
       requestBody:
         content:

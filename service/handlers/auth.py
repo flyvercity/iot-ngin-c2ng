@@ -14,7 +14,7 @@ from handlers.base import HandlerBase
 
 def fetch_keycloak_public_certs(config):
     keycloak = config['oauth']['keycloak']
-    lg.info(f'Fetching KeyCloak public keys started')
+    lg.info('Fetching KeyCloak public keys started')
 
     while True:
         try:

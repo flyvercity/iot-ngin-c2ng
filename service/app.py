@@ -20,6 +20,7 @@ from influx import Influx
 from handlers.auth import fetch_keycloak_public_certs
 from handlers.sesssion import UaSessionRequestHandler, AdxSessionRequestHandler
 from handlers.certificate import UaCertificateHandler, AdxCertificateHandler
+from handlers.address import UaAddressHandler, AdxAddressHandler
 from handlers.signal import SignalStatsHandler
 
 DEFAULT_LISTEN_PORT = 9090
@@ -44,6 +45,8 @@ def handlers():
         (r'/adx/session', AdxSessionRequestHandler),
         (r'/certificate/ua/([^/]+)', UaCertificateHandler),
         (r'/certificate/adx/([^/]+)', AdxCertificateHandler),
+        (r'/address/ua/([^/]+)', UaAddressHandler),
+        (r'/address/adx/([^/]+)', AdxAddressHandler),
         (r'/signal', SignalStatsHandler)
     ]
 
