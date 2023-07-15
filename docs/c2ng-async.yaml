@@ -1,0 +1,75 @@
+asyncapi: 2.6.0
+info:
+  description: Documentation for the Command-and-Control NextGen Notifications API
+  title: C2NG Notifications API Definition
+  version: 1.0.0
+channels:
+  /notifications:
+    publish:
+      description: Incoming WebSocket the Service
+      operationId: processReceivedMessage
+      message:
+        oneOf:
+          - $ref: '#/components/messages/subscribe'
+          - $ref: '#/components/messages/unsubscribe'
+    subscribe:
+      description: Async notifications from the Service on important changes.
+      operationId: sendMessage
+      message:
+        oneOf:
+          - $ref: '#/components/messages/subscribed'
+          - $ref: '#/components/messages/notification'
+components:
+  messages:
+    subscribe:
+      summary: Subscribe for updates for own connection.
+      description: UA or ADX client can Subscribe for updates for status of own connection. Status events include new peer's address, new security credentials, and signal QoS failure. This subscribtion is required to be set up pre-flight.
+      payload:
+        type: object
+        properties:
+          UasID:
+            description: CAA UAS ID
+            type: string
+        required:
+          - UasID
+      x-response:
+        $ref: '#/components/messages/subscribed'
+    unsubscribe:
+      summary: Stop receiving any notification for own connection.
+      description: Clients shall call this upon flight termination.
+      payload:
+        type: object
+        properties:
+          ConnectionID:
+            description: Active connection identifier.
+            type: string
+        required:
+        - ConnectionID
+    subscribed:
+      summary: Subscription confirmation.
+      description: Upon subscription, the Service generates a new connection and returns a new connection identifier to a client.
+      payload:
+        type: object
+        properties:
+          ConnectionID:
+            description: Active connection identifier.
+            type: string
+    notification:
+      summary: Notifies a client about an important change of connection information.
+      description: Important events include changes in own IP address, gateway IP address, peer's IP address, peer's public keys. Also a change of own private key can be requested.
+      payload:
+        type: object
+        properties:
+          ConnectionID:
+            description: Active connection identifier.
+            type: string
+          EventID:
+            summary: Describes what piece of information was changed.
+            description: A user shall request new information on thier own via the REST API.
+            type: string
+            enum:
+            - own_address
+            - gateway_address
+            - own_private_key_change
+            - peer_address
+            - peer_public_key
