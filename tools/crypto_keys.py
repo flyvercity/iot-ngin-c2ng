@@ -16,7 +16,7 @@ from cryptography.hazmat.primitives.serialization import (
     Encoding, PrivateFormat, BestAvailableEncryption
 )
 
-from service.secman import generate_pk, get_x509_subject
+from service.backend.secman import generate_pk, get_x509_subject
 
 
 SERVICE_CERTIFICATE_LIFESPAN_DAYS = 365

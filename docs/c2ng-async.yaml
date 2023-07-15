@@ -27,10 +27,14 @@ components:
       payload:
         type: object
         properties:
+          Action:
+            type: string
+            const: Subscribe
           UasID:
             description: CAA UAS ID
             type: string
         required:
+          - Action
           - UasID
       x-response:
         $ref: '#/components/messages/subscribed'
@@ -40,10 +44,14 @@ components:
       payload:
         type: object
         properties:
+          Action:
+            type: string
+            const: Unsubscribe
           ConnectionID:
             description: Active connection identifier.
             type: string
         required:
+        - Action
         - ConnectionID
     subscribed:
       summary: Subscription confirmation.
@@ -51,15 +59,24 @@ components:
       payload:
         type: object
         properties:
+          Action:
+            type: string
+            const: Subscribed
           ConnectionID:
             description: Active connection identifier.
             type: string
+        required:
+        - Action
+        - ConnectionID
     notification:
       summary: Notifies a client about an important change of connection information.
       description: Important events include changes in own IP address, gateway IP address, peer's IP address, peer's public keys. Also a change of own private key can be requested.
       payload:
         type: object
         properties:
+          Action:
+            type: string
+            const: Notification
           ConnectionID:
             description: Active connection identifier.
             type: string
@@ -73,3 +90,7 @@ components:
             - own_private_key_change
             - peer_address
             - peer_public_key
+        required:
+        - Action
+        - ConnectionID
+        - EventID

@@ -1,13 +1,19 @@
 src := $(wildcard service/*.py service/handlers/*.py tools/*py)
 
-build: 
-	docker build -t c2ng:latest .
-
 generate:
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service/ python tools/gen_openapi.py
 
+build: 
+	docker build -t c2ng:latest .
+
 keys:
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service/ python tools/crypto_keys.py
+
+up:
+	docker-compose up -d
+
+postrun:
+	python tools/c2ng.py keycloak
 
 # Documentation
 

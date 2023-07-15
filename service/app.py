@@ -11,11 +11,11 @@ from pathlib import Path
 import tornado.web as web
 
 
-from uss import UssInterface
-from mongo import Mongo
-from nsacf import NSACF
-from secman import SecMan
-from influx import Influx
+from backend.uss import UssInterface
+from backend.mongo import Mongo
+from backend.nsacf import NSACF
+from backend.secman import SecMan
+from backend.influx import Influx
 
 from handlers.auth import fetch_keycloak_public_certs
 from handlers.sesssion import UaSessionRequestHandler, AdxSessionRequestHandler
