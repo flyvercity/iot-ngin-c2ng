@@ -10,18 +10,25 @@ from pathlib import Path
 
 import tornado.web as web
 
-
 from backend.uss import UssInterface
 from backend.mongo import Mongo
 from backend.nsacf import NSACF
-from backend.secman import SecMan
 from backend.influx import Influx
+from backend.secman import SecMan
+from backend.sessman import SessMan
 
 from handlers.auth import fetch_keycloak_public_certs
 from handlers.sesssion import UaSessionRequestHandler, AdxSessionRequestHandler
 from handlers.certificate import UaCertificateHandler, AdxCertificateHandler
 from handlers.address import UaAddressHandler, AdxAddressHandler
 from handlers.signal import SignalStatsHandler
+
+from handlers.notify import (
+    WebsocketTicketManager,
+    WebsocketAuthHandler,
+    WsNotifyHandler
+)
+
 
 DEFAULT_LISTEN_PORT = 9090
 
@@ -47,7 +54,9 @@ def handlers():
         (r'/certificate/adx/([^/]+)', AdxCertificateHandler),
         (r'/address/ua/([^/]+)', UaAddressHandler),
         (r'/address/adx/([^/]+)', AdxAddressHandler),
-        (r'/signal', SignalStatsHandler)
+        (r'/signal', SignalStatsHandler),
+        (r'/notifications/auth/([^/]+)/([^/]+)', WebsocketAuthHandler),
+        (r'/notifications/websocket', WsNotifyHandler)
     ]
 
 
@@ -66,6 +75,8 @@ async def main():
     nsacf = NSACF(config['nsacf'])
     secman = SecMan(config['security'])
     influx = Influx(config['influx'])
+    sessman = SessMan(mongo, uss, nsacf, secman)
+    wstxman = WebsocketTicketManager()
 
     app = web.Application(
         handlers(),
@@ -74,7 +85,9 @@ async def main():
         uss=uss,
         nsacf=nsacf,
         secman=secman,
-        influx=influx
+        influx=influx,
+        sessman=sessman,
+        wstxman=wstxman
     )
 
     lg.info('---------- Restarted ----------')

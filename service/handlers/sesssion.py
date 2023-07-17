@@ -3,22 +3,19 @@
 
 '''This module implements session handlers.'''
 import logging as lg
-from base64 import b64decode as decode, b64encode as encode
 
 from schemas import (
-    BaseSuccessSchema,
     AerialConnectionSessionRequest,
     AerialConnectionSessionResponseFailed,
     AerialConnectionSessionResponse,
     AdxConnectionSessionRequest,
-    AdxConnectionSessionResponse,
+    AdxConnectionSessionResponse
 )
 
 from handlers.auth import AuthHandler
 
 
 class SessionHandlerBase(AuthHandler):
-
     def delete(self, uasid):
         '''Terminates a session.
 
@@ -83,52 +80,15 @@ class UaSessionRequestHandler(SessionHandlerBase):
         if not (request := self.get_request(AerialConnectionSessionRequest)):
             return
 
-        uasid = request['UasID']
-        approved, error = self.uss.request(uasid)
+        response, errors = self.sessman.ua_session(request)
 
-        if error:
-            self.fail(AerialConnectionSessionResponseFailed, {
-                    'USS': 'provider_unavailable',
-                },
-                message=error
+        if errors:
+            self.fail(
+                AerialConnectionSessionResponseFailed,
+                errors=errors
             )
-
-            return
-
-        lg.info(f'USS approval for {uasid}: {approved}')
-
-        if not approved:
-            self.fail(AerialConnectionSessionResponseFailed, {
-                'USS': 'flight_not_approved'
-            })
-
-            return
-
-        if not (session := self.mongo.get_session(uasid)):
-            lg.info(f'Initializing new session for {uasid}')
-            session = {'UasID': uasid}
         else:
-            lg.info(f'The session exist for {uasid}')
-
-        if 'UaCertificate' not in session:
-            ua_creds = self.nsacf.get_ue_network_creds(request['IMSI'])
-            session['UaIP'] = ua_creds['IP']
-            session['UaGatewayIP'] = ua_creds['Gateway']
-            sec_creds = self.secman.gen_client_credentials(f'{uasid}::UA')
-            session['UaCertificate'] = sec_creds.cert()
-            # TODO: Introduce the Key ID
-            session['UaKeyID'] = encode(sec_creds.key().encode()).decode()
-            self.mongo.put_session(session)
-        else:
-            lg.info(f'The UA endpoint established for {uasid}')
-
-        response = {
-            'IP': session['UaIP'],
-            'GatewayIP': session['UaGatewayIP'],
-            'EncryptedPrivateKey': decode(session['UaKeyID']).decode()
-        }
-
-        self.respond(AerialConnectionSessionResponse, response)
+            self.respond(AerialConnectionSessionResponse, response)
 
 
 class AdxSessionRequestHandler(SessionHandlerBase):
@@ -166,29 +126,12 @@ class AdxSessionRequestHandler(SessionHandlerBase):
             return
 
         uasid = request['UasID']
+        response, errors = self.sessman.adx_session(uasid)
 
-        if not (session := self.mongo.get_session(uasid)):
-            lg.info(f'Initializing new session (ADX) for {uasid}')
-            session = {'UasID': uasid}
+        if errors:
+            self.fail(
+                AerialConnectionSessionResponseFailed,
+                errors=errors
+            )
         else:
-            lg.info(f'The session exist for {uasid}')
-
-        if 'AdxCertificate' not in session:
-            adx_cred = self.nsacf.get_adx_network_creds(uasid)
-            session['AdxIP'] = adx_cred['IP']
-            session['AdxGatewayIP'] = adx_cred['Gateway']
-            sec_creds = self.secman.gen_client_credentials(f'{uasid}::ADX')
-            session['AdxCertificate'] = sec_creds.cert()
-            # TODO: Introduce the Key ID
-            session['AdxKeyID'] = encode(sec_creds.key().encode()).decode()
-            self.mongo.put_session(session)
-        else:
-            lg.info(f'The ADX endpoint established for {uasid}')
-
-        response = {
-            'IP': session['AdxIP'],
-            'GatewayIP': session['AdxGatewayIP'],
-            'EncryptedPrivateKey': decode(session['AdxKeyID']).decode()
-        }
-
-        self.respond(AdxConnectionSessionResponse, response)
+            self.respond(AdxConnectionSessionResponse, response)

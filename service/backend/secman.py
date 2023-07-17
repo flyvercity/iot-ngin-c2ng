@@ -118,9 +118,15 @@ class SecMan:
 
         Returns:
             `SecCredentials` object.
+
+        Raises:
+            RuntimeError: when there no configured secret to for a stored key
         '''
         # TODO: find out how to use individual key for each user
         oauth_client_id = os.getenv('C2NG_UAS_CLIENT_SECRET')
+
+        if not oauth_client_id:
+            raise RuntimeError('Not UAS OAuth client secret configured')
 
         client_key = generate_pk()
         subject = get_x509_subject(f'{client_id}.c2ng')
@@ -141,6 +147,3 @@ class SecMan:
         ).sign(self._private_key, hashes.SHA256())
 
         return SecCredentials(cert, client_key, oauth_client_id)
-
-    def validate_client_cert(service_cert, client_cert):
-        client_cert.verify_directly_issued_by(service_cert)

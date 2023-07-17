@@ -32,7 +32,6 @@ class BaseSuccessSchema(Schema):
 
 class ErrorSchema(Schema):
     Success = fields.Boolean(validate=validate.Equal(False), description='Failure flag.')
-    Message = fields.String()
 
 
 class ValidationErrorSchema(ErrorSchema):
@@ -191,3 +190,35 @@ class SignalStatsReportRequest(Schema):
     RTT = fields.Integer(description='Round-Trip Time (ms)')
     Cell = fields.String(description='Aircraft Serving physical cell identifier')
     FrequencyBand = fields.String(description='Aircraft Serving Frequency Band Identification')
+
+
+class WsAuthResponseSuccess(BaseSuccessSchema):
+    Ticket = fields.String(required=True, description='Websocket ticket')
+
+
+class WsAuthResponseErrors(Schema):
+    UasID = fields.String(validate=validate.OneOf([
+        'not_found'
+    ]))
+
+    Segment = fields.String(validate=validate.OneOf([
+        'not_found',
+        'bad_segment'
+    ]))
+
+
+class WsAuthResponseFailed(ErrorSchema):
+    Errors = fields.Nested(WsAuthResponseErrors, required=True)
+
+
+class AsyncIncomingSchema(Schema):
+    Ticket = fields.String(required=True, description='Websocket ticket')
+    Action = fields.String(required=True, description='Action to perform')
+
+
+class AsyncSubscribeSchema(AsyncIncomingSchema):
+    pass
+
+
+class AsyncUnsubscribeSchema(AsyncIncomingSchema):
+    pass

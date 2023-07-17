@@ -8,11 +8,12 @@ import json
 import tornado.web as web
 from marshmallow.exceptions import ValidationError
 
-from uss import UssInterface  # noqa
-from mongo import Mongo  # noqa
-from nsacf import NSACF  # noqa
-from secman import SecMan  # noqa
-from influx import Influx  # noqa
+from backend.uss import UssInterface  # noqa
+from backend.mongo import Mongo  # noqa
+from backend.nsacf import NSACF  # noqa
+from backend.secman import SecMan  # noqa
+from backend.influx import Influx  # noqa
+from backend.sessman import SessMan  # noqa
 
 from schemas import (
     BaseSuccessSchema,
@@ -30,6 +31,7 @@ class HandlerBase(web.RequestHandler):
         self.nsacf = self.settings['nsacf']  # type: NSACF
         self.secman = self.settings['secman']  # type: SecMan
         self.influx = self.settings['influx']  # type: Influx
+        self.sessman = self.settings['sessman']  # type: SessMan
 
     def _return(self, ResponseSchema: type, response: dict):
         '''Validate and return a response.
@@ -69,21 +71,16 @@ class HandlerBase(web.RequestHandler):
         data['Success'] = True
         self._return(ResponseSchema, data)
 
-    def fail(self, ResponseSchema: type, errors: dict, message: str = None):
+    def fail(self, ResponseSchema: type, errors: dict):
         '''Produces a graceful failure response.
 
         Args:
             ResponseSchema: a schema of the erroneous response, subclass of `ErrorSchema`.
             errors: a dict with structured error.
-            message: an optional human readable message.
         '''
 
         self.set_status(400)
         response = {'Success': False, 'Errors': errors}
-
-        if message:
-            response.update({'Message': message})
-
         self._return(ResponseSchema, response)
 
     def write_error(self, status_code, **kwargs):
@@ -98,14 +95,18 @@ class HandlerBase(web.RequestHandler):
         if status_code == 403:
             self.finish(json.dumps({
                 'Success': False,
-                'Code': status_code,
-                'Errors': 'Access denied'
+                'Errors': {
+                    'Access': 'denied',
+                    'Code': status_code
+                }
             }))
         else:
             self.finish(json.dumps({
                 'Success': False,
-                'Code': status_code,
-                'Errors': 'Internal Server Error'
+                'Errors': {
+                    'InternalError': 'internal_error',
+                    'Code': status_code
+                }
             }))
 
     def get_request(self, RequestSchema):

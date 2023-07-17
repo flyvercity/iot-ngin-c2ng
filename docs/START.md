@@ -49,13 +49,13 @@ make keys
 Start the application:
 
 ```sh
-docker-compose up -d
+make up
 ```
 
-Configure authentication server:
+Configure authentication server (make require a couple of minutes waiting time while KeyCloak initializes):
 
 ```sh
-python tools/c2ng.py keycloak
+make postrun
 ```
 
 _Note: the CLI tool `c2ng.py` has other capabilities. For further help, run:_

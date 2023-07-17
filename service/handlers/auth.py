@@ -6,8 +6,8 @@ import logging as lg
 import time
 
 import requests
-import tornado.web as web
-from jose import jwk, jwt
+from tornado import web
+from jose import jwt, jwk
 
 from handlers.base import HandlerBase
 
@@ -44,34 +44,34 @@ class AuthHandler(HandlerBase):
 
         Returns:
             User's JWT token payload.
-
-        Raises:
-            HTTPError: A HTTP 404 unauthorized exception.
         '''
 
-        try:
-            wkinfo = self.settings['config']['wkinfo']
-            auth_header = self.request.headers.get('Authentication', '')
+        wkinfo = self.settings['config']['wkinfo']
+        auth_header = self.request.headers.get('Authentication', '')
+        return get_auth_user(wkinfo, auth_header)
 
-            if len(auth_header.split()) < 2:
-                raise web.HTTPError(401, reason='Unauthorized')
 
-            bearer = auth_header.split()[1]
+def get_auth_user(wkinfo, auth_header):
+    try:
+        if len(auth_header.split()) < 2:
+            raise web.HTTPError(401, reason='Unauthorized')
 
-            if not auth_header or not bearer:
-                raise web.HTTPError(401, reason='Unauthorized')
+        bearer = auth_header.split()[1]
 
-            sig_keys = filter(lambda key: key['use'] == 'sig', wkinfo['keys'])
-            public_key = jwk.construct(next(sig_keys))
+        if not auth_header or not bearer:
+            raise web.HTTPError(401, reason='Unauthorized')
 
-            payload = jwt.decode(
-                bearer, public_key,
-                algorithms='RS256', options={'verify_aud': False}
-            )
+        sig_keys = filter(lambda key: key['use'] == 'sig', wkinfo['keys'])
+        public_key = jwk.construct(next(sig_keys))
 
-            lg.info(f'User authorized: {payload["preferred_username"]}')
-            return payload
+        payload = jwt.decode(
+            bearer, public_key,
+            algorithms='RS256', options={'verify_aud': False}
+        )
 
-        except Exception as exc:
-            lg.warn(f'Authentication failed: {exc}')
-            raise web.HTTPError(403, reason=str(exc))
+        lg.info(f'User authorized: {payload["preferred_username"]}')
+        return payload
+
+    except Exception as exc:
+        lg.warn(f'Authentication failed: {exc}')
+        raise web.HTTPError(403, reason=str(exc))

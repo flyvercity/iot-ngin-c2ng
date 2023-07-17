@@ -28,14 +28,14 @@ components:
         type: object
         properties:
           Action:
-            type: string
+            SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
             const: Subscribe
-          UasID:
-            description: CAA UAS ID
+          Ticket:
+            description: Websocket authentication ticket
             type: string
         required:
           - Action
-          - UasID
+          - Ticket
       x-response:
         $ref: '#/components/messages/subscribed'
     unsubscribe:
@@ -52,7 +52,7 @@ components:
             type: string
         required:
         - Action
-        - ConnectionID
+        - Ticket
     subscribed:
       summary: Subscription confirmation.
       description: Upon subscription, the Service generates a new connection and returns a new connection identifier to a client.
@@ -61,35 +61,28 @@ components:
         properties:
           Action:
             type: string
-            const: Subscribed
-          ConnectionID:
-            description: Active connection identifier.
-            type: string
+            const: subscribed
         required:
         - Action
-        - ConnectionID
     notification:
       summary: Notifies a client about an important change of connection information.
-      description: Important events include changes in own IP address, gateway IP address, peer's IP address, peer's public keys. Also a change of own private key can be requested.
+      description: Main purpose of this async channel is to report signal degradation and failure. Important events also include changes in own gateway IP address, peer's IP address, peer's public keys.
       payload:
         type: object
         properties:
           Action:
             type: string
-            const: Notification
-          ConnectionID:
-            description: Active connection identifier.
-            type: string
+            const: notification
           EventID:
             summary: Describes what piece of information was changed.
             description: A user shall request new information on thier own via the REST API.
             type: string
             enum:
-            - own_address
-            - gateway_address
-            - own_private_key_change
-            - peer_address
-            - peer_public_key
+            - signal-ok
+            - signal-abnormal
+            - signal-degraded
+            - request-own-credentials
+            - peer-credentials-changed
         required:
         - Action
         - ConnectionID
