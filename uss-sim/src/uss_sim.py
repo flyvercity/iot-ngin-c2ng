@@ -4,8 +4,9 @@
 '''CLI USSP Endpoint Simulator.'''
 import os
 import logging as lg
-import json
 import asyncio
+from argparse import ArgumentParser
+import json
 
 import requests
 import tornado.web as web
@@ -109,7 +110,21 @@ async def run(args: dict):
     await asyncio.Event().wait()
 
 
-def add_arg_subparsers(sp):
-    uss = sp.add_parser('uss', help='USSP Simulator')
-    uss.add_argument('-p', '--port', type=int, default=C2NG_DEFAULT_USS_PORT)
-    uss.add_argument('-D', '--disapprove', action='store_true', default=False)
+async def main():
+    parser = ArgumentParser()
+    parser.add_argument('-v', '--verbose', action='store_true', help='Verbose logging')
+    parser.add_argument('-p', '--port', type=int, default=C2NG_DEFAULT_USS_PORT)
+    parser.add_argument('-D', '--disapprove', action='store_true', default=False)
+
+    parser.add_argument(
+        '-a', '--auth', help='Address of the OIDC server (by default, KeyCloak)',
+        default='http://oauth:8080/'
+    )
+
+    args = parser.parse_args()
+    lg.basicConfig(level=lg.DEBUG if args.verbose else lg.INFO)
+    await run(args)
+
+
+if __name__ == '__main__':
+    asyncio.run(main())

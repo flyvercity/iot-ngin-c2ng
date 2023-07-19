@@ -33,8 +33,6 @@ components:
       properties:
         Errors:
           $ref: '#/components/schemas/AddressRequestResponseErrors'
-        Message:
-          type: string
         Success:
           description: Failure flag.
           enum:
@@ -86,8 +84,6 @@ components:
       properties:
         Errors:
           $ref: '#/components/schemas/AdxConnectionSessionResponseErrors'
-        Message:
-          type: string
         Success:
           description: Failure flag.
           enum:
@@ -148,8 +144,6 @@ components:
       properties:
         Errors:
           $ref: '#/components/schemas/AerialConnectionSessionResponseErrors'
-        Message:
-          type: string
         Success:
           description: Failure flag.
           enum:
@@ -195,8 +189,6 @@ components:
       properties:
         Errors:
           $ref: '#/components/schemas/CertificateRequestResponseErrors'
-        Message:
-          type: string
         Success:
           description: Failure flag.
           enum:
@@ -306,8 +298,6 @@ components:
             type: array
           description: Error identifier dict
           type: object
-        Message:
-          type: string
         Success:
           description: Failure flag.
           enum:

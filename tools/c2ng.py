@@ -11,7 +11,6 @@ import asyncio
 from dotenv import load_dotenv
 
 import uas_sim
-import uss_sim
 import oath_admin as oath_admin
 
 
@@ -40,10 +39,6 @@ class Handler:
         '''Simulate a request on behalf of a ground element (e.g., RPS).'''
         with uas_sim.SimAdxC2Subsystem(self._args) as sim:
             await sim.run()
-
-    async def uss(self):
-        '''Start USS simulator.'''
-        await uss_sim.run(self._args)
 
     async def keycloak(self):
         '''Configure the KeyCloak service.'''
@@ -97,7 +92,6 @@ async def main():
 
     sp = parser.add_subparsers(dest='command', required=True, metavar='CMD')
     uas_sim.add_arg_subparsers(sp)
-    uss_sim.add_arg_subparsers(sp)
     oath_admin.add_arg_subparsers(sp)
     args = parser.parse_args()
     setup_logging(args)

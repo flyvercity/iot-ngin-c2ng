@@ -1,13 +1,22 @@
-src := $(wildcard service/*.py service/handlers/*.py tools/*py)
+src := $(wildcard \
+	core/service/*.py \
+	core/service/handlers/*.py \
+	tools/*.py \
+	uss-sim/src/*.py \
+)
 
 generate:
-	PYTHONPATH=${PYTHONPATH}:`pwd`/service/ python tools/gen_openapi.py
+	PYTHONPATH=${PYTHONPATH}:`pwd`/core/service/:`pwd`/core \
+		python tools/gen_openapi.py
 
 build: 
-	docker build -t c2ng:latest .
+	(cd core; docker build -t c2ng:latest .)
+
+build-uss-sim:
+	(cd uss-sim; docker build -t c2ng-uss-sim:latest .)
 
 keys:
-	PYTHONPATH=${PYTHONPATH}:`pwd`/service/ python tools/crypto_keys.py
+	PYTHONPATH=${PYTHONPATH}:`pwd`/core/ python tools/crypto_keys.py
 
 up:
 	docker-compose up -d
@@ -18,7 +27,7 @@ postrun:
 # Documentation
 
 darglint: $(src)
-	darglint service/*.py service/handlers/*.py tools/*.py
+	darglint $(src)
 
 .autogen: $(src)
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service:`pwd`/tools lazydocs \

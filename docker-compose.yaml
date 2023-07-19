@@ -46,6 +46,15 @@ services:
     networks:
       - c2ng
 
+  uss:
+    image: c2ng-uss-sim
+    env_file:
+      - .env
+    ports:
+      - 9091:9091
+    networks:
+      - c2ng
+
   c2ng:
     image: c2ng
     env_file:
@@ -59,6 +68,9 @@ services:
       - c2ng
     depends_on:
       - mongo
+      - influxdb
+      - oauth
+      - uss
 
 networks:
   c2ng:

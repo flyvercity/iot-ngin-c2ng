@@ -56,12 +56,12 @@ def main():
 
     parser.add_argument(
         '-p', '--private',
-        help='PEM file for the private key', default='config/c2ng/private.pem'
+        help='PEM file for the private key', default='core/config/c2ng/private.pem'
     )
 
     parser.add_argument(
         '-c', '--certificate',
-        help='PEM file for root certificate', default='config/c2ng/service.pem'
+        help='PEM file for root certificate', default='core/config/c2ng/service.pem'
     )
 
     args = parser.parse_args()
