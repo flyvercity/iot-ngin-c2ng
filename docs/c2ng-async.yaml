@@ -28,7 +28,8 @@ components:
         type: object
         properties:
           Action:
-            SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+            description: Defines the type of the 'publish' message.
+            type: string
             const: Subscribe
           Ticket:
             description: Websocket authentication ticket
@@ -45,6 +46,7 @@ components:
         type: object
         properties:
           Action:
+            description: Defines the type of the 'publish' message.
             type: string
             const: Unsubscribe
           ConnectionID:

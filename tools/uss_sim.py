@@ -10,10 +10,7 @@ import asyncio
 import requests
 import tornado.web as web
 from jose import jwk, jwt
-from dotenv import load_dotenv
 
-
-load_dotenv()
 
 C2NG_DEFAULT_USS_PORT = os.getenv('C2NG_DEFAULT_USS_PORT')
 '''Default port for the USS simulator'''
@@ -27,7 +24,11 @@ class AuthHandler(web.RequestHandler):
         self.get_current_user()
 
     def get_current_user(self):
-        '''Using this method for authentication.'''
+        '''Using this method for authentication.
+
+        Raises:
+            HTTPError: if authentication fails.
+        '''
 
         try:
             auth_header = self.request.headers.get('Authentication', '')
@@ -77,18 +78,22 @@ class ApproveHandler(AuthHandler):
 
 
 def handlers():
-    '''Returns a full set of URLSpec'''
+    '''Returns a full set of URLSpec.
+
+    Returns:
+        A list of URL specifications.
+    '''
 
     return [
         (r'/approve', ApproveHandler),
     ]
 
 
-async def start(args: dict):
+async def run(args: dict):
     '''Simulator async entry point.
 
     Args:
-    - `args`: command line parameters
+        args: command line parameters
     '''
 
     port = args.port
@@ -102,11 +107,6 @@ async def start(args: dict):
     lg.info(f'USS SIM :: Listening for requests on {port}')
     app.listen(port)
     await asyncio.Event().wait()
-
-
-def run(args):
-    '''Simulator sync entry point.'''
-    asyncio.run(start(args))
 
 
 def add_arg_subparsers(sp):

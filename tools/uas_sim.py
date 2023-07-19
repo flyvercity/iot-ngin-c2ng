@@ -19,6 +19,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
+import tornado.websocket as ws
 
 import tool_util as u
 
@@ -103,6 +104,8 @@ class SimC2Subsystem:
 
     def _reset(self):
         lg.info('Reset')
+        self._ws_ticket = None
+        self._subscribe = False
         self._session_info = None
         self._private_key = None
         self._peer_cert_info = None
@@ -136,17 +139,37 @@ class SimC2Subsystem:
         self._outsocket.close()
         self._insocket.close()
 
+    def _segment(self) -> str:
+        '''Get the UAS segment (ua|adx).'''
+        pass
+
     def _request_session(self) -> dict:
         '''Requests a session from the service. Pure virtual method.'''
         pass
 
-    def _request_peer_address(self) -> dict:
-        '''Requests a certifice for the from the service. Pure virtual method.'''
-        pass
+    def _request_peer_certificate(self):
+        '''Implements `_request_peer_certificate` for the RPS simulator.
 
-    def _request_peer_certificate(self) -> dict:
-        '''Requests a certifice for the from the service. Pure virtual method.'''
-        pass
+        Returns:
+            Peer's certificate info.
+        '''
+
+        segment = self._segment()
+        uasid = self._args.uasid
+        cert_info = request(self._args, 'GET', f'/certificate/{segment}/{uasid}')
+        return cert_info
+
+    def _request_peer_address(self):
+        ''' Implements `_request_peer_address` for the RPS simulator.
+
+        Returns:
+            Peer's IP address information.
+        '''
+
+        segment = self._segment()
+        uasid = self._args.uasid
+        address_info = request(self._args, 'GET', f'/address/{segment}/{uasid}')
+        return address_info
 
     def _work_cycle(self):
         '''Execute internal simulation procedures. Pure virtual method.'''
@@ -160,50 +183,89 @@ class SimC2Subsystem:
         '''Get peer's UDP port.'''
         pass
 
-    def run(self):
+    def _fetch_session_info(self):
+        lg.info('Requesting session')
+        self._session_info = self._request_session()
+
+        if self._args.verbose:
+            u.pprint(self._session_info)
+
+        ip = self._session_info['IP']
+        port = self._in_port()
+        lg.info(f'Binding to {ip}:{port}')
+        self._reset_insocket()
+        self._insocket.bind((ip, port))
+
+        # NB: using known client secret as passphase
+        client_secret = os.getenv('C2NG_UAS_CLIENT_SECRET')
+
+        self._private_key = load_pem_private_key(
+            self._session_info['EncryptedPrivateKey'].encode(),
+            client_secret.encode()
+        )
+
+    def _fetch_peer_address(self):
+        lg.info('Requesting peer address')
+        address_info = self._request_peer_address()
+        lg.debug(address_info)
+        self._peer_address = address_info['Address']
+
+    def _fetch_peer_certificate(self):
+        lg.info('Requesting peer certificate')
+        self._peer_cert_info = self._request_peer_certificate()
+
+        if self._args.verbose:
+            u.pprint(self._peer_cert_info)
+
+        cert = x509.load_pem_x509_certificate(
+            self._peer_cert_info['Certificate'].encode()
+        )
+
+        self._peer_public_key = cert.public_key()
+
+    async def _do_subscribe(self):
+        segment = self._segment()
+        uasid = self._args.uasid
+        lg.debug(f'Requesting websocket ticket for {segment}/{uasid}')
+        response = request(self._args, 'POST', f'/notifications/auth/{segment}/{uasid}')
+        self._ws_ticket = response['Ticket']
+        lg.debug('Websocket ticket received, connecting to the websocket')
+        url = self._args.websocket
+        conn = await ws.websocket_connect(f'{url}/notifications/websocket')
+
+        await conn.write_message(json.dumps({
+            'Ticket': self._ws_ticket,
+            'Action': 'subscribe'
+        }))
+
+        message = await conn.read_message()
+
+        if not message:
+            raise UserWarning('Connection closed')
+
+        payload = json.loads(message)
+
+        if payload['Action'] != 'subscribed':
+            raise UserWarning('Subscription failed')
+
+        self._subscribe = True
+
+    async def run(self):
         '''Execute simulations.'''
 
         while True:
             try:
+                if not self._subscribe:
+                    await self._do_subscribe()
+
                 if not self._session_info:
-                    lg.info('Requesting session')
-                    self._session_info = self._request_session()
-
-                    if self._args.verbose:
-                        u.pprint(self._session_info)
-
-                    ip = self._session_info['IP']
-                    port = self._in_port()
-                    lg.info(f'Binding to {ip}:{port}')
-                    self._reset_insocket()
-                    self._insocket.bind((ip, port))
-
-                    # NB: using known client secret as passphase
-                    client_secret = os.getenv('C2NG_UAS_CLIENT_SECRET')
-
-                    self._private_key = load_pem_private_key(
-                        self._session_info['EncryptedPrivateKey'].encode(),
-                        client_secret.encode()
-                    )
+                    self._fetch_session_info()
 
                 if not self._peer_address:
-                    lg.info('Requesting peer address')
-                    address_info = self._request_peer_address()
-                    lg.debug(address_info)
-                    self._peer_address = address_info['Address']
+                    self._fetch_peer_address()
 
                 if not self._peer_cert_info:
-                    lg.info('Requesting peer certificate')
-                    self._peer_cert_info = self._request_peer_certificate()
-
-                    if self._args.verbose:
-                        u.pprint(self._peer_cert_info)
-
-                    cert = x509.load_pem_x509_certificate(
-                        self._peer_cert_info['Certificate'].encode()
-                    )
-
-                    self._peer_public_key = cert.public_key()
+                    self._fetch_peer_certificate()
 
                 self._work_cycle()
 
@@ -299,15 +361,23 @@ class SimC2Subsystem:
 
 class SimUaC2Subsystem(SimC2Subsystem):
     '''UA C2 Subsystem Simulator.'''
+    def _segment(self) -> str:
+        '''Implements `_segment` for the UA simulator.
 
-    def run(self):
+        Returns:
+            'ua'.
+        '''
+
+        return 'ua'
+
+    async def run(self):
         '''Run the simulations.
 
         Overrides the inherited method.
         '''
 
         if not self._args.signal_only:
-            super().run()
+            await super().run()
         else:
             lg.info('Starting signal reporting loop')
 
@@ -332,26 +402,6 @@ class SimUaC2Subsystem(SimC2Subsystem):
         })
 
         return session_info
-
-    def _request_peer_address(self):
-        ''' Implements `_request_peer_address` for the UA simulator.
-
-        Returns:
-            Peer's IP address information.
-        '''
-
-        address_info = request(self._args, 'GET', f'/address/adx/{self._args.uasid}')
-        return address_info
-
-    def _request_peer_certificate(self):
-        '''Implements `_request_peer_certificate` for the UA simulator.
-
-        Returns:
-            Peer's security certificate.
-        '''
-
-        cert_info = request(self._args, 'GET', f'/certificate/adx/{self._args.uasid}')
-        return cert_info
 
     def _in_port(self) -> int:
         '''Implements `_in_port` for the UA simulator.
@@ -422,6 +472,14 @@ class SimUaC2Subsystem(SimC2Subsystem):
 
 class SimAdxC2Subsystem(SimC2Subsystem):
     '''RPS C2 Subsystem Simulator.'''
+    def _segment(self) -> str:
+        '''Implements `_segment` for the RPS simulator.
+
+        Returns:
+            'adx'.
+        '''
+
+        return 'adx'
 
     def _request_session(self):
         '''Implements `_request_session` for the RPS simulator.
@@ -436,26 +494,6 @@ class SimAdxC2Subsystem(SimC2Subsystem):
         })
 
         return session_info
-
-    def _request_peer_certificate(self):
-        '''Implements `_request_peer_certificate` for the RPS simulator.
-
-        Returns:
-            Peer's certificate info.
-        '''
-
-        cert_info = request(self._args, 'GET', f'/certificate/ua/{self._args.uasid}')
-        return cert_info
-
-    def _request_peer_address(self):
-        ''' Implements `_request_peer_address` for the RPS simulator.
-
-        Returns:
-            Peer's IP address information.
-        '''
-
-        address_info = request(self._args, 'GET', f'/address/ua/{self._args.uasid}')
-        return address_info
 
     def _in_port(self) -> int:
         '''Implements `_in_port` for the RPS simulator.

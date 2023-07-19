@@ -38,7 +38,7 @@ class WebsocketTicketManager:
         }
 
         ticket = jwt.encode(client_info, self._secret, algorithm='HS256')
-        self.connections[key] = ticket
+        self._connections[key] = ticket
         return ticket
 
     def decode_ticket(self, ticket):
@@ -47,12 +47,12 @@ class WebsocketTicketManager:
 
     def deregister_user(self, uasid, segment):
         key = f'{uasid}/{segment}'
-        if key in self.connections:
-            del self.connections[key]
+        if key in self._connections:
+            del self._connections[key]
 
 
 class WebsocketAuthHandler(AuthHandler):
-    def get(self, uasid, segment):
+    def post(self, segment, uasid):
         errors = {}
 
         if not uasid:
@@ -76,17 +76,20 @@ class WebsocketAuthHandler(AuthHandler):
 
 
 class WsNotifyHandler(ws.WebSocketHandler):
-    def on_subscribe(self):
+    def on_subscribe(self, request):
+        lg.debug(f'User {self.uasid}::{self.segment} subscribing to notifications')
         sessman = self.settings['sessman']
         sessman.subscribe(self.uasid, self.segment, self)
         confirmation = json.dumps({'Action': 'subscribed'})
         self.write_message(confirmation)
 
-    def on_unsubscribe(self):
+    def on_unsubscribe(self, request):
+        lg.debug(f'Unsubscribing {self.uasid}::{self.segment}')
         sessman = self.settings['sessman']
         sessman.unsubscribe(self.uasid, self.segment, self)
 
     def notify(self, event):
+        lg.info(f'Notifying {self.uasid}::{self.segment} with {event}')
         self.write_message(json.dumps(event))
 
     ACTION_SCHEMAS = {
@@ -103,23 +106,21 @@ class WsNotifyHandler(ws.WebSocketHandler):
         self.uasid = None
         self.segment = None
 
-    def on_message(self, message: bytes):
-        payload = json.loads(message.decode())
+    def on_message(self, message: str):
+        payload = json.loads(message)
 
-        if self.settings['logging']['verbose']:
+        if self.settings['config']['logging']['verbose']:
             lg.debug('Incoming message websocket message')
             msg_dump = json.dumps(payload, indent=2)
             print(msg_dump)
-
-        payload = json.loads(self.request.body)
 
         ticket = payload.get('Ticket')
 
         if not ticket:
             raise ws.WebSocketError('Ticket field missing')
 
-        wsctxman = self.settings['wsctxman']
-        client_info = wsctxman.decode_ticket(ticket)
+        wstxman = self.settings['wstxman']
+        client_info = wstxman.decode_ticket(ticket)
         self.uasid = client_info['UasID']
         self.segment = client_info['Segment']
         action = payload.get('Action')
@@ -127,7 +128,8 @@ class WsNotifyHandler(ws.WebSocketHandler):
         if not action:
             raise ws.WebSocketError('Action field missing')
 
-        schema = WsNotifyHandler.ACTION_SCHEMAS.get(action)
+        SchemaClass = WsNotifyHandler.ACTION_SCHEMAS.get(action)
+        schema = SchemaClass()
 
         if not schema:
             raise ws.WebSocketError(f'Unknown action: {action}')
@@ -140,7 +142,7 @@ class WsNotifyHandler(ws.WebSocketHandler):
         handler(self, request)
 
     def on_close(self):
-        wsctxman = self.settings['wsctxman']
-        wsctxman.deregister_user(self.uasid, self.segment)
+        wstxman = self.settings['wstxman']
+        wstxman.deregister_user(self.uasid, self.segment)
         sessman = self.settings['sessman']
-        sessman.unsubscribe(self.uasid, self.segment, self)
+        sessman.unsubscribe(self.uasid, self.segment)
