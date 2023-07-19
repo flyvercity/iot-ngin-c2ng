@@ -60,8 +60,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./service:/c2ng/service
-      - ./config/c2ng/:/c2ng/config/
+      - ./core/service:/c2ng/service
+      - ./core/config/c2ng/:/c2ng/config/
     ports:
       - 9090:9090
     networks:

@@ -8,7 +8,7 @@ oauth:
     realm: c2ng
     retry-timeout: 5
 uss:
-  endpoint: http://host.docker.internal:9091
+  endpoint: http://uss:9091
   oauth:
     keycloak:
       base: http://oauth:8080

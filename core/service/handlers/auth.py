@@ -69,7 +69,7 @@ def get_auth_user(wkinfo, auth_header):
             algorithms='RS256', options={'verify_aud': False}
         )
 
-        lg.info(f'User authorized: {payload["preferred_username"]}')
+        lg.debug(f'User authorized: {payload["preferred_username"]}')
         return payload
 
     except Exception as exc:

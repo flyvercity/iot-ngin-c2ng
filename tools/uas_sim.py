@@ -429,7 +429,10 @@ class SimUaC2Subsystem(SimC2Subsystem):
             print('MESSAGE:', message)
             counter += 1
             self._send(message.encode(), (self._peer_address, self._out_port()))
-            self._report_sim_signal()
+
+            if self._args.modem == 'simulated':
+                self._report_sim_signal()
+
             time.sleep(1)
 
     def _report_sim_signal(self):
@@ -537,6 +540,11 @@ def add_arg_subparsers(sp):
     ua.add_argument(
         '-S', '--signal-only', help='Do not connect, transmit signal only',
         action='store_true', default=False
+    )
+
+    ua.add_argument(
+        '-m', '--modem', help='Modem type (none|simulated)',
+        choices=['none', 'simulated'], default='none'
     )
 
     adx = sp.add_parser('adx', help='Command on behalf of ADX client (RPS is simulated)')
