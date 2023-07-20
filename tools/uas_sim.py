@@ -11,6 +11,7 @@ import socket
 import base64
 import json
 from random import random
+import asyncio
 
 import requests
 from keycloak import KeycloakOpenID
@@ -111,6 +112,7 @@ class SimC2Subsystem:
         self._peer_cert_info = None
         self._peer_address = None
         self._peer_public_key = None
+        self._notify_task = None
 
     def _reset_insocket(self):
         if self._insocket:
@@ -171,7 +173,7 @@ class SimC2Subsystem:
         address_info = request(self._args, 'GET', f'/address/{segment}/{uasid}')
         return address_info
 
-    def _work_cycle(self):
+    async def _work_cycle(self):
         '''Execute internal simulation procedures. Pure virtual method.'''
         pass
 
@@ -223,6 +225,41 @@ class SimC2Subsystem:
 
         self._peer_public_key = cert.public_key()
 
+    async def _notify_receive_loop(self, conn):
+        '''Receive loop for the notification websocket.
+
+        Args:
+            conn: websocket connection.
+
+        Raises:
+            UserWarning: intercepted internally.
+        '''
+
+        while True:
+            try:
+                lg.info('Reading notifications')
+                message = await conn.read_message()
+
+                if not message:
+                    raise UserWarning('Connection closed')
+
+                payload = json.loads(message)
+
+                lg.info('Notification received')
+                u.pprint(payload)
+
+                if payload['Action'] == 'subscribed':
+                    self._subscribe = True
+
+            except ws.WebSocketClosedError:
+                lg.warn('Websocket closed')
+                self._subscribe = False
+                break
+
+            except Exception as exc:
+                lg.warn(f'Error receiving notification: {exc}')
+                continue
+
     async def _do_subscribe(self):
         segment = self._segment()
         uasid = self._args.uasid
@@ -239,19 +276,15 @@ class SimC2Subsystem:
         }))
 
         lg.info('Notification subscription request sent')
-        message = await conn.read_message()
+        self._notify_task = asyncio.create_task(self._notify_receive_loop(conn))
 
-        if not message:
-            raise UserWarning('Connection closed')
+        while True:
+            lg.info('Waiting for notification')
 
-        payload = json.loads(message)
+            if self._subscribe:
+                break
 
-        if payload['Action'] != 'subscribed':
-            raise UserWarning('Subscription failed')
-        else:
-            lg.info('Subscribed to notifications')
-
-        self._subscribe = True
+            await asyncio.sleep(1)
 
     async def run(self):
         '''Execute simulations.'''
@@ -270,7 +303,7 @@ class SimC2Subsystem:
                 if not self._peer_cert_info:
                     self._fetch_peer_certificate()
 
-                self._work_cycle()
+                await self._work_cycle()
 
             except KeyboardInterrupt:
                 lg.info('Exiting')
@@ -423,7 +456,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
 
         return int(C2NG_DEFAULT_ADX_UDP_PORT)
 
-    def _work_cycle(self):
+    async def _work_cycle(self):
         '''Implements `_work_cycle` for the UA simulator.'''
         counter = 0
 
@@ -436,7 +469,10 @@ class SimUaC2Subsystem(SimC2Subsystem):
             if self._args.modem == 'simulated':
                 self._report_sim_signal()
 
-            time.sleep(1)
+            await asyncio.sleep(1)
+
+            if not self._subscribe:
+                break
 
     def _report_sim_signal(self):
         '''Send simulated signal characteristics to the Service.'''
@@ -517,12 +553,15 @@ class SimAdxC2Subsystem(SimC2Subsystem):
         '''
         return int(C2NG_DEFAULT_UA_UDP_PORT)
 
-    def _work_cycle(self):
+    async def _work_cycle(self):
         '''Implements `_work_cycle` for the RPS simulator.'''
 
         while True:
             message, _addr = self._receive()
             print('MESSAGE:', message.decode())
+
+            if not self._subscribe:
+                break
 
 
 def add_arg_subparsers(sp):

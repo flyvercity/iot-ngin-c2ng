@@ -9,6 +9,10 @@ from pygments.formatters import TerminalFormatter
 
 
 def pprint(data):
-    '''Pretty print json with colors'''
+    '''Pretty print json with colors.
+
+    Args:
+        data: json data to print
+    '''
     json_str = json.dumps(data, indent=4, sort_keys=True)
     print(highlight(json_str, JsonnetLexer(), TerminalFormatter()))
