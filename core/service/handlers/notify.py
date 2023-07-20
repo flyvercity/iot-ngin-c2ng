@@ -5,7 +5,7 @@
 import os
 import logging as lg
 import json
-from jose import jwt
+from jose import jwt, JWTError
 
 import tornado.websocket as ws
 
@@ -107,39 +107,61 @@ class WsNotifyHandler(ws.WebSocketHandler):
         self.segment = None
 
     def on_message(self, message: str):
-        payload = json.loads(message)
+        try:
+            payload = json.loads(message)
 
-        if self.settings['config']['logging']['verbose']:
-            lg.debug('Incoming message websocket message')
-            msg_dump = json.dumps(payload, indent=2)
-            print(msg_dump)
+            if self.settings['config']['logging']['verbose']:
+                msg_dump = json.dumps(payload, indent=2)
+                lg.debug(f'Incoming message websocket message: {msg_dump}')
 
-        ticket = payload.get('Ticket')
+            ticket = payload.get('Ticket')
 
-        if not ticket:
-            raise ws.WebSocketError('Ticket field missing')
+            if not ticket:
+                raise UserWarning('Ticket field missing')
 
-        wstxman = self.settings['wstxman']
-        client_info = wstxman.decode_ticket(ticket)
-        self.uasid = client_info['UasID']
-        self.segment = client_info['Segment']
-        action = payload.get('Action')
+            wstxman = self.settings['wstxman']
+            client_info = wstxman.decode_ticket(ticket)
+            self.uasid = client_info['UasID']
+            self.segment = client_info['Segment']
+            action = payload.get('Action')
 
-        if not action:
-            raise ws.WebSocketError('Action field missing')
+            if not action:
+                raise UserWarning('Action field missing')
 
-        SchemaClass = WsNotifyHandler.ACTION_SCHEMAS.get(action)
-        schema = SchemaClass()
+            SchemaClass = WsNotifyHandler.ACTION_SCHEMAS.get(action)
+            schema = SchemaClass()
 
-        if not schema:
-            raise ws.WebSocketError(f'Unknown action: {action}')
+            if not schema:
+                raise UserWarning(f'Unknown action: {action}')
 
-        if ve := schema.validate(payload):
-            raise ws.WebSocketError(f'Invalid payload: {ve}')
+            if ve := schema.validate(payload):
+                raise UserWarning(f'Invalid payload: {ve}')
 
-        request = schema.load(payload)
-        handler = WsNotifyHandler.ACTION_HANDLERS.get(action)
-        handler(self, request)
+            request = schema.load(payload)
+            handler = WsNotifyHandler.ACTION_HANDLERS.get(action)
+            handler(self, request)
+
+        except JWTError as exc:
+            lg.warn(f'Bad JWT token: {exc}')
+
+            self.write_message(json.dumps({
+                'Action': 'error',
+                'Error': 'access_denied',
+                'Message': str(exc)
+            }))
+
+        except UserWarning as exc:
+            lg.warn(f'Bad websocket message: {exc}')
+
+            self.write_message(json.dumps({
+                'Action': 'error',
+                'Error': 'bad_request',
+                'Message': str(exc)
+            }))
+
+        except Exception as exc:
+            lg.warn(f'Error processing websocket message: {exc}')
+            self.close(1011, 'Internal error')
 
     def on_close(self):
         wstxman = self.settings['wstxman']

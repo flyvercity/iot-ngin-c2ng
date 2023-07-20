@@ -66,6 +66,13 @@ components:
             const: subscribed
         required:
         - Action
+    error:
+      summary: Respond to any erroneous message.
+      description: Upon receiption of any malformed or unauthorized message, the service responds with an async error message.
+      payload:
+        type: object
+        properties
+        
     notification:
       summary: Notifies a client about an important change of connection information.
       description: Main purpose of this async channel is to report signal degradation and failure. Important events also include changes in own gateway IP address, peer's IP address, peer's public keys.

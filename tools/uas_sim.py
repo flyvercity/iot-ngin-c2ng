@@ -60,7 +60,7 @@ def request(args, method: str, path: str, body={}, qsp={}) -> dict:
     )
 
     token = keycloak_openid.token(args.uasid, args.password)
-    lg.info('Token received')
+    lg.debug('KeyCloak token received')
     access_token = token['access_token']
     headers = {'Authentication': f'Bearer {access_token}'}
     url = args.url + path
@@ -226,10 +226,10 @@ class SimC2Subsystem:
     async def _do_subscribe(self):
         segment = self._segment()
         uasid = self._args.uasid
-        lg.debug(f'Requesting websocket ticket for {segment}/{uasid}')
+        lg.info(f'Requesting websocket ticket for {segment}/{uasid}')
         response = request(self._args, 'POST', f'/notifications/auth/{segment}/{uasid}')
         self._ws_ticket = response['Ticket']
-        lg.debug('Websocket ticket received, connecting to the websocket')
+        lg.info('Websocket ticket received, connecting to the websocket')
         url = self._args.websocket
         conn = await ws.websocket_connect(f'{url}/notifications/websocket')
 
@@ -238,6 +238,7 @@ class SimC2Subsystem:
             'Action': 'subscribe'
         }))
 
+        lg.info('Notification subscription request sent')
         message = await conn.read_message()
 
         if not message:
@@ -247,6 +248,8 @@ class SimC2Subsystem:
 
         if payload['Action'] != 'subscribed':
             raise UserWarning('Subscription failed')
+        else:
+            lg.info('Subscribed to notifications')
 
         self._subscribe = True
 
