@@ -50,13 +50,28 @@ class AerialConnectionSessionRequest(Schema):
     )
 
     UasID = uasid()
-    IMSI = fields.String(validate=validate_imsi, required=True, description='UE IMSI ID')
+
+    Segment = fields.String(
+        required=True,
+        validate=validate.OneOf([
+            'ua',
+            'adx'
+        ]),
+        description="Segment for which to request a session: airborne ('ua') or ground ('adx')."
+    )
+
+    IMSI = fields.String(validate=validate_imsi, required=False, description='UE IMSI ID')
+
     # TODO: Transmit metadata to USS
     Metadata = fields.Dict(required=False, description='Opaque object to pass to USSP')
 
 
 class AerialConnectionSessionResponseErrors(Schema):
-    USS = fields.String(required=True, validate=validate.OneOf([
+    Request = fields.String(required=False, validate=validate.OneOf([
+        'imsi_required'
+    ]))
+
+    USS = fields.String(required=False, validate=validate.OneOf([
         'provider_unavailable',
         'flight_not_approved'
     ]))
@@ -75,38 +90,13 @@ class AerialConnectionSessionResponse(BaseSuccessSchema):
     )
 
 
-class AdxConnectionSessionRequest(Schema):
-    # TODO: Check reference time
-    ReferenceTime = fields.Float(
-        description='UNIX Timestamp',
-        required=True
-    )
-
-    UasID = fields.String(required=True)
-
-
-class AdxConnectionSessionResponseErrors(Schema):
-    USS = fields.String(required=True, validate=validate.OneOf([
-        'here_define_the_errors'
-    ]))
-
-
-class AdxConnectionSessionResponseFailed(ErrorSchema):
-    Errors = fields.Nested(AdxConnectionSessionResponseErrors, required=True)
-
-
-class AdxConnectionSessionResponse(BaseSuccessSchema):
-    IP = fields.IP(required=True, description='Own IP address for the ADX connection.')
-    GatewayIP = fields.IP(required=True, description='Gateway IP for ADX connection.')
-
-    EncryptedPrivateKey = fields.String(
-        required=True, description='Session private key encrypted with client secret'
-    )
-
-
 class CertificateRequestResponseErrors(Schema):
     UasID = fields.String(validate=validate.OneOf([
-        'not_found',
+        'not_found'
+    ]))
+
+    Segment = fields.String(validate=validate.OneOf([
+        'invalid'
     ]))
 
     Session = fields.String(validate=validate.OneOf([
@@ -127,7 +117,11 @@ class CertificateRequestResponse(BaseSuccessSchema):
 
 class AddressRequestResponseErrors(Schema):
     UasID = fields.String(validate=validate.OneOf([
-        'not_found',
+        'not_found'
+    ]))
+
+    Segment = fields.String(validate=validate.OneOf([
+        'invalid'
     ]))
 
     Session = fields.String(validate=validate.OneOf([

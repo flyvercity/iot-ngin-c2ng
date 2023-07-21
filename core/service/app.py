@@ -18,9 +18,9 @@ from backend.secman import SecMan
 from backend.sessman import SessMan
 
 from handlers.auth import fetch_keycloak_public_certs
-from handlers.sesssion import UaSessionRequestHandler, AdxSessionRequestHandler
-from handlers.certificate import UaCertificateHandler, AdxCertificateHandler
-from handlers.address import UaAddressHandler, AdxAddressHandler
+from handlers.sesssion import SessionHandler
+from handlers.certificate import CertificateHandler
+from handlers.address import AddressHandler
 from handlers.signal import SignalStatsHandler
 
 from handlers.notify import (
@@ -48,12 +48,9 @@ def handlers():
 
     return [
         (r'/', HomepageHandler),
-        (r'/ua/session', UaSessionRequestHandler),
-        (r'/adx/session', AdxSessionRequestHandler),
-        (r'/certificate/ua/([^/]+)', UaCertificateHandler),
-        (r'/certificate/adx/([^/]+)', AdxCertificateHandler),
-        (r'/address/ua/([^/]+)', UaAddressHandler),
-        (r'/address/adx/([^/]+)', AdxAddressHandler),
+        (r'/session', SessionHandler),
+        (r'/certificate/([^/]+)/([^/]+)', CertificateHandler),
+        (r'/address/([^/]+)/([^/]+)', AddressHandler),
         (r'/signal', SignalStatsHandler),
         (r'/notifications/auth/([^/]+)/([^/]+)', WebsocketAuthHandler),
         (r'/notifications/websocket', WsNotifyHandler)

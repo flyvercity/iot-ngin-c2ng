@@ -145,9 +145,26 @@ class SimC2Subsystem:
         '''Get the UAS segment (ua|adx).'''
         pass
 
-    def _request_session(self) -> dict:
-        '''Requests a session from the service. Pure virtual method.'''
-        pass
+    def _request_session(self):
+        '''Requests aerial connection from the Service.
+
+        Returns:
+            Session info JSON object.
+        '''
+
+        segment = self._segment()
+
+        payload = {
+            'ReferenceTime': datetime.now().timestamp(),
+            'UasID': self._args.uasid,
+            'Segment': segment
+        }
+
+        if segment == 'ua':
+            payload['IMSI'] = '123456789012345'
+
+        session_info = request(self._args, 'POST', '/session', payload)
+        return session_info
 
     def _request_peer_certificate(self):
         '''Implements `_request_peer_certificate` for the RPS simulator.
@@ -158,7 +175,7 @@ class SimC2Subsystem:
 
         segment = self._segment()
         uasid = self._args.uasid
-        cert_info = request(self._args, 'GET', f'/certificate/{segment}/{uasid}')
+        cert_info = request(self._args, 'GET', f'/certificate/{uasid}/{segment}')
         return cert_info
 
     def _request_peer_address(self):
@@ -170,7 +187,7 @@ class SimC2Subsystem:
 
         segment = self._segment()
         uasid = self._args.uasid
-        address_info = request(self._args, 'GET', f'/address/{segment}/{uasid}')
+        address_info = request(self._args, 'GET', f'/address/{uasid}/{segment}')
         return address_info
 
     async def _work_cycle(self):
@@ -263,8 +280,8 @@ class SimC2Subsystem:
     async def _do_subscribe(self):
         segment = self._segment()
         uasid = self._args.uasid
-        lg.info(f'Requesting websocket ticket for {segment}/{uasid}')
-        response = request(self._args, 'POST', f'/notifications/auth/{segment}/{uasid}')
+        lg.info(f'Requesting websocket ticket for {uasid}/{segment}')
+        response = request(self._args, 'POST', f'/notifications/auth/{uasid}/{segment}')
         self._ws_ticket = response['Ticket']
         lg.info('Websocket ticket received, connecting to the websocket')
         url = self._args.websocket
@@ -421,24 +438,6 @@ class SimUaC2Subsystem(SimC2Subsystem):
                 self._report_sim_signal()
                 time.sleep(5)
 
-    def _request_session(self):
-        '''Implements `_request_session` for the UA simulator.
-
-        Returns:
-            Session info object:
-            * ReferenceTime (str)
-            * UasID (str)
-            * IMSI (str)
-        '''
-
-        session_info = request(self._args, 'POST', '/ua/session', body={
-            'ReferenceTime': datetime.now().timestamp(),
-            'UasID': self._args.uasid,
-            'IMSI': '123456989012345'
-        })
-
-        return session_info
-
     def _in_port(self) -> int:
         '''Implements `_in_port` for the UA simulator.
 
@@ -522,20 +521,6 @@ class SimAdxC2Subsystem(SimC2Subsystem):
         '''
 
         return 'adx'
-
-    def _request_session(self):
-        '''Implements `_request_session` for the RPS simulator.
-
-        Returns:
-            Session info JSON object.
-        '''
-
-        session_info = request(self._args, 'POST', '/adx/session', {
-            'ReferenceTime': datetime.now().timestamp(),
-            'UasID': self._args.uasid,
-        })
-
-        return session_info
 
     def _in_port(self) -> int:
         '''Implements `_in_port` for the RPS simulator.

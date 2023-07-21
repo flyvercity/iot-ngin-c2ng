@@ -12,23 +12,21 @@ from schemas import (
 from handlers.auth import AuthHandler
 
 
-class CertificateHandlerBase(AuthHandler):
+FIELD_DEFS = {
+    'ua': 'UaCertificate',
+    'adx': 'AdxCertificate'
+}
+
+
+class CertificateHandler(AuthHandler):
     '''Peer Certificate Request Base Endpoints Handler'''
 
-    def _certificate_field(self) -> str:
-        '''Abstract method, an override shall return a field in the Session Mongo Object.
-
-        Raises:
-            RuntimeError: always (must be overriden).
-        '''
-
-        raise RuntimeError('This method shall be overriden.')
-
-    def get(self, uasid):
+    def get(self, uasid, segment):
         '''Returns a security certificate for a peer.
 
         Args:
             uasid: Logical UAS identifier
+            segment: Airborne ('ua') or Ground ('adx') segment
 
         ---
         summary: Request a current certificate from existing connectivity session.
@@ -40,6 +38,13 @@ class CertificateHandlerBase(AuthHandler):
                     type: string
                 required: true
                 description: UAS ID for which to fetch the peer's certificate
+            -   in: path
+                name: Segment
+                schema:
+                    type: string
+                    enum: [ua, adx]
+                required: true
+                description: Segment for which to fetch the peer's certificate
 
         responses:
             200:
@@ -71,7 +76,15 @@ class CertificateHandlerBase(AuthHandler):
 
             return
 
-        cert = session.get(self._certificate_field())
+        if not (field := FIELD_DEFS.get(segment)):
+            lg.warn(f'Invalid segment {uasid}:{segment}')
+            self.fail(CertificateRequestResponseFailed, {
+                'Segment': 'invalid'
+            })
+
+            return
+
+        cert = session.get(field)
 
         if not cert:
             self.fail(CertificateRequestResponseFailed, {
@@ -83,29 +96,3 @@ class CertificateHandlerBase(AuthHandler):
         self.respond(CertificateRequestResponse, {
             'Certificate': cert
         })
-
-
-class UaCertificateHandler(CertificateHandlerBase):
-    '''UA Certificate Request Base Endpoints Handler'''
-
-    def _certificate_field(self) -> str:
-        '''Virtual method override.
-
-        Returns:
-            "UaCertificate"
-        '''
-
-        return 'UaCertificate'
-
-
-class AdxCertificateHandler(CertificateHandlerBase):
-    '''ADX Certificate Request Base Endpoints Handler'''
-
-    def _certificate_field(self) -> str:
-        '''Virtual method override.
-
-        Returns:
-            "AdxCertificate"
-        '''
-
-        return 'AdxCertificate'

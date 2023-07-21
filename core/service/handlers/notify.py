@@ -52,7 +52,7 @@ class WebsocketTicketManager:
 
 
 class WebsocketAuthHandler(AuthHandler):
-    def post(self, segment, uasid):
+    def post(self, uasid, segment):
         errors = {}
 
         if not uasid:

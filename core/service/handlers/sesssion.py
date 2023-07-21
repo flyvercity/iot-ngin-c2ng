@@ -7,15 +7,13 @@ import logging as lg
 from schemas import (
     AerialConnectionSessionRequest,
     AerialConnectionSessionResponseFailed,
-    AerialConnectionSessionResponse,
-    AdxConnectionSessionRequest,
-    AdxConnectionSessionResponse
+    AerialConnectionSessionResponse
 )
 
 from handlers.auth import AuthHandler
 
 
-class SessionHandlerBase(AuthHandler):
+class SessionHandler(AuthHandler):
     def delete(self, uasid):
         '''Terminates a session.
 
@@ -45,67 +43,18 @@ class SessionHandlerBase(AuthHandler):
         # TODO: implement
         self.respond()
 
-
-class UaSessionRequestHandler(SessionHandlerBase):
-    '''UA Session Endpoint Handler.'''
-
-    def post(self):
-        ''' Returns new connection credentials
-        ---
-        summary: Request a new session for UA
-
-        requestBody:
-            description: Aerial Connectivity Session Request
-            required: True
-            content:
-                application/json:
-                    schema:
-                        AerialConnectionSessionRequest
-
-        responses:
-            200:
-                description: Success payload containing session information
-                content:
-                    application/json:
-                        schema:
-                            AerialConnectionSessionResponse
-            400:
-                description: Payload containing error description
-                content:
-                    application/json:
-                        schema:
-                            AerialConnectionSessionResponseFailed
-        '''
-
-        if not (request := self.get_request(AerialConnectionSessionRequest)):
-            return
-
-        response, errors = self.sessman.ua_session(request)
-
-        if errors:
-            self.fail(
-                AerialConnectionSessionResponseFailed,
-                errors=errors
-            )
-        else:
-            self.respond(AerialConnectionSessionResponse, response)
-
-
-class AdxSessionRequestHandler(SessionHandlerBase):
-    '''Aviation Data Exchange Network Session Endpoint Handler'''
-
     def post(self):
         ''' Returns new connection credentials
         ---
         summary: Request a new session for an ADX client (RPS or USS services)
 
         requestBody:
-            description: ADX Connectivity Session Request
+            description: Connectivity Session Request
             required: True
             content:
                 application/json:
                     schema:
-                        AdxConnectionSessionRequest
+                        AerialConnectionSessionRequest
 
         responses:
             200:
@@ -119,19 +68,34 @@ class AdxSessionRequestHandler(SessionHandlerBase):
                 content:
                     application/json:
                         schema:
-                            AdxConnectionSessionResponseFailed
+                            AerialConnectionSessionResponseFailed
         '''
 
-        if not (request := self.get_request(AdxConnectionSessionRequest)):
+        if not (request := self.get_request(AerialConnectionSessionRequest)):
             return
 
-        uasid = request['UasID']
-        response, errors = self.sessman.adx_session(uasid)
+        segment = request['Segment']
+        errors = {}
+
+        if segment == 'ua':
+            response, sess_errors = self.sessman.ua_session(request)
+
+            if sess_errors:
+                errors.update(sess_errors)
+
+            if 'IMSI' not in request:
+                errors['Request'] = 'imsi_required'
+
+            if not errors:
+                self.respond(AerialConnectionSessionResponse, response)
+        else:
+            response, errors = self.sessman.adx_session(request)
+
+            if not errors:
+                self.respond(AdxConnectionSessionResponse, response)
 
         if errors:
             self.fail(
                 AerialConnectionSessionResponseFailed,
                 errors=errors
             )
-        else:
-            self.respond(AdxConnectionSessionResponse, response)
