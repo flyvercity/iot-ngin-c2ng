@@ -10,7 +10,7 @@ from marshmallow.exceptions import ValidationError
 
 from backend.uss import UssInterface  # noqa
 from backend.mongo import Mongo  # noqa
-from backend.nsacf import NSACF  # noqa
+from backend.sliceman import SliceMan  # noqa
 from backend.secman import SecMan  # noqa
 from backend.influx import Influx  # noqa
 from backend.sessman import SessMan  # noqa
@@ -28,7 +28,7 @@ class HandlerBase(web.RequestHandler):
         '''Creates shortcuts to subservices.'''
         self.uss = self.settings['uss']  # type: UssInterface
         self.mongo = self.settings['mongo']  # type: Mongo
-        self.nsacf = self.settings['nsacf']  # type: NSACF
+        self.sliceman = self.settings['sliceman']  # type: SliceMan
         self.secman = self.settings['secman']  # type: SecMan
         self.influx = self.settings['influx']  # type: Influx
         self.sessman = self.settings['sessman']  # type: SessMan

@@ -10,7 +10,7 @@
 | CSV | Comma-Separated Values |
 | GCS | Ground Control Station |
 | IP | Internet Protocol |
-| NSACF | Network Slide Admission Control Function |
+| SliceMan | Network Slide Admission Control Function |
 | OIDC | OpenID Connnect Protocol |
 | PNTP | Precise Network Time Protocol |
 | RAM | Random Access Memory |

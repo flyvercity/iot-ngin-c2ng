@@ -16,9 +16,14 @@ uss:
       auth-client-id: uss-access
 mongo:
   uri: mongodb://root:example@mongo:27017/
-nsacf:
-  simulated: true
-  uri: https://host:port/
+sliceman:
+  provider: simulated
+  simulated:
+    ue: 127.0.0.1
+    adx: 127.0.0.1
+    gateway: 127.0.0.1
+  cumucore:
+    uri: https://host:port/
 security:
   certificate: /c2ng/config/service.pem
   private: /c2ng/config/private.pem

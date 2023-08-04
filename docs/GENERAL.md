@@ -32,9 +32,9 @@ There are two types of users of the service:
 sequenceDiagram
     UA/ADX ->> C2NG: Request Session
     C2NG ->> USS: Request Authorization
-    C2NG ->> NSACF: Request UA Addressing
+    C2NG ->> SliceMan: Request UA Addressing
     ADX ->> C2NG: Request Session
-    C2NG ->> NSACF: Request ADX Addressing
+    C2NG ->> SliceMan: Request ADX Addressing
     UA ->> C2NG: Request Peer Certificate
     ADX ->> C2NG: Request Peer Certificate and Address
     UA ->> C2NG: Signal Quality Reporting
@@ -46,7 +46,7 @@ The Application is based on containerized services and comprises three open sour
 
 KeyCloak is an open source implementation OIDC protocol and supports authorized calls to the service.
 
-NSACF is a Network Function exposed by the 5G Core to control which users are authorized to use a slide, and hence enjoy high-reliablity allocated to it.
+SliceManMan is a Network Function exposed by the 5G Core to control which users are authorized to use a slide, and hence enjoy high-reliablity allocated to it.
 
 MongoDB is a NoSQL database that serves as a persistence layer. The database is schema-less, but a logic schema is described is the corresponding [section](#mongodb-logical-schema).
 
@@ -66,7 +66,7 @@ flowchart
         C2NG --> KeyCloak
         MongoDB --> MongoExpress
     end
-    Application --> NSACF
+    Application --> SliceMan
     Application --> USS
 ```
 
@@ -109,7 +109,7 @@ flowchart
     App --> Certificates
     App --> Signal
     Sessions --> USS
-    Sessions --> NSACF
+    Sessions --> SliceMan
     Sessions --> SecMan
     Certificates --> SecMan
     Signal --> Influx
@@ -118,7 +118,7 @@ flowchart
 The are two layers in the application:
 
 * user-facing interfaces comprise `Sessions`, `Certificates`, `Signal` request handlers.
-* "backbone" service interfaces comprises `USS`, `NSACF`, `Mongo`, and `Influx` class. Besides that, this layer also contain the Security Manager component responsible to manage session security credentials.
+* "backbone" service interfaces comprises `USS`, `SliceMan`, `Mongo`, and `Influx` class. Besides that, this layer also contain the Security Manager component responsible to manage session security credentials.
 
 Main service dependencies are:
 
@@ -155,14 +155,14 @@ sequenceDiagram
     KeyCloak -->> User: Access Token
     User ->> +C2NG: Request Session
     C2NG ->> USS: Request Authorization
-    C2NG ->> NSACF: Request Admission
-    NSACF -->> C2NG: IP/Gateway
+    C2NG ->> SliceMan: Request Admission
+    SliceMan -->> C2NG: IP/Gateway
     C2NG ->> SecMan: Request Session credentials
     SecMan -->> C2NG: Session Public/Private Keys
     C2NG -->> -User: IP/Gateway, Certificate
 ```
 
-Session Establishment involves three main interfaces: with USSP to check flight authorization, NSACF to admit the users in a slice; and internal Security Manager (`SenMan`) to generate, store, and distribute session security credentials.
+Session Establishment involves three main interfaces: with USSP to check flight authorization, SliceMan to admit the users in a slice; and internal Security Manager (`SenMan`) to generate, store, and distribute session security credentials.
 
 #### Expected User Interaction
 

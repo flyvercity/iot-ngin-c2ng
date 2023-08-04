@@ -11,10 +11,10 @@ from base64 import b64decode as decode, b64encode as encode
 
 
 class SessMan:
-    def __init__(self, mongo, uss, nsacf, secman):
+    def __init__(self, mongo, uss, sliceman, secman):
         self.mongo = mongo
         self.uss = uss
-        self.nsacf = nsacf
+        self.sliceman = sliceman
         self.secman = secman
         self.subscribers = {}
 
@@ -60,7 +60,7 @@ class SessMan:
             lg.info(f'The session exists for {uasid}')
 
         if 'UaCertificate' not in session:
-            ua_creds = self.nsacf.get_ue_network_creds(request['IMSI'])
+            ua_creds = self.sliceman.get_ue_network_creds(request['IMSI'])
             session['UaIP'] = ua_creds['IP']
             session['UaGatewayIP'] = ua_creds['Gateway']
             sec_creds = self.secman.gen_client_credentials(f'{uasid}::UA')
@@ -89,7 +89,7 @@ class SessMan:
             lg.info(f'The session exist for {uasid}')
 
         if 'AdxCertificate' not in session:
-            adx_cred = self.nsacf.get_adx_network_creds(uasid)
+            adx_cred = self.sliceman.get_adx_network_creds(uasid)
             session['AdxIP'] = adx_cred['IP']
             session['AdxGatewayIP'] = adx_cred['Gateway']
             sec_creds = self.secman.gen_client_credentials(f'{uasid}::ADX')

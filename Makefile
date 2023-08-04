@@ -68,7 +68,7 @@ docbuild/body.pdf: .autogen $(markdowns) $(images) docbuild/openapi.md
 		../docbuild/app.md \
 		../docbuild/secman.md \
 		../docbuild/uss.md \
-		../docbuild/nsacf.md \
+		../docbuild/sliceman.md \
 		../docbuild/mongo.md \
 		../docbuild/c2ng.md \
 		../docbuild/crypto_keys.md \

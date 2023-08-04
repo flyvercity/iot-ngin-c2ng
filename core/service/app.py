@@ -12,7 +12,7 @@ import tornado.web as web
 
 from backend.uss import UssInterface
 from backend.mongo import Mongo
-from backend.nsacf import NSACF
+from backend.sliceman import SliceMan
 from backend.influx import Influx
 from backend.secman import SecMan
 from backend.sessman import SessMan
@@ -65,22 +65,25 @@ async def main():
     port = config['service']['port']
     verbose = config['logging']['verbose']
     lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
-    lg.info('---------- Starting up ---------- ')
+    lg.info('---------- Starting up ----------')
     fetch_keycloak_public_certs(config)
     mongo = Mongo(config['mongo'])
     uss = UssInterface(config['uss'])
-    nsacf = NSACF(config['nsacf'])
+    sliceman = SliceMan(config['sliceman'])
     secman = SecMan(config['security'])
     influx = Influx(config['influx'])
-    sessman = SessMan(mongo, uss, nsacf, secman)
+    sessman = SessMan(mongo, uss, sliceman, secman)
     wstxman = WebsocketTicketManager()
+
+    # Perform pre-start activities
+    await sliceman.establish()
 
     app = web.Application(
         handlers(),
         config=config,
         mongo=mongo,
         uss=uss,
-        nsacf=nsacf,
+        sliceman=sliceman,
         secman=secman,
         influx=influx,
         sessman=sessman,
@@ -88,7 +91,7 @@ async def main():
     )
 
     lg.info('---------- Restarted ----------')
-    lg.info(f'C2NG :: Listening for requests on {port}')
+    lg.info(f'Listening for requests on {port}')
     app.listen(port)
     await asyncio.Event().wait()
 

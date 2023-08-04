@@ -86,13 +86,13 @@ Parameters:
 
 * `uri` is a base URI of the server.
 
-#### `nsacf` Section
+#### `sliceman` Section
 
-This section controls interface with NSACF in the Network Core.
+This section controls interface with SliceMan in the Network Core.
 
 Parameters:
 
-* `simulated` is set to `true` for simulations with an internal NSACF simulator.
+* `simulated` is set to `true` for simulations with an internal SliceMan simulator.
 * `uri` is a base URL of the Function.
 
 #### `security` Section

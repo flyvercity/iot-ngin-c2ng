@@ -3,18 +3,37 @@
 
 '''This module implements an interface with Network Slice Admission Control Function.'''
 
+from net_providers.simulated import SimulatedSlice
+from net_providers.cucumore import CucumoreManager
 
-class NSACF:
-    '''NSACF API Implementation.'''
+
+PROVIDERS = {
+    'simulated': SimulatedSlice,
+    'cucumore': CucumoreManager
+}
+
+
+class SliceMan:
+    '''SliceMan API Implementation.'''
 
     def __init__(self, config: dict):
         '''Constructor.
 
         Args:
-            config: contains `nsacf` section of the configuration file.
+            config: contains `sliceman` section of the configuration file.
         '''
 
         self._config = config
+        provider_type = config.get('provider')
+
+        if provider_type not in PROVIDERS:
+            raise RuntimeError(f'Invalid provider type: {provider_type}')
+
+        self._provider = PROVIDERS[provider_type](config[provider_type])
+
+    async def establish(self):
+        '''Perform pre-start activities of a network provider if any.'''
+        await self._provider.establish()
 
     def get_ue_network_creds(self, imsi: str):
         '''Get next network credentials for a UE.
@@ -29,18 +48,9 @@ class NSACF:
                     "IP": "<address>",
                     "Gateway": "<address>"
                 }
-
-        Raises:
-            RuntimeError: if NSACF endpoint is not implemented
         '''
 
-        if self._config.get('simulated'):
-            return {
-                'IP': '127.0.0.1',
-                'Gateway': '127.0.0.1'
-            }
-
-        raise RuntimeError('Not implemented exception')
+        return self._provider.get_ue_network_creds(imsi)
 
     def get_adx_network_creds(self, uid: str):
         '''Get next network credentials for an ADX client.
@@ -57,14 +67,8 @@ class NSACF:
                 }
 
         Raises:
-            RuntimeError: if NSACF endpoint is not implemented
+            RuntimeError: if SliceMan endpoint is not implemented
 
         '''
 
-        if self._config.get('simulated'):
-            return {
-                'IP': '127.0.0.1',
-                'Gateway': '127.0.0.1'
-            }
-
-        raise RuntimeError('Not implemented exception')
+        return self._provider.get_adx_network_creds(uid)

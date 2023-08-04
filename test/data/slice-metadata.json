@@ -1,0 +1,138 @@
+{
+    "sliceName": "slice1",
+    "activate_slice": 0,
+    "ServiceProfile": {
+        "SNSSAIList": [
+            {
+                "sst": 1
+            }
+        ],
+        "PLMNIdList": [
+            {
+                "mcc": "244",
+                "mnc": "59"
+            }
+        ],
+        "maxNumberofUEs": 300,
+        "latency": 0,
+        "DLThptPerSlice": {
+            "guaThpt": 500,
+            "maxThpt": 1000
+        },
+        "DLThptPerUE": {
+            "guaThpt": 0,
+            "maxThpt": 0
+        },
+        "ULThptPerSlice": {
+            "guaThpt": 500,
+            "maxThpt": 1000
+        },
+        "ULThptPerUE": {
+            "guaThpt": 0,
+            "maxThpt": 0
+        },
+        "maxDLDataVolume": "1000 Mbps",
+        "maxULDataVolume": "1000 Mbps",
+        "survivalTime": "",
+        "dnn": "internet"
+    },
+    "NetworkSliceSubnet": {
+        "SliceProfile": {
+            "SNSSAIList": null,
+            "PLMNIdList": null,
+            "PerfReq": {
+                "PerfReqEmbbList": {
+                    "expDataRateDL": 21,
+                    "expDataRateUL": 21,
+                    "areaTrafficCapDL": 1,
+                    "areaTrafficCapUL": 1,
+                    "userDensity": 0,
+                    "activityFactor": 20,
+                    "ExpDataRateDL": 0,
+                    "ExpDataRateUL": 0,
+                    "AreaTrafficCapDL": 0,
+                    "AreaTrafficCapUL": 0,
+                    "UserDensity": 10
+                },
+                "PerfReqUrllcList": {
+                    "cSAvailabilityTarget": 0,
+                    "cSReliabilityMeanTime": 0,
+                    "expDataRateDL": 0,
+                    "msgSizeByte": "",
+                    "CSAvailabilityTarget": 10,
+                    "CSReliabilityMeanTime": 10,
+                    "ExpDataRateDL": 10,
+                    "MsgSizeByte": ""
+                }
+            },
+            "CNSliceSubnetProfile": {
+                "maxNumberofUEs": 0,
+                "latency": 0,
+                "DLThptPerSliceSubnet": {
+                    "guaThpt": 0,
+                    "maxThpt": 0
+                },
+                "DLThptPerUEPerSubnet": {
+                    "guaThpt": 0,
+                    "maxThpt": 0
+                },
+                "ULThptPerSlicePerSubnet": {
+                    "guaThpt": 0,
+                    "maxThpt": 0
+                },
+                "ULThptPerUEPerSubnet": {
+                    "guaThpt": 0,
+                    "maxThpt": 0
+                },
+                "maxNumberofPDUSessions": 0,
+                "CoverageAreaTAList": {
+                    "TAC": [
+                        16512
+                    ]
+                }
+            },
+            "RANSliceSubnetProfile": {
+                "CoverageAreaTAList": {
+                    "TAC": [
+                        16512
+                    ]
+                },
+                "UEMobilityLevel": "",
+                "resourceSharingLevel": 0,
+                "maxNumberofUEs": 0,
+                "activityFactor": 0,
+                "DLThptPerUEPerSubnet": {
+                    "guaThpt": 0,
+                    "maxThpt": 0
+                },
+                "ULThptPerUEPerSubnet": {
+                    "guaThpt": 0,
+                    "maxThpt": 0
+                },
+                "uESpeed": 0
+            },
+            "TopSliceSubnetProfile": ""
+        },
+        "managedFunction": "",
+        "EpTransport": {
+            "ioAddress": "",
+            "logicInterfaceId": "",
+            "qosProfile": 9,
+            "epApplication": [
+                "internet"
+            ]
+        },
+        "SNSSAIList": [
+            {
+                "sst": 1,
+                "sd": ""
+            }
+        ],
+        "PLMNIdList": [],
+        "OperationalState": true,
+        "AdministrativeState": "",
+        "nsInfo": "",
+        "ManagedFunction": ""
+    },
+    "SliceDescription": ""
+}
