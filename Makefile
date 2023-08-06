@@ -27,7 +27,7 @@ postrun:
 # Documentation
 
 darglint: $(src)
-	darglint $(src)
+	darglint -s google -z full $(src)
 
 .autogen: $(src)
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service:`pwd`/tools lazydocs \

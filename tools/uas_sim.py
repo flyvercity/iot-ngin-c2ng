@@ -12,6 +12,7 @@ import base64
 import json
 from random import random
 import asyncio
+import uuid
 
 import requests
 from keycloak import KeycloakOpenID
@@ -20,6 +21,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.exceptions import InvalidSignature
 import tornado.websocket as ws
 
 import tool_util as u
@@ -27,6 +29,9 @@ import tool_util as u
 
 RECEIVE_BUFFER = 1024
 '''Maximum size of the UDP receive buffer.'''
+
+ECHO_PACKET_SIGN = b'0'
+NORMAL_PACKET_SIGN = b'1'
 
 # TODO: Get rid of globals
 load_dotenv()
@@ -356,7 +361,7 @@ class SimC2Subsystem:
             except Exception:
                 traceback.print_exc()
                 lg.info('Pause...')
-                asyncio.sleep(10)
+                await asyncio.sleep(10)
                 self._reset()
 
     def _secure(self):
@@ -423,16 +428,47 @@ class SimC2Subsystem:
 
         return message
 
-    def _send(self, message: bytes, address: tuple):
-        packet_bytes = self._construct_sec_packet(message)
-        lg.info('Transmitting')
-        self._outsocket.sendto(packet_bytes, address)
+    def _send_plain(self, message: bytes):
+        if self._peer_address:
+            self._outsocket.sendto(message, (self._peer_address, self._out_port()))
 
-    def _receive(self):
-        lg.info('Receiving')
-        packet_bytes, addr = self._insocket.recvfrom(RECEIVE_BUFFER)
-        message = self._deconstruct_sec_packet(packet_bytes)
-        return (message, addr)
+    def _send(self, message: bytes):
+        packet_bytes = NORMAL_PACKET_SIGN + self._construct_sec_packet(message)
+        lg.info('Transmitting')
+        self._send_plain(packet_bytes)
+
+    def _receive_plain(self):
+        packet_bytes, _addr = self._insocket.recvfrom(RECEIVE_BUFFER)
+        return packet_bytes
+
+    def _receive(self) -> bytes:
+        packet_bytes = self._receive_plain()
+        sign = packet_bytes[0:1]
+
+        if sign == ECHO_PACKET_SIGN:
+            raise UserWarning('Unexpected packet sign (echo)')
+
+        body_bytes = packet_bytes[1:]
+        message = self._deconstruct_sec_packet(body_bytes)
+        lg.info('Message received')
+        return message
+
+    def _need_reinit(self):
+        if not self._subscribe:
+            lg.warn('Subscription cancelled - resetting')
+            return True
+
+        if not self._session_info:
+            lg.warn('Session info is missing - resetting')
+            return True
+
+        if not self._peer_address:
+            lg.warn('Peer address is missing - resetting')
+            return True
+
+        if not self._peer_cert_info:
+            lg.warn('Peer certificate is missing - resetting')
+            return True
 
 
 class SimUaC2Subsystem(SimC2Subsystem):
@@ -478,39 +514,98 @@ class SimUaC2Subsystem(SimC2Subsystem):
 
         return int(C2NG_DEFAULT_ADX_UDP_PORT)
 
+    def _reset_insocket(self):
+        super()._reset_insocket()
+        self._insocket.settimeout(1)
+
+    def _measure_plain_rtt(self):
+        try:
+            uid = str(uuid.uuid4())
+            message = {'Probe': uid}
+            u.pprint(message)
+            message_data = ECHO_PACKET_SIGN + json.dumps(message).encode()
+            self._send_plain(message_data)
+            sent_ts = time.time_ns()
+            pong_message_data = self._receive_plain()
+
+            if pong_message_data[0:1] != ECHO_PACKET_SIGN:
+                raise UserWarning('Unexpected packet sign')
+
+            pong_body_data = pong_message_data[1:]
+
+            pong_ts = time.time_ns()
+            pong_message = json.loads(pong_body_data.decode())
+            u.pprint(pong_message)
+
+            if pong_message['Probe'] != uid:
+                raise UserWarning('Probe UID mismatch')
+            else:
+                lg.info('Probe OK')
+
+            rtt = (pong_ts - sent_ts)/1000000  # ms
+            lg.info(f'RTT: {rtt} ms')
+            return rtt, False
+
+        except TimeoutError:
+            lg.warn('Probe timeout')
+            return None, True
+
+    def _measure_enc_rtt(self):
+        uid = str(uuid.uuid4())
+        message = {'EncryptedProbe': uid}
+        u.pprint(message)
+        self._send(json.dumps(message).encode())
+        sent_ts = time.time_ns()
+
+        try:
+            pong_message_data = self._receive()
+            pong_ts = time.time_ns()
+            pong_message = json.loads(pong_message_data.decode())
+            u.pprint(pong_message)
+
+            if pong_message['EncryptedProbe'] != uid:
+                raise UserWarning('Encrypted probe UID mismatch')
+            else:
+                lg.info('Encrypted probe OK')
+
+            rtt = (pong_ts - sent_ts)/1000000  # ms
+            lg.info(f'Encrypted RTT: {rtt} ms')
+
+        except TimeoutError:
+            lg.warn('Encrypted probe timeout')
+
+        except InvalidSignature:
+            lg.warn('Invalid peer signature - resetting peer cert')
+            self._peer_cert_info = None
+
+        except ValueError:
+            lg.warn('Invalid peer public key - resetting peer cert')
+            self._peer_cert_info = None
+
     async def _work_cycle(self):
         '''Implements `_work_cycle` for the UA simulator.'''
-        counter = 0
+        lg.info('Waiting for a peer to react to notifications')
+        await asyncio.sleep(2)
 
         while True:
-            message = f'Heartbeat #{counter}'
-            print('MESSAGE:', message)
-            counter += 1
-            self._send(message.encode(), (self._peer_address, self._out_port()))
+            rtt, lost = self._measure_plain_rtt()
+            self._measure_enc_rtt()
 
             if self._args.modem == 'simulated':
-                self._report_sim_signal()
+                self._report_sim_signal(rtt, lost)
+
+            if self._need_reinit():
+                break
 
             await asyncio.sleep(1)
 
-            if not self._subscribe:
-                lg.warn('Subscription cancelled - resetting')
-                break
+    def _report_sim_signal(self, rtt, lost):
+        '''Send simulated signal characteristics to the Service.
 
-            if not self._session_info:
-                lg.warn('Session info is missing - resetting')
-                break
-
-            if not self._peer_address:
-                lg.warn('Peer address is missing - resetting')
-                break
-
-            if not self._peer_cert_info:
-                lg.warn('Peer certificate is missing - resetting')
-                break
-
-    def _report_sim_signal(self):
-        '''Send simulated signal characteristics to the Service.'''
+        Args:
+            rtt: round trip time in milliseconds.
+            lost: heartbeat loss flag.
+        '''
         sim_signal_flux = int(15*random())
 
         response = request(self._args, 'POST', '/signal', body={
@@ -536,8 +631,8 @@ class SimUaC2Subsystem(SimC2Subsystem):
             'RSRQ': -99 + sim_signal_flux,
             'RSSI': -99 + sim_signal_flux,
             'SINR': -99 + sim_signal_flux,
-            'HeartbeatLoss': (random() < 0.01),
-            'RTT': 50 + int(10*random())
+            'HeartbeatLoss': lost,
+            'RTT': rtt
         })
 
         if response['Success']:
@@ -578,10 +673,32 @@ class SimAdxC2Subsystem(SimC2Subsystem):
         '''Implements `_work_cycle` for the RPS simulator.'''
 
         while True:
-            message, _addr = self._receive()
-            print('MESSAGE:', message.decode())
+            lg.info('Waiting for a packet')
+            packet_bytes = self._receive_plain()
+            sign = packet_bytes[0:1]
 
-            if not self._subscribe:
+            if sign == ECHO_PACKET_SIGN:
+                # NOTE: the echo packet is not verified here, echoing back as is
+                self._send_plain(packet_bytes)
+                lg.info('Echo packet sent back')
+            else:
+                body_bytes = packet_bytes[1:]
+
+                try:
+                    message = self._deconstruct_sec_packet(body_bytes)
+                    u.pprint(json.loads(message.decode()))
+                    self._send(message)
+                    lg.info('Encrypted echo packet sent back')
+
+                except InvalidSignature:
+                    lg.warn('Invalid peer signature - resetting peer cert')
+                    self._peer_cert_info = None
+                
+                except ValueError:
+                    lg.warn('Invalid peer public key - resetting peer cert')
+                    self._peer_cert_info = None
+
+            if self._need_reinit():
                 break
 
 
