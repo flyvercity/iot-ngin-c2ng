@@ -84,6 +84,7 @@ class AerialConnectionSessionResponseFailed(ErrorSchema):
 class AerialConnectionSessionResponse(BaseSuccessSchema):
     IP = fields.IP(required=True, description='Own IP address for aerial connection.')
     GatewayIP = fields.IP(required=True, description='Gateway IP for aerial connection.')
+    KID = fields.String(required=True, description='Key unique identifier')
 
     EncryptedPrivateKey = fields.String(
         required=True, description='Session private key encrypted with client secret'
@@ -110,6 +111,8 @@ class CertificateRequestResponseFailed(ErrorSchema):
 
 
 class CertificateRequestResponse(BaseSuccessSchema):
+    KID = fields.String(required=True, description='Key unique identifier')
+
     Certificate = fields.String(
         required=True, description='Certificate with a public key as a PEM string'
     )

@@ -2,10 +2,12 @@
 # Copyright 2023 Flyvercity
 
 '''This module defines Security Credentials Manager.'''
+
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
 import logging as lg
+from uuid import uuid4
 
 from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -54,18 +56,34 @@ def get_x509_subject(name: str):
 class SecCredentials:
     '''Typed Client Security Credentials'''
 
-    def __init__(self, cert: x509.Certificate, key: rsa.RSAPrivateKey, client_secret: str):
+    def __init__(
+            self, 
+            kid: str,
+            cert: x509.Certificate,
+            key: rsa.RSAPrivateKey,
+            client_secret: str
+    ):
         '''Constructor
 
         Args:
+            kid: key unique identifier
             cert: X509 client certificate
             key: client session key
             client_secret: static client secret used to encrypt session keys
         '''
 
+        self._kid = kid
         self._cert = cert
         self._key = key
         self._client_secret = client_secret
+
+    def kid(self):
+        '''Get a key identifier.
+
+        Returns:
+            A key identifier as a string.
+        '''
+        return self._kid
 
     def cert(self):
         '''Get a certificate string.
@@ -128,6 +146,7 @@ class SecMan:
         if not oauth_client_id:
             raise RuntimeError('Not UAS OAuth client secret configured')
 
+        kid = str(uuid4())
         client_key = generate_pk()
         subject = get_x509_subject(f'{client_id}.c2ng')
         ttl = self._config['default-ttl']
@@ -146,4 +165,4 @@ class SecMan:
             datetime.utcnow() + timedelta(seconds=ttl)
         ).sign(self._private_key, hashes.SHA256())
 
-        return SecCredentials(cert, client_key, oauth_client_id)
+        return SecCredentials(kid, cert, client_key, oauth_client_id)

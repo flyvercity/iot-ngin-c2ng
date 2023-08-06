@@ -62,7 +62,7 @@ class SessionHandler(AuthHandler):
                 content:
                     application/json:
                         schema:
-                            AdxConnectionSessionResponse
+                            AerialConnectionSessionResponse
             400:
                 description: Payload containing error description
                 content:
@@ -92,7 +92,7 @@ class SessionHandler(AuthHandler):
             response, errors = self.sessman.adx_session(request)
 
             if not errors:
-                self.respond(AdxConnectionSessionResponse, response)
+                self.respond(AerialConnectionSessionResponse, response)
 
         if errors:
             self.fail(

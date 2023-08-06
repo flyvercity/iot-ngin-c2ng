@@ -7,7 +7,6 @@ Session manager is the main component of the Service, which manages existing con
 '''
 
 import logging as lg
-from base64 import b64decode as decode, b64encode as encode
 
 
 class SessMan:
@@ -18,18 +17,36 @@ class SessMan:
         self.secman = secman
         self.subscribers = {}
 
+    def _sub_id(self, uasid, segment):
+        return f'{uasid}::{segment}'
+
     def notify(self, uasid, segment, event):
-        sub_id = f'{uasid}::{segment}'
+        sub_id = self._sub_id(uasid, segment)
 
         if subscription := self.subscribers.get(sub_id):
-            subscription.notify(event)
+            lg.info(f'SessMan :: Notifying {sub_id} about {event}')
+
+            subscription.notify({
+                'Action': 'notification',
+                'Event': event
+            })
+
+        else:
+            lg.info(f'SessMan :: No subscriber for {sub_id}')
 
     def subscribe(self, uasid, segment, subscriber):
-        self.subscribers[f'{uasid}::{segment}'] = subscriber
+        sub_id = self._sub_id(uasid, segment)
+        lg.info(f'SessMan :: Subscribing {sub_id}')
+        self.subscribers[sub_id] = subscriber
 
     def unsubscribe(self, uasid, segment):
-        if f'{uasid}::{segment}' in self.subscribers:
-            del self.subscribers[f'{uasid}::{segment}']
+        sub_id = self._sub_id(uasid, segment)
+
+        if sub_id in self.subscribers:
+            lg.info(f'SessMan :: Unsubscribing {sub_id}')
+            del self.subscribers[sub_id]
+        else:
+            lg.info(f'SessMan :: No subscriber to unsubscribe for {sub_id}')
 
     def ua_session(self, request):
         uasid = request['UasID']
@@ -59,53 +76,61 @@ class SessMan:
         else:
             lg.info(f'The session exists for {uasid}')
 
-        if 'UaCertificate' not in session:
-            ua_creds = self.sliceman.get_ue_network_creds(request['IMSI'])
-            session['UaIP'] = ua_creds['IP']
-            session['UaGatewayIP'] = ua_creds['Gateway']
-            sec_creds = self.secman.gen_client_credentials(f'{uasid}::UA')
-            session['UaCertificate'] = sec_creds.cert()
-            # TODO: Introduce the Key ID
-            session['UaKeyID'] = encode(sec_creds.key().encode()).decode()
-            self.mongo.put_session(session)
-            self.notify(uasid, 'adx', 'peer-credentials-changed')
-        else:
-            lg.info(f'The UA endpoint established for {uasid}')
+        lg.info(f'Generating credentials for {uasid} - UA')
+        ua_creds = self.sliceman.get_ue_network_creds(request['IMSI'])
+        sec_creds = self.secman.gen_client_credentials(f'{uasid}::UA')
+
+        session['UA'] = {
+            'IP': ua_creds['IP'],
+            'GatewayIP': ua_creds['Gateway'],
+            'KID': sec_creds.kid(),
+            'Certificate': sec_creds.cert()
+        }
+
+        self.mongo.put_session(session)
+        self.notify(uasid, 'adx', 'peer-address-changed')
+        self.notify(uasid, 'adx', 'peer-credentials-changed')
 
         return (
             {
-                'IP': session['UaIP'],
-                'GatewayIP': session['UaGatewayIP'],
-                'EncryptedPrivateKey': decode(session['UaKeyID']).decode()
+                'IP': session['UA']['IP'],
+                'GatewayIP': session['UA']['GatewayIP'],
+                'KID': session['UA']['KID'],
+                'EncryptedPrivateKey': sec_creds.key()
             },
             None
         )
 
-    def adx_session(self, uasid):
+    def adx_session(self, request):
+        uasid = request['UasID']
+
         if not (session := self.mongo.get_session(uasid)):
             lg.info(f'Initializing new session (ADX) for {uasid}')
             session = {'UasID': uasid}
         else:
             lg.info(f'The session exist for {uasid}')
 
-        if 'AdxCertificate' not in session:
-            adx_cred = self.sliceman.get_adx_network_creds(uasid)
-            session['AdxIP'] = adx_cred['IP']
-            session['AdxGatewayIP'] = adx_cred['Gateway']
-            sec_creds = self.secman.gen_client_credentials(f'{uasid}::ADX')
-            session['AdxCertificate'] = sec_creds.cert()
-            # TODO: Introduce the Key ID
-            session['AdxKeyID'] = encode(sec_creds.key().encode()).decode()
-            self.mongo.put_session(session)
-            self.notify(uasid, 'ua', 'peer-credentials-changed')
-        else:
-            lg.info(f'The ADX endpoint established for {uasid}')
+        lg.info(f'Generating credentials for {uasid} - ADX')
+        adx_cred = self.sliceman.get_adx_network_creds(uasid)
+        sec_creds = self.secman.gen_client_credentials(f'{uasid}::ADX')
+
+        session['ADX'] = {
+            'IP': adx_cred['IP'],
+            'GatewayIP': adx_cred['Gateway'],
+            'KID': sec_creds.kid(),
+            'Certificate': sec_creds.cert()
+        }
+
+        self.mongo.put_session(session)
+        self.notify(uasid, 'ua', 'peer-address-changed')
+        self.notify(uasid, 'ua', 'peer-credentials-changed')
 
         return (
             {
-                'IP': session['AdxIP'],
-                'GatewayIP': session['AdxGatewayIP'],
-                'EncryptedPrivateKey': decode(session['AdxKeyID']).decode()
+                'IP': session['ADX']['IP'],
+                'GatewayIP': session['ADX']['GatewayIP'],
+                'KID': session['ADX']['KID'],
+                'EncryptedPrivateKey': sec_creds.key()
             },
             None
         )

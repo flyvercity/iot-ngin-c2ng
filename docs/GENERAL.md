@@ -98,7 +98,7 @@ OpenAPI v.3 defition files contains an exhaustive description of the API see [Pa
 
 ## C2NG Service Architecture
 
-The C2NG service is implemented in Python as a standalone Web Service based on Tornado framework. The service has modular architecture and separates core logic from external interfaces. The implementation is largely object-oriented. Web frontend follows the guidelines of the framework. 
+The C2NG service is implemented in Python (tested with Python 3.9) as a standalone Web Service based on Tornado framework. The service has modular architecture and separates core logic from external interfaces. The implementation is largely object-oriented. Web frontend follows the guidelines of the framework. 
 
 The following diagram present a schematic view of the C2NG service architecture.
 
@@ -227,10 +227,12 @@ Document schema:
     "UaIP": "string: IPv4 or IPv6 address",
     "UaGatewayIP": "string: IPv4 or IPv6 address",
     "UaCertificate": "string: PEM",
+    "UaKeyID" : "string: UUID",
 
     "AdxIP": "string: IPv4 or IPv6 address",
     "AdxGatewayIP": "string: IPv4 or IPv6 address",
-    "AdxCertificate": "string: PEM"
+    "AdxCertificate": "string: PEM",
+    "AdxKeyID" : "string: UUID"
 }
 ```
 

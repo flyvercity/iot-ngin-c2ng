@@ -13,8 +13,8 @@ from handlers.auth import AuthHandler
 
 
 FIELD_DEFS = {
-    'ua': 'UaCertificate',
-    'adx': 'AdxCertificate'
+    'ua': 'UA',
+    'adx': 'ADX'
 }
 
 
@@ -84,7 +84,9 @@ class CertificateHandler(AuthHandler):
 
             return
 
-        cert = session.get(field)
+        unit_session = session.get(field)
+        kid = unit_session.get('KID')
+        cert = unit_session.get('Certificate')
 
         if not cert:
             self.fail(CertificateRequestResponseFailed, {
@@ -94,5 +96,6 @@ class CertificateHandler(AuthHandler):
             return
 
         self.respond(CertificateRequestResponse, {
+            'KID': kid,
             'Certificate': cert
         })

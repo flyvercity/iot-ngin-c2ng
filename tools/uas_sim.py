@@ -138,12 +138,26 @@ class SimC2Subsystem:
         Args:
             args: Standard argument (unused).
         '''
+
         self._outsocket.close()
         self._insocket.close()
 
     def _segment(self) -> str:
         '''Get the UAS segment (ua|adx).'''
         pass
+
+    def _peer_segment(self) -> str:
+        '''Get the peer's segment (adx|ua).
+
+        Returns:
+            'adx' for the UA simulator, 'ua' for the RPS simulator.
+        '''
+        segment = self._segment()
+
+        if segment == 'ua':
+            return 'adx'
+
+        return 'ua'
 
     def _request_session(self):
         '''Requests aerial connection from the Service.
@@ -173,7 +187,7 @@ class SimC2Subsystem:
             Peer's certificate info.
         '''
 
-        segment = self._segment()
+        segment = self._peer_segment()
         uasid = self._args.uasid
         cert_info = request(self._args, 'GET', f'/certificate/{uasid}/{segment}')
         return cert_info
@@ -185,7 +199,7 @@ class SimC2Subsystem:
             Peer's IP address information.
         '''
 
-        segment = self._segment()
+        segment = self._peer_segment()
         uasid = self._args.uasid
         address_info = request(self._args, 'GET', f'/address/{uasid}/{segment}')
         return address_info
@@ -247,9 +261,6 @@ class SimC2Subsystem:
 
         Args:
             conn: websocket connection.
-
-        Raises:
-            UserWarning: intercepted internally.
         '''
 
         while True:
@@ -258,7 +269,9 @@ class SimC2Subsystem:
                 message = await conn.read_message()
 
                 if not message:
-                    raise UserWarning('Connection closed')
+                    lg.warn('Websocket closed')
+                    self._subscribe = False
+                    break
 
                 payload = json.loads(message)
 
@@ -267,6 +280,16 @@ class SimC2Subsystem:
 
                 if payload['Action'] == 'subscribed':
                     self._subscribe = True
+
+                if payload['Action'] == 'notification':
+                    if payload['Event'] == 'peer-address-changed':
+                        self._peer_address = None
+
+                    if payload['Event'] == 'peer-credentials-changed':
+                        self._peer_cert_info = None
+
+                    if payload['Event'] == 'request-own-session':
+                        self._session_info = None
 
             except ws.WebSocketClosedError:
                 lg.warn('Websocket closed')
@@ -333,7 +356,7 @@ class SimC2Subsystem:
             except Exception:
                 traceback.print_exc()
                 lg.info('Pause...')
-                time.sleep(10)
+                asyncio.sleep(10)
                 self._reset()
 
     def _secure(self):
@@ -471,6 +494,19 @@ class SimUaC2Subsystem(SimC2Subsystem):
             await asyncio.sleep(1)
 
             if not self._subscribe:
+                lg.warn('Subscription cancelled - resetting')
+                break
+
+            if not self._session_info:
+                lg.warn('Session info is missing - resetting')
+                break
+
+            if not self._peer_address:
+                lg.warn('Peer address is missing - resetting')
+                break
+
+            if not self._peer_cert_info:
+                lg.warn('Peer certificate is missing - resetting')
                 break
 
     def _report_sim_signal(self):

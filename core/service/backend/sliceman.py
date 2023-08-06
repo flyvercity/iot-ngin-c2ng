@@ -3,8 +3,8 @@
 
 '''This module implements an interface with Network Slice Admission Control Function.'''
 
-from net_providers.simulated import SimulatedSlice
-from net_providers.cucumore import CucumoreManager
+from backend.net_providers.simulated import SimulatedSlice
+from backend.net_providers.cucumore import CucumoreManager
 
 
 PROVIDERS = {
@@ -21,6 +21,9 @@ class SliceMan:
 
         Args:
             config: contains `sliceman` section of the configuration file.
+
+        Raises:
+            RuntimeError: if provider type is not implemented.
         '''
 
         self._config = config

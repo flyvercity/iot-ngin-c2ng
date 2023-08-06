@@ -82,7 +82,7 @@ components:
           Action:
             type: string
             const: notification
-          EventID:
+          Event:
             summary: Describes what piece of information was changed.
             description: A user shall request new information on thier own via the REST API.
             type: string
@@ -90,9 +90,9 @@ components:
             - signal-ok
             - signal-abnormal
             - signal-degraded
-            - request-own-credentials
+            - request-own-session
+            - peer-address-changed
             - peer-credentials-changed
         required:
         - Action
-        - ConnectionID
-        - EventID
+        - Event

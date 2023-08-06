@@ -13,8 +13,8 @@ from handlers.auth import AuthHandler
 
 
 FIELD_DEFS = {
-    'ua': 'UaIP',
-    'adx': 'AdxIP'
+    'ua': 'UA',
+    'adx': 'ADX'
 }
 
 
@@ -84,9 +84,9 @@ class AddressHandler(AuthHandler):
 
             return
 
-        address = session.get(field)
+        unit = session.get(field)
 
-        if not address:
+        if not unit:
             self.fail(AddressRequestResponseFailed, {
                 'Session': 'peer_not_connected'
             })
@@ -94,5 +94,5 @@ class AddressHandler(AuthHandler):
             return
 
         self.respond(AddressRequestResponse, {
-            'Address': address
+            'Address': unit['IP']
         })
