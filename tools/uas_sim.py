@@ -611,7 +611,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
         response = request(self._args, 'POST', '/signal', body={
             'ReferenceTime': datetime.now().timestamp(),
             'UasID': self._args.uasid,
-            'Radio': '5gnr',
+            'Radio': '5G',
             'Cell': '1234567890',
             'Waypoint': {
                 'Latitude': 35.0,
@@ -625,8 +625,8 @@ class SimUaC2Subsystem(SimC2Subsystem):
             'VEast': 0.0,
             'VDown': 0.0,
             'VAir': 10.0,
-            'Baro': 100.0 + 5.0*random(),
-            'Heading': 35 + random(),
+            'Baro': 100.0,
+            'Heading': 35,
             'RSRP': -99 + sim_signal_flux,
             'RSRQ': -99 + sim_signal_flux,
             'RSSI': -99 + sim_signal_flux,
