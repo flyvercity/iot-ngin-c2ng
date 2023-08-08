@@ -21,7 +21,7 @@ def fetch_keycloak_public_certs(config):
             base = keycloak['base']
             realm = keycloak['realm']
             wkurl = f'{base}/realms/{realm}/protocol/openid-connect/certs'
-            lg.info(f'Fetching KeyCloak public keys: {wkurl}')
+            lg.info(f"Fetching KeyCloak public keys: {wkurl}")
             config['wkinfo'] = requests.get(wkurl).json()
             return
 

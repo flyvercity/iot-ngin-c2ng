@@ -10,7 +10,7 @@ generate:
 		python tools/gen_openapi.py
 
 build-core: 
-	(cd core; docker build -t c2ng:latest .)
+	docker build -t c2ng:latest -f core/Dockerfile .
 
 build-uss-sim:
 	(cd uss-sim; docker build -t c2ng-uss-sim:latest .)

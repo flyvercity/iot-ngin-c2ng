@@ -59,7 +59,7 @@ def handlers():
 
 async def main():
     '''Asynchronious entry point.'''
-    config_file = Path(os.getenv('C2NG_CONFIG_FILE', '/app/config/config.yaml'))
+    config_file = Path(os.getenv('C2NG_CONFIG_FILE', '/app/config/c2ng/config.yaml'))
     # TODO: Validate config
     config = yaml.safe_load(config_file.read_text())
     port = config['service']['port']
