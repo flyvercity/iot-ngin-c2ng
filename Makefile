@@ -15,6 +15,11 @@ build-core:
 build-uss-sim:
 	docker build -t c2ng-uss-sim:latest -f docker/uss_sim/Dockerfile .
 
+build-uas-sim:
+	docker build -t c2ng-uas-sim:latest -f docker/uas_sim/Dockerfile .
+
+build: build-core build-uss-sim build-uas-sim
+
 keys:
 	PYTHONPATH=${PYTHONPATH}:`pwd`/core/ python tools/crypto_keys.py
 

@@ -1,6 +1,6 @@
 FROM python:3.10
 
-EXPOSE 9090
+EXPOSE 9091
 
 RUN mkdir -p /app
 WORKDIR /app

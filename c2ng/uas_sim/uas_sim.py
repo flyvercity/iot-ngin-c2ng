@@ -13,11 +13,10 @@ import json
 from random import random
 import asyncio
 import uuid
-import queue
+import argparse
 
 import requests
 from keycloak import KeycloakOpenID
-from dotenv import load_dotenv
 from cryptography import x509
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives import hashes
@@ -25,21 +24,17 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.exceptions import InvalidSignature
 import tornado.websocket as ws
 
-import common.c2ng_util as u
+import c2ng.common.c2ng_util as u
 
 
 RECEIVE_BUFFER = 1024
 '''Maximum size of the UDP receive buffer.'''
 
 ECHO_PACKET_SIGN = b'0'
+'''Binary signature of the echo (plaintext) packet.'''
+
 NORMAL_PACKET_SIGN = b'1'
-
-# TODO: Get rid of globals
-load_dotenv()
-
-C2NG_SIM_DRONE_ID = os.getenv('C2NG_SIM_DRONE_ID')
-C2NG_DEFAULT_UA_UDP_PORT = os.getenv('C2NG_DEFAULT_UA_UDP_PORT')
-C2NG_DEFAULT_ADX_UDP_PORT = os.getenv('C2NG_DEFAULT_ADX_UDP_PORT')
+'''Binary signature of the normal (encrypted) packet.'''
 
 
 def request(args, method: str, path: str, body={}, qsp={}) -> dict:
@@ -504,7 +499,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
         Returns:
             Incoming UDP Port.'''
 
-        return int(C2NG_DEFAULT_UA_UDP_PORT)
+        return int(self._args.ua_port)
 
     def _out_port(self) -> int:
         '''Implements `_out_port` for the UA simulator.
@@ -513,7 +508,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
             Outgoing UDP Port.
         '''
 
-        return int(C2NG_DEFAULT_ADX_UDP_PORT)
+        return int(self._args.adx_port)
 
     def _reset_insocket(self):
         super()._reset_insocket()
@@ -660,7 +655,7 @@ class SimAdxC2Subsystem(SimC2Subsystem):
         Returns:
             Inbound UDP port.
         '''
-        return int(C2NG_DEFAULT_ADX_UDP_PORT)
+        return int(self._args.adx_port)
 
     def _out_port(self) -> int:
         '''Implements `_out_port` for the RPS simulator.
@@ -668,7 +663,7 @@ class SimAdxC2Subsystem(SimC2Subsystem):
         Returns:
             Outbound UDP port.
         '''
-        return int(C2NG_DEFAULT_UA_UDP_PORT)
+        return int(self._args.ua_port)
 
     async def _work_cycle(self):
         '''Implements `_work_cycle` for the RPS simulator.'''
@@ -694,7 +689,7 @@ class SimAdxC2Subsystem(SimC2Subsystem):
                 except InvalidSignature:
                     lg.warn('Invalid peer signature - resetting peer cert')
                     self._peer_cert_info = None
-                
+
                 except ValueError:
                     lg.warn('Invalid peer public key - resetting peer cert')
                     self._peer_cert_info = None
@@ -703,41 +698,55 @@ class SimAdxC2Subsystem(SimC2Subsystem):
                 break
 
 
-async def run():
-        '''Simulate a request on behalf of a drone.'''
-        with uas_sim.SimUaC2Subsystem(self._args) as sim:
-            await sim.run()
+async def main():
+    C2NG_SIM_DRONE_ID = os.getenv('C2NG_SIM_DRONE_ID')
+    C2NG_DEFAULT_UA_UDP_PORT = os.getenv('C2NG_DEFAULT_UA_UDP_PORT')
+    C2NG_DEFAULT_ADX_UDP_PORT = os.getenv('C2NG_DEFAULT_ADX_UDP_PORT')
 
-    async def adx(self):
-        '''Simulate a request on behalf of a ground element (e.g., RPS).'''
-        with uas_sim.SimAdxC2Subsystem(self._args) as sim:
-            await sim.run()
+    parser = argparse.ArgumentParser()
 
+    parser.add_argument(
+        '-a', '--auth', help='Address of the OIDC server (by default, KeyCloak)',
+        default='http://oauth:8080/'
+    )
 
-def add_arg_subparsers(sp):
-    '''Define command line arguments for this module.
+    parser.add_argument(
+        '-i', '--uasid', help='UAS Logical ID', 
+        default=C2NG_SIM_DRONE_ID
+    )
 
-    Args:
-        sp: subparsers collection.
-    '''
+    parser.add_argument(
+        '-p', '--password', help='OIDC authentication password',
+        default=os.getenv('C2NG_UA_DEFAULT_PASSWORD')
+    )
+
+    parser.add_argument(
+        '-v', '--verbose',
+        action='store_true', help='Verbose logging'
+    )
 
     parser.add_argument(
         '-u', '--url', help='C2NG service URL',
-        default='http://localhost:9090'
+        default='http://c2ng:9090'
     )
 
     parser.add_argument(
         '-w', '--websocket', help='C2NG service websocket URL',
-        default='ws://localhost:9090'
+        default='ws://c2ng:9090'
     )
 
-    ua = sp.add_parser('ua', help='Command on behalf of UA')
-    ua.add_argument('-i', '--uasid', help='UAS Logical ID', default=C2NG_SIM_DRONE_ID)
-
-    ua.add_argument(
-        '-P', '--port', help='Incoming UDP port for UA C2 sim',
+    parser.add_argument(
+        '--ua-port', help='Incoming UDP port for UA C2 sim',
         type=int, default=C2NG_DEFAULT_UA_UDP_PORT
     )
+
+    parser.add_argument(
+        '--adx-port', help='Incoming UDP port for ADX C2 sim',
+        type=int, default=C2NG_DEFAULT_ADX_UDP_PORT
+    )
+
+    sp = parser.add_subparsers(dest='subsystem', help='Subsystem (ua|adx)')
+    ua = sp.add_parser('ua', help='Command on behalf of UA')
 
     ua.add_argument(
         '-S', '--signal-only', help='Do not connect, transmit signal only',
@@ -749,10 +758,22 @@ def add_arg_subparsers(sp):
         choices=['none', 'simulated'], default='none'
     )
 
-    adx = sp.add_parser('adx', help='Command on behalf of ADX client (RPS is simulated)')
-    adx.add_argument('-i', '--uasid', help='UAS Logical ID', default=C2NG_SIM_DRONE_ID)
-
-    adx.add_argument(
-        '-P', '--port', help='Incoming UDP port for RPS sim',
-        type=int, default=C2NG_DEFAULT_ADX_UDP_PORT
+    adx = sp.add_parser(  # noqa
+        'adx',
+        help='Command on behalf of ADX client (RPS is simulated)'
     )
+
+    args = parser.parse_args()
+    u.setup_logging(args)
+
+    if args.subsystem == 'ua':
+        Sim = SimUaC2Subsystem
+    else:
+        Sim = SimAdxC2Subsystem
+
+    with Sim(args) as sim:
+        await sim.run()
+
+
+if __name__ == '__main__':
+    asyncio.run(main())

@@ -7,10 +7,10 @@ import asyncio
 
 from dotenv import load_dotenv
 
-import common.c2ng_util as u
-import oath_admin
-import gen_openapi
-import crypto_keys
+import c2ng.common.c2ng_util as u
+import c2ng.tools.oath_admin as oath_admin
+import c2ng.tools.gen_openapi as gen_openapi
+import c2ng.tools.crypto_keys as crypto_keys
 
 
 class Handler:

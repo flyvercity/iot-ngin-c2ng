@@ -14,7 +14,7 @@ from cryptography.hazmat.primitives.serialization import (
     Encoding, PrivateFormat, BestAvailableEncryption
 )
 
-from service.backend.secman import generate_pk, get_x509_subject
+from c2ng.service.backend.secman import generate_pk, get_x509_subject
 
 
 SERVICE_CERTIFICATE_LIFESPAN_DAYS = 365
@@ -53,12 +53,14 @@ def add_arg_subparsers(sp):
 
     cryptokeys.add_argument(
         '-p', '--private',
-        help='PEM file for the private key', default='core/config/c2ng/private.pem'
+        help='PEM file for the private key',
+        default='docker/core/config/c2ng/private.pem'
     )
 
     cryptokeys.add_argument(
         '-c', '--certificate',
-        help='PEM file for root certificate', default='core/config/c2ng/service.pem'
+        help='PEM file for root certificate',
+        default='docker/core/config/c2ng/service.pem'
     )
 
 
@@ -66,7 +68,6 @@ async def run(args):
     service_key = generate_pk()
     issuer = get_x509_subject('root.c2ng')
     service_sscert = gen_ss_cert(service_key, issuer)
-
     passphrase = os.getenv('C2NG_UAS_CLIENT_SECRET').encode()
 
     Path(args.private).write_bytes(

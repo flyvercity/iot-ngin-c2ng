@@ -10,7 +10,7 @@ from apispec.exceptions import APISpecError
 from apispec.ext.marshmallow import MarshmallowPlugin
 from apispec_webframeworks.tornado import TornadoPlugin  # type: ignore
 
-from service.app import handlers
+from c2ng.service.app import handlers
 
 
 def run(args: dict):

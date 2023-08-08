@@ -50,6 +50,8 @@ services:
     image: c2ng-uss-sim
     env_file:
       - .env
+    volumes:
+      - ./c2ng/uss_sim:/app/c2ng/uss_sim
     ports:
       - 9091:9091
     networks:
@@ -60,8 +62,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./c2ng/service:/app/c2ng/service
       - ./c2ng/common:/app/c2ng/common
+      - ./c2ng/service:/app/c2ng/service
       - ./docker/core/config:/app/config
     ports:
       - 9090:9090
@@ -72,6 +74,22 @@ services:
       - influxdb
       - oauth
       - uss
+
+  c2ng-ua:
+    image: c2ng-uas-sim
+    env_file:
+      - .env
+    volumes:
+      - ./c2ng/common:/app/c2ng/common
+      - ./c2ng/uas_sim:/app/c2ng/uas_sim
+    ports:
+      - 9092:9092/udp
+    networks:
+      - c2ng
+    depends_on:
+      - c2ng
+    profiles:
+      - noautostart
 
 networks:
   c2ng:

@@ -25,8 +25,8 @@ sliceman:
   cumucore:
     uri: https://host:port/
 security:
-  certificate: /c2ng/config/service.pem
-  private: /c2ng/config/private.pem
+  certificate: /app/config/c2ng/service.pem
+  private: /app/config/c2ng/private.pem
   default-ttl: 3600
 influx:
   uri: http://influxdb:8086

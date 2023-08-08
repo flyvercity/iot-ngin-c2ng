@@ -13,10 +13,6 @@ import tornado.web as web
 from jose import jwk, jwt
 
 
-C2NG_DEFAULT_USS_PORT = os.getenv('C2NG_DEFAULT_USS_PORT')
-'''Default port for the USS simulator'''
-
-
 class AuthHandler(web.RequestHandler):
     '''Base for all handlers for authenticated requests.'''
 
@@ -111,6 +107,8 @@ async def run(args: dict):
 
 
 async def main():
+    C2NG_DEFAULT_USS_PORT = os.getenv('C2NG_DEFAULT_USS_PORT')
+
     parser = ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose logging')
     parser.add_argument('-p', '--port', type=int, default=C2NG_DEFAULT_USS_PORT)
