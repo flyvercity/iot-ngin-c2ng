@@ -10,10 +10,10 @@ generate:
 		python tools/gen_openapi.py
 
 build-core: 
-	docker build -t c2ng:latest -f core/Dockerfile .
+	docker build -t c2ng:latest -f docker/core/Dockerfile .
 
 build-uss-sim:
-	(cd uss-sim; docker build -t c2ng-uss-sim:latest .)
+	docker build -t c2ng-uss-sim:latest -f docker/uss_sim/Dockerfile .
 
 keys:
 	PYTHONPATH=${PYTHONPATH}:`pwd`/core/ python tools/crypto_keys.py

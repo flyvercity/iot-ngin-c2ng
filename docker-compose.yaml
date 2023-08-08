@@ -62,7 +62,7 @@ services:
     volumes:
       - ./c2ng/service:/app/c2ng/service
       - ./c2ng/common:/app/c2ng/common
-      - ./core/config:/app/config
+      - ./docker/core/config:/app/config
     ports:
       - 9090:9090
     networks:
