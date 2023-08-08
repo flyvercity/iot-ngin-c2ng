@@ -5,10 +5,6 @@ src := $(wildcard \
 	uss-sim/src/*.py \
 )
 
-generate:
-	PYTHONPATH=${PYTHONPATH}:`pwd`/core/service/:`pwd`/core \
-		python tools/gen_openapi.py
-
 build-core: 
 	docker build -t c2ng:latest -f docker/core/Dockerfile .
 
@@ -20,21 +16,29 @@ build-uas-sim:
 
 build: build-core build-uss-sim build-uas-sim
 
-keys:
-	PYTHONPATH=${PYTHONPATH}:`pwd`/core/ python tools/crypto_keys.py
+prerun:
+	./cli.sh cryptokeys
 
-up:
+up: build prerun
 	docker-compose up -d
 
-postrun:
-	python tools/c2ng.py keycloak
+start: up
+	./cli.sh keycloak
+
+# Generate API specification
+
+docbuild:
+	mkdir -p docbuild
+
+generate: docbuild
+	./cli.sh genapi
 
 # Documentation
 
 darglint: $(src)
 	darglint -s google -z full $(src)
 
-.autogen: $(src)
+.autogen: docbuild $(src)
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service:`pwd`/tools lazydocs \
 		--src-base-url=https://github.com/flyvercity/iot-ngin-c2ng/blob/main/ \
 		--output-path ./docbuild \

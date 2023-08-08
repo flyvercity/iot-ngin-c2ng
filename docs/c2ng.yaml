@@ -19,6 +19,10 @@ components:
       type: object
     AddressRequestResponseErrors:
       properties:
+        Segment:
+          enum:
+          - invalid
+          type: string
         Session:
           enum:
           - session_not_found
@@ -41,57 +45,6 @@ components:
       required:
       - Errors
       type: object
-    AdxConnectionSessionRequest:
-      properties:
-        ReferenceTime:
-          description: UNIX Timestamp
-          type: number
-        UasID:
-          type: string
-      required:
-      - ReferenceTime
-      - UasID
-      type: object
-    AdxConnectionSessionResponse:
-      properties:
-        EncryptedPrivateKey:
-          description: Session private key encrypted with client secret
-          type: string
-        GatewayIP:
-          description: Gateway IP for ADX connection.
-        IP:
-          description: Own IP address for the ADX connection.
-        Success:
-          description: Success flag
-          enum:
-          - true
-          type: boolean
-      required:
-      - EncryptedPrivateKey
-      - GatewayIP
-      - IP
-      type: object
-    AdxConnectionSessionResponseErrors:
-      properties:
-        USS:
-          enum:
-          - here_define_the_errors
-          type: string
-      required:
-      - USS
-      type: object
-    AdxConnectionSessionResponseFailed:
-      properties:
-        Errors:
-          $ref: '#/components/schemas/AdxConnectionSessionResponseErrors'
-        Success:
-          description: Failure flag.
-          enum:
-          - false
-          type: boolean
-      required:
-      - Errors
-      type: object
     AerialConnectionSessionRequest:
       properties:
         IMSI:
@@ -103,12 +56,19 @@ components:
         ReferenceTime:
           description: UNIX Timestamp
           type: number
+        Segment:
+          description: 'Segment for which to request a session: airborne (''ua'')
+            or ground (''adx'').'
+          enum:
+          - ua
+          - adx
+          type: string
         UasID:
           description: CAA UAS ID
           type: string
       required:
-      - IMSI
       - ReferenceTime
+      - Segment
       - UasID
       type: object
     AerialConnectionSessionResponse:
@@ -120,6 +80,9 @@ components:
           description: Gateway IP for aerial connection.
         IP:
           description: Own IP address for aerial connection.
+        KID:
+          description: Key unique identifier
+          type: string
         Success:
           description: Success flag
           enum:
@@ -129,16 +92,19 @@ components:
       - EncryptedPrivateKey
       - GatewayIP
       - IP
+      - KID
       type: object
     AerialConnectionSessionResponseErrors:
       properties:
+        Request:
+          enum:
+          - imsi_required
+          type: string
         USS:
           enum:
           - provider_unavailable
           - flight_not_approved
           type: string
-      required:
-      - USS
       type: object
     AerialConnectionSessionResponseFailed:
       properties:
@@ -165,6 +131,9 @@ components:
         Certificate:
           description: Certificate with a public key as a PEM string
           type: string
+        KID:
+          description: Key unique identifier
+          type: string
         Success:
           description: Success flag
           enum:
@@ -172,9 +141,14 @@ components:
           type: boolean
       required:
       - Certificate
+      - KID
       type: object
     CertificateRequestResponseErrors:
       properties:
+        Segment:
+          enum:
+          - invalid
+          type: string
         Session:
           enum:
           - session_not_found
@@ -305,7 +279,7 @@ components:
           type: boolean
       type: object
 paths:
-  /address/adx/{uasid}:
+  /address/{uasid}/{segment}:
     get:
       parameters:
       - description: UAS ID for which to fetch the peer's address.
@@ -313,6 +287,15 @@ paths:
         name: UasID
         required: true
         schema:
+          type: string
+      - description: Segment for which to fetch the peer's certificate
+        in: path
+        name: Segment
+        required: true
+        schema:
+          enum:
+          - ua
+          - adx
           type: string
       responses:
         '200':
@@ -328,30 +311,39 @@ paths:
                 $ref: '#/components/schemas/AddressRequestResponseFailed'
           description: Payload containing error description
       summary: Request a current address from existing connectivity session.
-  /address/ua/{uasid}:
+  /certificate/{uasid}/{segment}:
     get:
       parameters:
-      - description: UAS ID for which to fetch the peer's address.
+      - description: UAS ID for which to fetch the peer's certificate
         in: path
         name: UasID
         required: true
         schema:
+          type: string
+      - description: Segment for which to fetch the peer's certificate
+        in: path
+        name: Segment
+        required: true
+        schema:
+          enum:
+          - ua
+          - adx
           type: string
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AddressRequestResponse'
-          description: Success payload containing peer's address
+                $ref: '#/components/schemas/CertificateRequestResponse'
+          description: Success payload containing peer's certificate
         '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AddressRequestResponseFailed'
+                $ref: '#/components/schemas/CertificateRequestResponseFailed'
           description: Payload containing error description
-      summary: Request a current address from existing connectivity session.
-  /adx/session:
+      summary: Request a current certificate from existing connectivity session.
+  /session:
     delete:
       parameters:
       - description: UAS ID for the session
@@ -373,69 +365,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AdxConnectionSessionRequest'
-        description: ADX Connectivity Session Request
+              $ref: '#/components/schemas/AerialConnectionSessionRequest'
+        description: Connectivity Session Request
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdxConnectionSessionResponse'
+                $ref: '#/components/schemas/AerialConnectionSessionResponse'
           description: Success payload containing session information
         '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdxConnectionSessionResponseFailed'
+                $ref: '#/components/schemas/AerialConnectionSessionResponseFailed'
           description: Payload containing error description
       summary: Request a new session for an ADX client (RPS or USS services)
-  /certificate/adx/{uasid}:
-    get:
-      parameters:
-      - description: UAS ID for which to fetch the peer's certificate
-        in: path
-        name: UasID
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CertificateRequestResponse'
-          description: Success payload containing peer's certificate
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CertificateRequestResponseFailed'
-          description: Payload containing error description
-      summary: Request a current certificate from existing connectivity session.
-  /certificate/ua/{uasid}:
-    get:
-      parameters:
-      - description: UAS ID for which to fetch the peer's certificate
-        in: path
-        name: UasID
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CertificateRequestResponse'
-          description: Success payload containing peer's certificate
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CertificateRequestResponseFailed'
-          description: Payload containing error description
-      summary: Request a current certificate from existing connectivity session.
   /signal:
     post:
       requestBody:
@@ -460,42 +406,3 @@ paths:
           description: Payload containing error description.
       summary: Receives a sample of signal measurements from a UA with reference time
         and position.
-  /ua/session:
-    delete:
-      parameters:
-      - description: UAS ID for the session
-        in: path
-        name: UasID
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseSuccess'
-          description: Success payload containing session information
-      summary: Request a new session for an ADX client (RPS or USS services)
-    post:
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AerialConnectionSessionRequest'
-        description: Aerial Connectivity Session Request
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AerialConnectionSessionResponse'
-          description: Success payload containing session information
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AerialConnectionSessionResponseFailed'
-          description: Payload containing error description
-      summary: Request a new session for UA

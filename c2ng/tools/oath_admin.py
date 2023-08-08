@@ -3,6 +3,7 @@
 
 '''CLI Tools to manage the KeyCloak OAuth service.'''
 import os
+import time
 
 from keycloak import KeycloakAdmin
 from keycloak import KeycloakOpenIDConnection
@@ -13,14 +14,29 @@ def run(args: dict):
 
     Args:
         args: command line args
+
+    Raises:
+        UserWarning: if the connection to the KeyCloak server fails (captured)
     '''
 
-    conn = KeycloakOpenIDConnection(
-        server_url=args.auth,
-        username=args.user,
-        password=args.password,
-        realm_name="master"
-    )
+    while True:
+        try:
+            conn = KeycloakOpenIDConnection(
+                server_url=args.auth,
+                username=args.user,
+                password=args.password,
+                realm_name="master"
+            )
+
+            if conn:
+                break
+            else:
+                raise UserWarning('Empty connection')
+
+        except Exception as exc:
+            print(f'KeyCloak connection failed: {exc}, retrying...')
+            print('Press Ctrl-C to abort')
+            time.sleep(3)
 
     admin = KeycloakAdmin(connection=conn)
 
