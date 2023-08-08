@@ -711,7 +711,7 @@ async def main():
     )
 
     parser.add_argument(
-        '-i', '--uasid', help='UAS Logical ID', 
+        '-i', '--uasid', help='UAS Logical ID',
         default=C2NG_SIM_DRONE_ID
     )
 

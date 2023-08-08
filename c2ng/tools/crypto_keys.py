@@ -52,7 +52,7 @@ def gen_ss_cert(service_key: RSAPrivateKey, issuer: x509.Name):
 
 
 def add_arg_subparsers(sp):
-    cryptokeys = sp.add_parser('genapi', help='Generate crypto keys')
+    cryptokeys = sp.add_parser('cryptokeys', help='Generate crypto keys')
 
     cryptokeys.add_argument(
         '-p', '--private',
@@ -67,7 +67,7 @@ def add_arg_subparsers(sp):
     )
 
 
-async def run(args):
+def run(args):
     service_key = generate_pk()
     issuer = get_x509_subject('root.c2ng')
     service_sscert = gen_ss_cert(service_key, issuer)

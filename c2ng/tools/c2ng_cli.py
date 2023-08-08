@@ -3,7 +3,6 @@
 
 '''CLI Tools to manage the Service and simulators.'''
 from argparse import ArgumentParser
-import asyncio
 
 from dotenv import load_dotenv
 
@@ -19,30 +18,30 @@ class Handler:
     def __init__(self, args):
         self._args = args
 
-    async def handle(self):
+    def handle(self):
         '''Dispatch a CLI command.'''
 
         try:
             func = getattr(self, self._args.command)
-            await func()
+            func()
 
         except UserWarning as exc:
             print(f'Command failed: {exc}')
 
-    async def keycloak(self):
+    def keycloak(self):
         '''Configure the KeyCloak service.'''
         oath_admin.run(self._args)
 
-    async def genapi(self):
+    def genapi(self):
         '''Generate OpenAPI specification.'''
         gen_openapi.run(self._args)
 
-    async def cryptokeys(self):
+    def cryptokeys(self):
         '''Generate crypto keys.'''
         crypto_keys.run(self._args)
 
 
-async def main():
+def main():
     '''C2NG CLI Tool entry point.'''
 
     load_dotenv()
@@ -58,10 +57,11 @@ async def main():
     sp = parser.add_subparsers(dest='command', required=True, metavar='CMD')
     oath_admin.add_arg_subparsers(sp)
     gen_openapi.add_arg_subparsers(sp)
+    crypto_keys.add_arg_subparsers(sp)
     args = parser.parse_args()
     u.setup_logging(args)
-    await Handler(args).handle()
+    Handler(args).handle()
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
