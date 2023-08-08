@@ -4,12 +4,12 @@
 '''This module implements certificate requests.'''
 import logging as lg
 
-from schemas import (
+from c2ng.service.schemas import (
     CertificateRequestResponse,
     CertificateRequestResponseFailed
 )
 
-from handlers.auth import AuthHandler
+from c2ng.service.handlers.auth import AuthHandler
 
 
 FIELD_DEFS = {

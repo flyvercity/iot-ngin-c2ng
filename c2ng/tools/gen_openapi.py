@@ -4,7 +4,6 @@
 '''This tool generates OpenAPI specification out of the code.'''
 import yaml
 from pathlib import Path
-from argparse import ArgumentParser
 
 from apispec import APISpec
 from apispec.exceptions import APISpecError
@@ -14,8 +13,9 @@ from apispec_webframeworks.tornado import TornadoPlugin  # type: ignore
 from service.app import handlers
 
 
-def generate_openapi_file(file: Path):
+def run(args: dict):
     ''' Generate OpenAPI Specification from Code '''
+    file = Path(args.file)
 
     spec = APISpec(
         title='C2NG API Definition',
@@ -38,17 +38,10 @@ def generate_openapi_file(file: Path):
     file.write_text(yaml_version + yaml_imfo + yaml_rest)
 
 
-def main():
-    parser = ArgumentParser()
+def add_arg_subparsers(sp):
+    genapi = sp.add_parser('genapi', help='Generate OpenAPI specification')
 
-    parser.add_argument(
+    genapi.add_argument(
         '-f', '--file',
         help='Target file to write specification', default='docs/c2ng.yaml'
     )
-
-    args = parser.parse_args()
-    generate_openapi_file(Path(args.file))
-
-
-if __name__ == '__main__':
-    main()

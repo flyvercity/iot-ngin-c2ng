@@ -10,20 +10,20 @@ from pathlib import Path
 
 import tornado.web as web
 
-from backend.uss import UssInterface
-from backend.mongo import Mongo
-from backend.sliceman import SliceMan
-from backend.influx import Influx
-from backend.secman import SecMan
-from backend.sessman import SessMan
+from c2ng.service.backend.uss import UssInterface
+from c2ng.service.backend.mongo import Mongo
+from c2ng.service.backend.sliceman import SliceMan
+from c2ng.service.backend.influx import Influx
+from c2ng.service.backend.secman import SecMan
+from c2ng.service.backend.sessman import SessMan
 
-from handlers.auth import fetch_keycloak_public_certs
-from handlers.sesssion import SessionHandler
-from handlers.certificate import CertificateHandler
-from handlers.address import AddressHandler
-from handlers.signal import SignalStatsHandler
+from c2ng.service.handlers.auth import fetch_keycloak_public_certs
+from c2ng.service.handlers.sesssion import SessionHandler
+from c2ng.service.handlers.certificate import CertificateHandler
+from c2ng.service.handlers.address import AddressHandler
+from c2ng.service.handlers.signal import SignalStatsHandler
 
-from handlers.notify import (
+from c2ng.service.handlers.notify import (
     WebsocketTicketManager,
     WebsocketAuthHandler,
     WsNotifyHandler
@@ -59,7 +59,7 @@ def handlers():
 
 async def main():
     '''Asynchronious entry point.'''
-    config_file = Path(os.getenv('C2NG_CONFIG_FILE', '/c2ng/config/config.yaml'))
+    config_file = Path(os.getenv('C2NG_CONFIG_FILE', '/app/config/config.yaml'))
     # TODO: Validate config
     config = yaml.safe_load(config_file.read_text())
     port = config['service']['port']

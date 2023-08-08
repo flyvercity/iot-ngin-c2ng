@@ -4,11 +4,11 @@
 '''This module implements certificate requests.'''
 import logging as lg
 
-from schemas import (
+from c2ng.service.schemas import (
     SignalStatsReportRequest
 )
 
-from handlers.auth import AuthHandler
+from c2ng.service.handlers.auth import AuthHandler
 
 
 class SignalStatsHandler(AuthHandler):

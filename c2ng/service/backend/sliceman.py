@@ -3,8 +3,8 @@
 
 '''This module implements an interface with Network Slice Admission Control Function.'''
 
-from backend.net_providers.simulated import SimulatedSlice
-from backend.net_providers.cucumore import CucumoreManager
+from c2ng.service.backend.net_providers.simulated import SimulatedSlice
+from c2ng.service.backend.net_providers.cucumore import CucumoreManager
 
 
 PROVIDERS = {

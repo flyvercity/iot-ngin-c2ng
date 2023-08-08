@@ -9,7 +9,7 @@ generate:
 	PYTHONPATH=${PYTHONPATH}:`pwd`/core/service/:`pwd`/core \
 		python tools/gen_openapi.py
 
-build: 
+build-core: 
 	(cd core; docker build -t c2ng:latest .)
 
 build-uss-sim:

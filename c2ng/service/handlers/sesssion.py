@@ -4,13 +4,13 @@
 '''This module implements session handlers.'''
 import logging as lg
 
-from schemas import (
+from c2ng.service.schemas import (
     AerialConnectionSessionRequest,
     AerialConnectionSessionResponseFailed,
     AerialConnectionSessionResponse
 )
 
-from handlers.auth import AuthHandler
+from c2ng.service.handlers.auth import AuthHandler
 
 
 class SessionHandler(AuthHandler):

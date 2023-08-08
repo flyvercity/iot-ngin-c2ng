@@ -9,7 +9,7 @@ from jose import jwt, JWTError
 
 import tornado.websocket as ws
 
-from schemas import (
+from c2ng.service.schemas import (
     WsAuthResponseSuccess,
     WsAuthResponseFailed,
     AsyncSubscribeSchema,
@@ -17,7 +17,7 @@ from schemas import (
 )
 
 
-from handlers.auth import AuthHandler
+from c2ng.service.handlers.auth import AuthHandler
 
 
 class WebsocketTicketManager:

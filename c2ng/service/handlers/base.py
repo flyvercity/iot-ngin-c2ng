@@ -8,14 +8,14 @@ import json
 import tornado.web as web
 from marshmallow.exceptions import ValidationError
 
-from backend.uss import UssInterface  # noqa
-from backend.mongo import Mongo  # noqa
-from backend.sliceman import SliceMan  # noqa
-from backend.secman import SecMan  # noqa
-from backend.influx import Influx  # noqa
-from backend.sessman import SessMan  # noqa
+from c2ng.service.backend.uss import UssInterface  # noqa
+from c2ng.service.backend.mongo import Mongo  # noqa
+from c2ng.service.backend.sliceman import SliceMan  # noqa
+from c2ng.service.backend.secman import SecMan  # noqa
+from c2ng.service.backend.influx import Influx  # noqa
+from c2ng.service.backend.sessman import SessMan  # noqa
 
-from schemas import (
+from c2ng.service.schemas import (
     BaseSuccessSchema,
     ValidationErrorSchema
 )

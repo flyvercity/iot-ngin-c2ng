@@ -6,13 +6,9 @@ import os
 
 from keycloak import KeycloakAdmin
 from keycloak import KeycloakOpenIDConnection
-from dotenv import load_dotenv
 
 
-load_dotenv()
-
-
-def configure_oauth(args: dict):
+def run(args: dict):
     '''Creates a realm, clients and sets up other authentication parameters.
 
     Args:

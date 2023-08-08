@@ -9,7 +9,7 @@ import requests
 from tornado import web
 from jose import jwt, jwk
 
-from handlers.base import HandlerBase
+from c2ng.service.handlers.base import HandlerBase
 
 
 def fetch_keycloak_public_certs(config):

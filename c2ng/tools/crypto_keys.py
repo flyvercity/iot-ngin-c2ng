@@ -5,8 +5,6 @@
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
-from argparse import ArgumentParser
-from dotenv import load_dotenv
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
@@ -50,21 +48,21 @@ def gen_ss_cert(service_key: RSAPrivateKey, issuer: x509.Name):
     return cert
 
 
-def main():
-    '''Tool entry point.'''
-    parser = ArgumentParser()
+def add_arg_subparsers(sp):
+    cryptokeys = sp.add_parser('genapi', help='Generate crypto keys')
 
-    parser.add_argument(
+    cryptokeys.add_argument(
         '-p', '--private',
         help='PEM file for the private key', default='core/config/c2ng/private.pem'
     )
 
-    parser.add_argument(
+    cryptokeys.add_argument(
         '-c', '--certificate',
         help='PEM file for root certificate', default='core/config/c2ng/service.pem'
     )
 
-    args = parser.parse_args()
+
+async def run(args):
     service_key = generate_pk()
     issuer = get_x509_subject('root.c2ng')
     service_sscert = gen_ss_cert(service_key, issuer)
@@ -80,8 +78,3 @@ def main():
     )
 
     Path(args.certificate).write_bytes(service_sscert.public_bytes(Encoding.PEM))
-
-
-if __name__ == '__main__':
-    load_dotenv()
-    main()

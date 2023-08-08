@@ -13,6 +13,7 @@ import json
 from random import random
 import asyncio
 import uuid
+import queue
 
 import requests
 from keycloak import KeycloakOpenID
@@ -24,7 +25,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.exceptions import InvalidSignature
 import tornado.websocket as ws
 
-import tool_util as u
+import common.c2ng_util as u
 
 
 RECEIVE_BUFFER = 1024
@@ -702,12 +703,33 @@ class SimAdxC2Subsystem(SimC2Subsystem):
                 break
 
 
+async def run():
+        '''Simulate a request on behalf of a drone.'''
+        with uas_sim.SimUaC2Subsystem(self._args) as sim:
+            await sim.run()
+
+    async def adx(self):
+        '''Simulate a request on behalf of a ground element (e.g., RPS).'''
+        with uas_sim.SimAdxC2Subsystem(self._args) as sim:
+            await sim.run()
+
+
 def add_arg_subparsers(sp):
     '''Define command line arguments for this module.
 
     Args:
         sp: subparsers collection.
     '''
+
+    parser.add_argument(
+        '-u', '--url', help='C2NG service URL',
+        default='http://localhost:9090'
+    )
+
+    parser.add_argument(
+        '-w', '--websocket', help='C2NG service websocket URL',
+        default='ws://localhost:9090'
+    )
 
     ua = sp.add_parser('ua', help='Command on behalf of UA')
     ua.add_argument('-i', '--uasid', help='UAS Logical ID', default=C2NG_SIM_DRONE_ID)
