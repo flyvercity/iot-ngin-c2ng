@@ -25,8 +25,11 @@ def gen_ss_cert(service_key: RSAPrivateKey, issuer: x509.Name):
     '''Generates a self-signed certificate.
 
     Args:
-    - `service_key`: generated private key of the service itself
-    - `issuer`: own X.509 name to be used both as the issuer and the subject
+        service_key: generated private key of the service itself
+        issuer: own X.509 name to be used both as the issuer and the subject
+
+    Returns:
+        X509 certificate
     '''
 
     subject = issuer

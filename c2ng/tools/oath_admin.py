@@ -12,7 +12,7 @@ def run(args: dict):
     '''Creates a realm, clients and sets up other authentication parameters.
 
     Args:
-    - args: command line args
+        args: command line args
     '''
 
     conn = KeycloakOpenIDConnection(

@@ -14,7 +14,11 @@ from c2ng.service.app import handlers
 
 
 def run(args: dict):
-    ''' Generate OpenAPI Specification from Code '''
+    ''' Generate OpenAPI Specification from Code
+
+    Args:
+        args: command line args
+    '''
     file = Path(args.file)
 
     spec = APISpec(
