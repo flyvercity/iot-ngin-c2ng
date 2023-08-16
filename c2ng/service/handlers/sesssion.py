@@ -39,7 +39,7 @@ class SessionHandler(AuthHandler):
                             BaseSuccessSchema
         '''
 
-        lg.warn(f'Session removal for {uasid}')
+        lg.warning(f'Session removal for {uasid}')
         # TODO: implement
         self.respond()
 

@@ -3,7 +3,7 @@
 
 '''This module handles API authentication against OAuth.'''
 import logging as lg
-import time
+import asyncio
 
 import requests
 from tornado import web
@@ -12,7 +12,7 @@ from jose import jwt, jwk
 from c2ng.service.handlers.base import HandlerBase
 
 
-def fetch_keycloak_public_certs(config):
+async def fetch_keycloak_public_certs(config):
     keycloak = config['oauth']['keycloak']
     lg.info('Fetching KeyCloak public keys started')
 
@@ -26,9 +26,11 @@ def fetch_keycloak_public_certs(config):
             return
 
         except Exception as exc:
-            lg.warn(f'Exception while fetching KeyCloak public keys: {exc}')
+            lg.warning(f'Exception while fetching KeyCloak public keys: {exc}')
             lg.info('Unable to fetch KeyCloak keys, re-trying...')
-            time.sleep(keycloak['retry-timeout'])
+            timeout = keycloak['retry-timeout']
+            lg.debug(f'Waiting {timeout} seconds before retrying')
+            await asyncio.sleep(timeout)
 
 
 class AuthHandler(HandlerBase):
@@ -73,5 +75,5 @@ def get_auth_user(wkinfo, auth_header):
         return payload
 
     except Exception as exc:
-        lg.warn(f'Authentication failed: {exc}')
+        lg.warning(f'Authentication failed: {exc}')
         raise web.HTTPError(403, reason=str(exc))

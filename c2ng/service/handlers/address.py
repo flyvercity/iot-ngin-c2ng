@@ -77,7 +77,7 @@ class AddressHandler(AuthHandler):
             return
 
         if not (field := FIELD_DEFS.get(segment)):
-            lg.warn(f'Invalid segment {uasid}:{segment}')
+            lg.warning(f'Invalid segment {uasid}:{segment}')
             self.fail(AddressRequestResponseFailed, {
                 'Segment': 'invalid'
             })

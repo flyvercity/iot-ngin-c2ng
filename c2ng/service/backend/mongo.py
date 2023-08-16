@@ -2,6 +2,8 @@
 # Copyright 2023 Flyvercity
 
 '''This module implements interface with MongoDB.'''
+import logging as lg
+
 from pymongo import MongoClient
 
 
@@ -15,7 +17,9 @@ class Mongo:
             config: `mongo` section of the configuration dict
         '''
 
-        self._client = MongoClient(config['uri'])
+        uri = config['uri']
+        lg.info(f'Connecting to MongoDB on {uri}')
+        self._client = MongoClient(uri)
 
     def get_session(self, sid: str) -> dict | None:
         '''Fetch a session from a collection.

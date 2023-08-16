@@ -54,5 +54,5 @@ class UssInterface:
             return (approved, None)
 
         except Exception as exc:
-            lg.warn(f'USSP request failed: {exc}')
+            lg.warning(f'USSP request failed: {exc}')
             return (None, 'Request failed')

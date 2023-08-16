@@ -142,7 +142,7 @@ class WsNotifyHandler(ws.WebSocketHandler):
             handler(self, request)
 
         except JWTError as exc:
-            lg.warn(f'Bad JWT token: {exc}')
+            lg.warning(f'Bad JWT token: {exc}')
 
             self.write_message(json.dumps({
                 'Action': 'error',
@@ -151,7 +151,7 @@ class WsNotifyHandler(ws.WebSocketHandler):
             }))
 
         except UserWarning as exc:
-            lg.warn(f'Bad websocket message: {exc}')
+            lg.warning(f'Bad websocket message: {exc}')
 
             self.write_message(json.dumps({
                 'Action': 'error',
@@ -160,7 +160,7 @@ class WsNotifyHandler(ws.WebSocketHandler):
             }))
 
         except Exception as exc:
-            lg.warn(f'Error processing websocket message: {exc}')
+            lg.warning(f'Error processing websocket message: {exc}')
             self.close(1011, 'Internal error')
 
     def on_close(self):

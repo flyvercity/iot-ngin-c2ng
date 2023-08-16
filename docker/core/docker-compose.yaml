@@ -10,7 +10,8 @@ services:
     ports:
       - 8080:8080
     networks:
-      - c2ng
+      c2ng:
+        ipv4_address: 192.168.48.2
 
   mongo:
     image: mongo
@@ -20,7 +21,8 @@ services:
     ports:
       - 27017:27017
     networks:
-      - c2ng
+      c2ng:
+        ipv4_address: 192.168.48.3
 
   mongo-express:
     image: mongo-express
@@ -30,7 +32,8 @@ services:
     ports:
       - 8081:8081
     networks:
-      - c2ng
+      c2ng:
+        ipv4_address: 192.168.48.4
     depends_on:
       - mongo
 
@@ -44,7 +47,8 @@ services:
     ports:
       - 8086:8086
     networks:
-      - c2ng
+      c2ng:
+        ipv4_address: 192.168.48.5
 
   uss:
     image: c2ng-uss-sim
@@ -55,7 +59,8 @@ services:
     ports:
       - 9091:9091
     networks:
-      - c2ng
+      c2ng:
+        ipv4_address: 192.168.48.6
 
   c2ng:
     image: c2ng
@@ -68,7 +73,8 @@ services:
     ports:
       - 9090:9090
     networks:
-      - c2ng
+      c2ng:
+        ipv4_address: 192.168.48.7
     depends_on:
       - mongo
       - influxdb
@@ -78,6 +84,11 @@ services:
 networks:
   c2ng:
     name: c2ng-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.48.0/24
+          gateway: 192.168.48.1
 
 volumes:
   influx:

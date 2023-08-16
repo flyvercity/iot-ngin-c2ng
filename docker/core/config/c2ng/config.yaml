@@ -6,7 +6,7 @@ oauth:
   keycloak:
     base: http://oauth:8080
     realm: c2ng
-    retry-timeout: 5
+    retry-timeout: 30
 uss:
   endpoint: http://uss:9091
   oauth:
@@ -19,9 +19,9 @@ mongo:
 sliceman:
   provider: simulated
   simulated:
-    ue: 127.0.0.1
-    adx: 127.0.0.1
-    gateway: 127.0.0.1
+    ue: 192.168.48.8
+    adx: 192.168.48.9
+    gateway: 192.168.48.1
   cumucore:
     uri: https://host:port/
 security:

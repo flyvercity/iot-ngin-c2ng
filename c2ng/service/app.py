@@ -66,7 +66,11 @@ async def main():
     verbose = config['logging']['verbose']
     lg.basicConfig(level=lg.DEBUG if verbose else lg.INFO)
     lg.info('---------- Starting up ----------')
-    fetch_keycloak_public_certs(config)
+
+    lg.debug('Executing pre-start tasks')
+    await fetch_keycloak_public_certs(config)
+
+    lg.debug('Creating backend objects')
     mongo = Mongo(config['mongo'])
     uss = UssInterface(config['uss'])
     sliceman = SliceMan(config['sliceman'])
@@ -75,7 +79,7 @@ async def main():
     sessman = SessMan(mongo, uss, sliceman, secman)
     wstxman = WebsocketTicketManager()
 
-    # Perform pre-start activities
+    lg.debug('Perform pre-start activities')
     await sliceman.establish()
 
     app = web.Application(

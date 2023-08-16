@@ -52,7 +52,7 @@ class AuthHandler(web.RequestHandler):
 
             lg.info(f'Service authorized: {payload["clientHost"]}')
         except Exception as exc:
-            lg.warn(f'Authentication failed: {exc}')
+            lg.warning(f'Authentication failed: {exc}')
             raise web.HTTPError(403, reason=str(exc))
 
 

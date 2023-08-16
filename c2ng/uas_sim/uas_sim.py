@@ -79,7 +79,7 @@ def request(args, method: str, path: str, body={}, qsp={}) -> dict:
         errors = reply['Errors']
 
         if message := reply.get('Message'):
-            lg.warn(f'Error message from service: {message}')
+            lg.warning(f'Error message from service: {message}')
 
         raise UserWarning(errors)
 
@@ -270,7 +270,7 @@ class SimC2Subsystem:
                 message = await conn.read_message()
 
                 if not message:
-                    lg.warn('Websocket closed')
+                    lg.warning('Websocket closed')
                     self._subscribe = False
                     break
 
@@ -293,12 +293,12 @@ class SimC2Subsystem:
                         self._session_info = None
 
             except ws.WebSocketClosedError:
-                lg.warn('Websocket closed')
+                lg.warning('Websocket closed')
                 self._subscribe = False
                 break
 
             except Exception as exc:
-                lg.warn(f'Error receiving notification: {exc}')
+                lg.warning(f'Error receiving notification: {exc}')
                 continue
 
     async def _do_subscribe(self):
@@ -426,7 +426,9 @@ class SimC2Subsystem:
 
     def _send_plain(self, message: bytes):
         if self._peer_address:
-            self._outsocket.sendto(message, (self._peer_address, self._out_port()))
+            addr = (self._peer_address, self._out_port())
+            self._outsocket.sendto(message, addr)
+            lg.info(f'UDP packet sent to {addr}')
 
     def _send(self, message: bytes):
         packet_bytes = NORMAL_PACKET_SIGN + self._construct_sec_packet(message)
@@ -463,7 +465,7 @@ class SimC2Subsystem:
             return True
 
         if not self._peer_cert_info:
-            lg.warn('Peer certificate is missing - resetting')
+            lg.warning('Peer certificate is missing - resetting')
             return True
 
 
@@ -543,7 +545,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
             return rtt, False
 
         except TimeoutError:
-            lg.warn('Probe timeout')
+            lg.warning('Probe timeout')
             return None, True
 
     def _measure_enc_rtt(self):
@@ -568,14 +570,14 @@ class SimUaC2Subsystem(SimC2Subsystem):
             lg.info(f'Encrypted RTT: {rtt} ms')
 
         except TimeoutError:
-            lg.warn('Encrypted probe timeout')
+            lg.warning('Encrypted probe timeout')
 
         except InvalidSignature:
-            lg.warn('Invalid peer signature - resetting peer cert')
+            lg.warning('Invalid peer signature - resetting peer cert')
             self._peer_cert_info = None
 
         except ValueError:
-            lg.warn('Invalid peer public key - resetting peer cert')
+            lg.warning('Invalid peer public key - resetting peer cert')
             self._peer_cert_info = None
 
     async def _work_cycle(self):
@@ -635,7 +637,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
             lg.info('Signal reported')
         else:
             errors = response['Errors']
-            lg.warn(f'There was an error while sending the signal: {errors}')
+            lg.warning(f'There was an error while sending the signal: {errors}')
 
 
 class SimAdxC2Subsystem(SimC2Subsystem):
@@ -687,11 +689,11 @@ class SimAdxC2Subsystem(SimC2Subsystem):
                     lg.info('Encrypted echo packet sent back')
 
                 except InvalidSignature:
-                    lg.warn('Invalid peer signature - resetting peer cert')
+                    lg.warning('Invalid peer signature - resetting peer cert')
                     self._peer_cert_info = None
 
                 except ValueError:
-                    lg.warn('Invalid peer public key - resetting peer cert')
+                    lg.warning('Invalid peer public key - resetting peer cert')
                     self._peer_cert_info = None
 
             if self._need_reinit():
@@ -765,6 +767,7 @@ async def main():
 
     args = parser.parse_args()
     u.setup_logging(args)
+    lg.info('------ Starting ------')
 
     if args.subsystem == 'ua':
         lg.info('Selected UA subsystem')

@@ -11,7 +11,8 @@ services:
     ports:
       - 9092:9092/udp
     networks:
-      - c2ng
+      c2ng:
+        ipv4_address: 192.168.48.8
 
   c2ng-adx:
     image: c2ng-uas-sim
@@ -24,7 +25,8 @@ services:
     ports:
       - 9093:9093/udp
     networks:
-      - c2ng
+      c2ng:
+        ipv4_address: 192.168.48.9
 
 networks:
   c2ng:
