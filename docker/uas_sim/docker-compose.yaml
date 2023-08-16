@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  c2ng-ua:
+    image: c2ng-uas-sim
+    env_file:
+      - ../../.env
+    volumes:
+      - ../../c2ng/common:/app/c2ng/common
+      - ../../c2ng/uas_sim:/app/c2ng/uas_sim
+    ports:
+      - 9092:9092/udp
+    networks:
+      - c2ng
+
+  c2ng-adx:
+    image: c2ng-uas-sim
+    entrypoint: ["python3", "c2ng/uas_sim/uas_sim.py", "adx"]
+    env_file:
+      - ../../.env
+    volumes:
+      - ../../c2ng/common:/app/c2ng/common
+      - ../../c2ng/uas_sim:/app/c2ng/uas_sim
+    ports:
+      - 9093:9093/udp
+    networks:
+      - c2ng
+
+networks:
+  c2ng:
+    name: c2ng-net
+    external: true

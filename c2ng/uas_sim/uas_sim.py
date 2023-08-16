@@ -351,7 +351,7 @@ class SimC2Subsystem:
                 break
 
             except UserWarning as warn:
-                lg.warn(str(warn))
+                lg.warning(str(warn))
                 time.sleep(5)
 
             except Exception:
@@ -451,15 +451,15 @@ class SimC2Subsystem:
 
     def _need_reinit(self):
         if not self._subscribe:
-            lg.warn('Subscription cancelled - resetting')
+            lg.warning('Subscription cancelled - resetting')
             return True
 
         if not self._session_info:
-            lg.warn('Session info is missing - resetting')
+            lg.warning('Session info is missing - resetting')
             return True
 
         if not self._peer_address:
-            lg.warn('Peer address is missing - resetting')
+            lg.warning('Peer address is missing - resetting')
             return True
 
         if not self._peer_cert_info:
@@ -767,8 +767,10 @@ async def main():
     u.setup_logging(args)
 
     if args.subsystem == 'ua':
+        lg.info('Selected UA subsystem')
         Sim = SimUaC2Subsystem
     else:
+        lg.info('Selected ADX subsystem')
         Sim = SimAdxC2Subsystem
 
     with Sim(args) as sim:

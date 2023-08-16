@@ -3,9 +3,9 @@ version: '3'
 services:
   oauth:
     image: quay.io/keycloak/keycloak
-    restart: unless-stopped
     env_file:
-      - .env
+      - ../../.env
+    restart: unless-stopped
     command: [ 'start-dev' ]
     ports:
       - 8080:8080
@@ -14,21 +14,21 @@ services:
 
   mongo:
     image: mongo
+    env_file:
+      - ../../.env
     restart: unless-stopped
     ports:
       - 27017:27017
-    env_file:
-      - .env
     networks:
       - c2ng
 
   mongo-express:
     image: mongo-express
+    env_file:
+      - ../../.env
     restart: unless-stopped
     ports:
       - 8081:8081
-    env_file:
-      - .env
     networks:
       - c2ng
     depends_on:
@@ -36,9 +36,9 @@ services:
 
   influxdb:
     image: influxdb
-    restart: unless-stopped
     env_file:
-      - .env
+      - ../../.env
+    restart: unless-stopped
     volumes:
       - influx:/var/lib/influxdb2
     ports:
@@ -49,9 +49,9 @@ services:
   uss:
     image: c2ng-uss-sim
     env_file:
-      - .env
+      - ../../.env
     volumes:
-      - ./c2ng/uss_sim:/app/c2ng/uss_sim
+      - ../../c2ng/uss_sim:/app/c2ng/uss_sim
     ports:
       - 9091:9091
     networks:
@@ -60,11 +60,11 @@ services:
   c2ng:
     image: c2ng
     env_file:
-      - .env
+      - ../../.env
     volumes:
-      - ./c2ng/common:/app/c2ng/common
-      - ./c2ng/service:/app/c2ng/service
-      - ./docker/core/config:/app/config
+      - ../../c2ng/common:/app/c2ng/common
+      - ../../c2ng/service:/app/c2ng/service
+      - ../../docker/core/config:/app/config
     ports:
       - 9090:9090
     networks:
@@ -75,24 +75,10 @@ services:
       - oauth
       - uss
 
-  c2ng-ua:
-    image: c2ng-uas-sim
-    env_file:
-      - .env
-    volumes:
-      - ./c2ng/common:/app/c2ng/common
-      - ./c2ng/uas_sim:/app/c2ng/uas_sim
-    ports:
-      - 9092:9092/udp
-    networks:
-      - c2ng
-    depends_on:
-      - c2ng
-    profiles:
-      - noautostart
-
 networks:
   c2ng:
+    name: c2ng-net
 
 volumes:
   influx:
+    name: c2ng-influx
