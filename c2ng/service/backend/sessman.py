@@ -50,6 +50,15 @@ class SessMan:
 
     def ua_session(self, request):
         uasid = request['UasID']
+
+        if 'IMSI' not in request:
+            return (
+                None,
+                {
+                    'Request': 'imsi_required'
+                }
+            )
+
         approved, error = self.uss.request(uasid)
 
         if error:

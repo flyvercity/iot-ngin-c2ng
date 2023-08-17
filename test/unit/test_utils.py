@@ -14,6 +14,26 @@ UAS_PASSWORD = os.getenv('C2NG_UA_DEFAULT_PASSWORD')
 UAS_SECRET = os.getenv('C2NG_UAS_CLIENT_SECRET')
 
 
+class BadReply(Exception):
+    '''Base server's bad response.'''
+    pass
+
+
+class BadReplyNoSuccess(BadReply):
+    '''Server's response has no Success field.'''
+    pass
+
+
+class BadReplyNoErrors(BadReply):
+    '''Server's response has no Errors field but reply is not successful.'''
+    pass
+
+
+class BadReplyWithErrors(BadReply):
+    '''Server's response has Errors field.'''
+    pass
+
+
 def auth_request(method: str, path: str, body={}, qsp={}) -> dict:
     '''Make a authenticated request to the service.
 
@@ -27,7 +47,9 @@ def auth_request(method: str, path: str, body={}, qsp={}) -> dict:
         Response as a JSON object.
 
     Raises:
-        UserWarning: when server's response is malformed.
+        BadReplyNoSuccess: server's response has no Success field.
+        BadReplyNoErrors: server's response has no Errors field but reply is not successful.
+        BadReplyWithErrors: server's response has Errors field.
     '''
 
     print(f'CREDS [{AUTH_URL}], [{UAS_ID}], [{UAS_PASSWORD}], [{UAS_SECRET}]')
@@ -48,17 +70,17 @@ def auth_request(method: str, path: str, body={}, qsp={}) -> dict:
     reply = r.json()
 
     if 'Success' not in reply:
-        raise UserWarning(f'Malformed reply: {r.text}')
+        raise BadReplyNoSuccess(f'Malformed reply: {r.text}')
 
     if not reply['Success']:
         if 'Errors' not in reply:
-            raise UserWarning(f'Malformed failure reply: {r.text}')
+            raise BadReplyNoErrors(f'Malformed failure reply: {r.text}')
 
         errors = reply['Errors']
 
         if message := reply.get('Message'):
-            print(f'Error message from service: {message}')
+            print(f'Aux error message from service: {message}')
 
-        raise UserWarning(errors)
+        raise BadReplyWithErrors(errors)
 
     return reply
