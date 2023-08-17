@@ -7,6 +7,18 @@ src := $(wildcard \
 	uss-sim/src/*.py \
 )
 
+deps-check:
+	which git
+	which python3
+	which docker
+	which docker-compose
+
+deps-check-docs:
+	which darglint
+	which pdflatex
+	which lazydocs
+	which pandoc
+
 # Core and simulators
 
 build-core: 
@@ -18,13 +30,13 @@ build-uss-sim:
 build-uas-sim:
 	docker build -t c2ng-uas-sim:latest -f docker/uas_sim/Dockerfile .
 
-build: build-core build-uss-sim build-uas-sim
+build: deps-check build-core build-uss-sim build-uas-sim
 
 prerun:
 	./cli.sh cryptokeys
 
 up: build prerun
-	docker-compose up -d
+	./scripts/ctrl-core.sh up -d
 
 start: up
 	./cli.sh keycloak
@@ -33,6 +45,9 @@ start: up
 
 build-unit-tests:
 	docker build -t c2ng-unit-tests:latest -f test/docker/Dockerfile .
+
+test: build-unit-tests
+	./scripts/test-unit.sh
 
 # API specification
 
@@ -103,4 +118,4 @@ $(deliverable): docbuild/title.pdf docbuild/body.pdf
 						   docbuild/title.pdf \
 						   docbuild/body.pdf
 
-docs: $(deliverable)
+docs: deps-check-docs $(deliverable)
