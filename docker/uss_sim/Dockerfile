@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
+
 FROM python:3.10
 
 EXPOSE 9091
