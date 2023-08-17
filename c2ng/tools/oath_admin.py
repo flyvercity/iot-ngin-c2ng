@@ -36,7 +36,7 @@ def run(args: dict):
         except Exception as exc:
             print(f'KeyCloak connection failed: {exc}, retrying...')
             print('Press Ctrl-C to abort')
-            time.sleep(3)
+            time.sleep(30)
 
     admin = KeycloakAdmin(connection=conn)
 

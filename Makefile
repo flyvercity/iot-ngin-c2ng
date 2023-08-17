@@ -32,11 +32,14 @@ build-uas-sim:
 
 build: deps-check build-core build-uss-sim build-uas-sim
 
-prerun:
+docker/core/config/c2ng/private.pem:
 	./cli.sh cryptokeys
+
+prerun: docker/core/config/c2ng/private.pem
 
 up: build prerun
 	./scripts/ctrl-core.sh up -d
+	./scripts/ctrl-sims.sh create
 
 start: up
 	./cli.sh keycloak
