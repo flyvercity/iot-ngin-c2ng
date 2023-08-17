@@ -1,9 +1,13 @@
+# Environment
+
 src := $(wildcard \
 	core/service/*.py \
 	core/service/handlers/*.py \
 	tools/*.py \
 	uss-sim/src/*.py \
 )
+
+# Core and simulators
 
 build-core: 
 	docker build -t c2ng:latest -f docker/core/Dockerfile .
@@ -25,7 +29,12 @@ up: build prerun
 start: up
 	./cli.sh keycloak
 
-# Generate API specification
+# Tests
+
+build-unit-tests:
+	docker build -t c2ng-unit-tests:latest -f test/docker/Dockerfile .
+
+# API specification
 
 docbuild:
 	mkdir -p docbuild
