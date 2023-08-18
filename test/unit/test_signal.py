@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright 2023 Flyvercity
 
-import os
 from datetime import datetime
 
 import pytest
@@ -48,5 +47,4 @@ def test_signal_report(with_signal_report):
 
 def test_get_signal_stats(with_signal_report):
     stats = u.auth_request('GET', f'/signal/{UAS_ID}')
-    print('STATS', stats)
-    assert False
+    assert len(stats['Stats']) > 0

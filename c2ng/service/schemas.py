@@ -197,4 +197,8 @@ class SignalRequestResponseFailed(ErrorSchema):
 
 
 class SignalRequestResponse(BaseSuccessSchema):
-    Stats = fields.String()
+    Stats = fields.List(
+        fields.Integer,
+        required=True,
+        description='Signal averaged statistics'
+    )

@@ -9,6 +9,10 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 
+MEASUREMENT_NAME = 'cell-signal'
+ESTIMATION_WINDOW = 30
+
+
 class Influx():
     '''Influx Client Helper Class.'''
 
@@ -37,7 +41,7 @@ class Influx():
         signal = packet.get('signal')
         perf = packet.get('perf')
 
-        point = Point('cell-signal').tag('UasID', uasid)
+        point = Point(MEASUREMENT_NAME).tag('uasid', uasid)
 
         if signal:
             point.tag('radio', signal.get('radio'))
@@ -76,20 +80,23 @@ class Influx():
     def read(self, uasid: str):
         try:
             query_api = self._client.query_api()
+            bucket = self._as_bucket
 
             query = f'''
-                from(bucket: "{self._as_bucket}")
-                |> range(start: -10m)
-                |> filter(fn: (r) => r._measurement == "{uasid}")
+                from(bucket: "{bucket}")
+                    |> range(start: -{ESTIMATION_WINDOW}m)
+                    |> filter(fn: (r) => r._measurement == "{MEASUREMENT_NAME}")
+                    |> filter(fn: (r) => r.uasid == "{uasid}")
+                    |> filter(fn: (r) => r._field == "RSRP")
             '''
 
             lg.debug(f'Querying InfluxDB: {query}')
             tables = query_api.query(query)
 
-            response = ""
+            response = []
             for table in tables:
                 for record in table.records:
-                    response += str(record) + "\n"
+                    response.append(record['_value'])
 
             return response, None
 
