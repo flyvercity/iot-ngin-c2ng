@@ -4,15 +4,18 @@
 import os
 from datetime import datetime
 
+import pytest
+
 import test_utils as u
 
 
-UAS_ID = os.getenv('C2NG_SIM_DRONE_ID')
+# NB: Using surrogate UAS ID to avoid polluting the database.
+UAS_ID = 'test_uas_id'
 
 
-def test_signal_report():
-    u.auth_request('POST', '/signal', body={
-        'UasID': 'test_uas_id',
+@pytest.fixture(scope='module')
+def with_signal_report():
+    u.auth_request('POST', f'/signal/{UAS_ID}', body={
         'Packet': {
             'timestamp': {
                 'unix': datetime.now().timestamp(),
@@ -37,3 +40,13 @@ def test_signal_report():
             }
         }
     })
+
+
+def test_signal_report(with_signal_report):
+    pass
+
+
+def test_get_signal_stats(with_signal_report):
+    stats = u.auth_request('GET', f'/signal/{UAS_ID}')
+    print('STATS', stats)
+    assert False

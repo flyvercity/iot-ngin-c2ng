@@ -34,6 +34,7 @@ class BaseSuccessSchema(Schema):
 
 class ErrorSchema(Schema):
     Success = fields.Boolean(validate=validate.Equal(False), description='Failure flag.')
+    Message = fields.String(description='Auxillary error message')
 
 
 class ValidationErrorSchema(ErrorSchema):
@@ -146,7 +147,6 @@ class AddressRequestResponse(BaseSuccessSchema):
 
 
 class SignalStatsReportRequest(Schema):
-    UasID = fields.String(required=True)
     Packet = fields.Nested(FVCPacket, required=True)
 
 
@@ -180,3 +180,21 @@ class AsyncSubscribeSchema(AsyncIncomingSchema):
 
 class AsyncUnsubscribeSchema(AsyncIncomingSchema):
     pass
+
+
+class SignalRequestResponseFailed(ErrorSchema):
+    Errors = fields.Nested(
+        {
+            'UasID': fields.String(validate=validate.OneOf([
+                'not_found'
+            ])),
+            'Database': fields.String(validate=validate.OneOf([
+                'unable_to_read'
+            ]))
+        },
+        required=True
+    )
+
+
+class SignalRequestResponse(BaseSuccessSchema):
+    Stats = fields.String()

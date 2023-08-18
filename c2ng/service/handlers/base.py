@@ -71,16 +71,21 @@ class HandlerBase(web.RequestHandler):
         data['Success'] = True
         self._return(ResponseSchema, data)
 
-    def fail(self, ResponseSchema: type, errors: dict):
+    def fail(self, ResponseSchema: type, errors: dict, message: str = None):
         '''Produces a graceful failure response.
 
         Args:
             ResponseSchema: a schema of the erroneous response, subclass of `ErrorSchema`.
             errors: a dict with structured error.
+            message: an optional error message.
         '''
 
         self.set_status(400)
         response = {'Success': False, 'Errors': errors}
+
+        if message:
+            response['Message'] = message
+
         self._return(ResponseSchema, response)
 
     def write_error(self, status_code, **kwargs):

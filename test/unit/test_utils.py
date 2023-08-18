@@ -65,6 +65,7 @@ def auth_request(method: str, path: str, body={}, qsp={}) -> dict:
     headers = {'Authentication': f'Bearer {access_token}'}
     url = SERVICE_URL + path
     r = requests.request(method=method, url=url, json=body, params=qsp, headers=headers)
+    print('RAW REPLY', r.text)
     reply = r.json()
 
     if 'Success' not in reply:

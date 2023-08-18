@@ -5,7 +5,9 @@
 import logging as lg
 
 from c2ng.service.schemas import (
-    SignalStatsReportRequest
+    SignalStatsReportRequest,
+    SignalRequestResponse,
+    SignalRequestResponseFailed
 )
 
 from c2ng.service.handlers.auth import AuthHandler
@@ -14,8 +16,12 @@ from c2ng.service.handlers.auth import AuthHandler
 class SignalStatsHandler(AuthHandler):
     '''Signal Statistics Reporting Handler'''
 
-    def post(self):
+    def post(self, uasid):
         '''Receives a measurement sample.
+
+        Args:
+            uasid: Logical UAS identifier
+
         ---
         summary: Receives a sample of signal measurements from a UA with reference time and position.
 
@@ -26,6 +32,14 @@ class SignalStatsHandler(AuthHandler):
                 application/json:
                     schema:
                         SignalStatsReportRequest
+
+        parameters:
+            -   in: path
+                name: UasID
+                schema:
+                    type: string
+                required: true
+                description: UAS ID that sent the sample.
 
         responses:
             200:
@@ -45,6 +59,51 @@ class SignalStatsHandler(AuthHandler):
         if not (request := self.get_request(SignalStatsReportRequest)):
             return
 
-        self.influx.write_signal(request['UasID'], request)
-        lg.info(f'Signal data written for {request["UasID"]}')
+        self.influx.write_signal(uasid, request['Packet'])
+        lg.info(f'Signal data written for {uasid}')
         self.respond()
+
+    def get(self, uasid):
+        '''Returns signal statistics for a given UAS.
+
+        Args:
+            uasid: Logical UAS identifier
+
+        ---
+        summary: Request a current address from existing connectivity session.
+
+        parameters:
+            -   in: path
+                name: UasID
+                schema:
+                    type: string
+                required: true
+                description: UAS ID for which to fetch the peer's address.
+
+        responses:
+            200:
+                description: Success payload containing peer's address
+                content:
+                    application/json:
+                        schema:
+                            SignalRequestResponse
+            400:
+                description: Payload containing error description
+                content:
+                    application/json:
+                        schema:
+                            SignalRequestResponseFailed
+        '''
+
+        response, errors = self.influx.read(uasid)
+
+        if errors:
+            self.fail(
+                SignalRequestResponseFailed,
+                errors={'Database': 'unable_to_read'},
+                message=str(errors)
+            )
+        else:
+            self.respond(SignalRequestResponse, {
+                'Stats': response
+            })

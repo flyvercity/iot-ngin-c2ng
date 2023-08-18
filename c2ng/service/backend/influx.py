@@ -25,18 +25,17 @@ class Influx():
         self._client = InfluxDBClient(url=url, token=token, org=self._org)
         self._as_bucket = config['bucket']
 
-    def write_signal(self, uasid: str, measurement: dict):
+    def write_signal(self, uasid: str, packet: dict):
         write_api = self._client.write_api(write_options=SYNCHRONOUS)
 
-        lg.error(f'Writing {measurement} to {self._as_bucket}')
+        lg.debug(f'Writing {packet} to {self._as_bucket}')
 
-        packet = measurement['Packet']
         position = packet.get('position')
         location = position.get('location') if position else None
         attitude = position.get('attitude') if position else None
         speeds = position.get('speeds') if position else None
         signal = packet.get('signal')
-        perf = packet.get('perf') 
+        perf = packet.get('perf')
 
         point = Point('cell-signal').tag('UasID', uasid)
 
@@ -75,16 +74,25 @@ class Influx():
         write_api.write(bucket=self._as_bucket, record=point, org=self._org)
 
     def read(self, uasid: str):
-        query_api = self._client.query_api()
+        try:
+            query_api = self._client.query_api()
 
-        query = f'''
-            from(bucket: "{self._as_bucket}")
-            |> range(start: -10m)
-            |> filter(fn: (r) => r._measurement == f"{uasid}")
-        '''
+            query = f'''
+                from(bucket: "{self._as_bucket}")
+                |> range(start: -10m)
+                |> filter(fn: (r) => r._measurement == "{uasid}")
+            '''
 
-        tables = query_api.query(query)
+            lg.debug(f'Querying InfluxDB: {query}')
+            tables = query_api.query(query)
 
-        for table in tables:
-            for record in table.records:
-                print(record)
+            response = ""
+            for table in tables:
+                for record in table.records:
+                    response += str(record) + "\n"
+
+            return response, None
+
+        except Exception as exc:
+            lg.error(f'Failed to read from InfluxDB: {exc}')
+            return None, 'Database unavailable'

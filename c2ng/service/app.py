@@ -51,7 +51,7 @@ def handlers():
         (r'/session', SessionHandler),
         (r'/certificate/([^/]+)/([^/]+)', CertificateHandler),
         (r'/address/([^/]+)/([^/]+)', AddressHandler),
-        (r'/signal', SignalStatsHandler),
+        (r'/signal/([^/]+)', SignalStatsHandler),
         (r'/notifications/auth/([^/]+)/([^/]+)', WebsocketAuthHandler),
         (r'/notifications/websocket', WsNotifyHandler)
     ]
