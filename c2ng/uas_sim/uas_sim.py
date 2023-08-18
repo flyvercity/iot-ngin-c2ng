@@ -611,30 +611,23 @@ class SimUaC2Subsystem(SimC2Subsystem):
         sim_signal_flux = int(15*random())
 
         response = request(self._args, 'POST', '/signal', body={
-            'ReferenceTime': datetime.now().timestamp(),
             'UasID': self._args.uasid,
-            'Radio': '5G',
-            'Cell': '1234567890',
-            'Waypoint': {
-                'Latitude': 35.0,
-                'Longitude': 35.0,
-                'Altitude': 100.0
-            },
-            'Roll': 0,
-            'Pitch': 0,
-            'Yaw': 0,
-            'VNorth': 0.0,
-            'VEast': 0.0,
-            'VDown': 0.0,
-            'VAir': 10.0,
-            'Baro': 100.0,
-            'Heading': 35,
-            'RSRP': -99 + sim_signal_flux,
-            'RSRQ': -99 + sim_signal_flux,
-            'RSSI': -99 + sim_signal_flux,
-            'SINR': -99 + sim_signal_flux,
-            'HeartbeatLoss': lost,
-            'RTT': rtt
+            'Packet': {
+                'timestamp': {
+                    'unix': datetime.now().timestamp(),
+                },
+                'signal': {
+                    'radio': '5G',
+                    'RSRP': -99 + sim_signal_flux,
+                    'RSRQ': -99 + sim_signal_flux,
+                    'RSSI': -99 + sim_signal_flux,
+                    'SINR': -99 + sim_signal_flux,
+                },
+                'perf': {
+                    'heartbeat_loss': lost,
+                    'RTT': rtt
+                }
+            }
         })
 
         if response['Success']:

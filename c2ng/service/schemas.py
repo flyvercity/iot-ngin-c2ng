@@ -4,6 +4,8 @@
 '''This module defines Input/Output Data Object Schemas.'''
 from marshmallow import Schema, fields, validate
 
+from c2ng.service.fvc_packet import FVCPacket
+
 
 def uasid():
     '''Generate standard UAS ID field.
@@ -37,7 +39,7 @@ class ErrorSchema(Schema):
 class ValidationErrorSchema(ErrorSchema):
     Errors = fields.Dict(
         keys=fields.String,
-        values=fields.List(fields.String),
+        values=fields.Dict(keys=fields.String, values=fields.Raw),
         description='Error identifier dict'
     )
 
@@ -143,50 +145,9 @@ class AddressRequestResponse(BaseSuccessSchema):
     )
 
 
-class GeoPointWGS84(Schema):
-    Latitude = fields.Float(description='Latitude in degress', required=True)
-    Longitude = fields.Float(description='Longitude in degress', required=True)
-    Altitude = fields.Float(description='Geodetic altitude in meters', required=True)
-
-
 class SignalStatsReportRequest(Schema):
-    ReferenceTime = fields.Float(
-        description='UNIX Timestamp',
-        required=True
-    )
-
     UasID = fields.String(required=True)
-
-    Radio = fields.String(
-        validate=validate.OneOf([
-            '4glte',
-            '5gnr'
-        ]),
-        description='Current radio access mode',
-        required=True
-    )
-
-    Waypoint = fields.Nested(GeoPointWGS84, description='Reference Position', required=True)
-    Roll = fields.Integer(description='Aircraft Roll (degrees)')
-    Pitch = fields.Integer(description='Aircraft Pitch (degrees)')
-    Yaw = fields.Integer(description='Aircraft Yaw (degrees)')
-
-    VNorth = fields.Float(description='Aircraft North Velocity (meters per second)')
-    VEast = fields.Float(description='Aircraft Eest Velocity (meters per second)')
-    VDown = fields.Float(description='Aircraft Downward Velocity (meters per second)')
-    VAir = fields.Float(description='Aircraft Air Speed (meters per second)')
-    Baro = fields.Float(description='Aircraft Barometric Altitude')
-    Heading = fields.Float(description='Aircraft True Heading (degrees)')
-
-    RSRP = fields.Integer(description='Reference Signal Received Power', required=True)
-    RSRQ = fields.Integer(description='Reference Signal Received Quality')
-    RSSI = fields.Integer(description='Received Signal Strength Indicator')
-    SINR = fields.Integer(description='Signal to Interference & Noise Ratio')
-
-    HeartbeatLoss = fields.Boolean(description='Heartbeat Loss Flag', required=True)
-    RTT = fields.Integer(description='Round-Trip Time (ms)')
-    Cell = fields.String(description='Aircraft Serving physical cell identifier')
-    FrequencyBand = fields.String(description='Aircraft Serving Frequency Band Identification')
+    Packet = fields.Nested(FVCPacket, required=True)
 
 
 class WsAuthResponseSuccess(BaseSuccessSchema):

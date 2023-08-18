@@ -130,5 +130,6 @@ class HandlerBase(web.RequestHandler):
             return request
 
         except ValidationError as ve:
+            lg.warning(f'Invalid request {payload}: {ve}')
             self.fail(ValidationErrorSchema, ve.messages_dict)
             return None

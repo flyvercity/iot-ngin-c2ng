@@ -52,8 +52,6 @@ def auth_request(method: str, path: str, body={}, qsp={}) -> dict:
         BadReplyWithErrors: server's response has Errors field.
     '''
 
-    print(f'CREDS [{AUTH_URL}], [{UAS_ID}], [{UAS_PASSWORD}], [{UAS_SECRET}]')
-
     keycloak_openid = KeycloakOpenID(
         server_url=AUTH_URL,
         realm_name="c2ng",
