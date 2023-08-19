@@ -53,10 +53,8 @@ def request(args, method: str, path: str, body={}, qsp={}) -> dict:
     Raises:
         UserWarning: when server's response is malformed.
     '''
-    
-    secret = os.getenv('C2NG_UAS_CLIENT_SECRET')
 
-    lg.warning(f'CREDS [{args.auth}], [{args.uasid}], [{args.password}], [{secret}]')
+    secret = os.getenv('C2NG_UAS_CLIENT_SECRET')
 
     keycloak_openid = KeycloakOpenID(
         server_url=args.auth,
@@ -496,7 +494,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
             lg.info('Starting signal reporting loop')
 
             while True:
-                self._report_sim_signal()
+                self._report_sim_signal(None, None)
                 time.sleep(5)
 
     def _in_port(self) -> int:
@@ -594,7 +592,10 @@ class SimUaC2Subsystem(SimC2Subsystem):
             self._measure_enc_rtt()
 
             if self._args.modem == 'simulated':
+                lg.info('Reporting simulated signal')
                 self._report_sim_signal(rtt, lost)
+            else:
+                lg.info('Skipping signal reporting')
 
             if self._need_reinit():
                 break
@@ -609,24 +610,29 @@ class SimUaC2Subsystem(SimC2Subsystem):
             lost: heartbeat loss flag.
         '''
         sim_signal_flux = int(15*random())
+        uasid = self._args.uasid
 
-        response = request(self._args, 'POST', '/signal', body={
-            'UasID': self._args.uasid,
+        perf = {}
+
+        if rtt:
+            perf['RTT'] = rtt
+
+        if lost:
+            perf['heartbeat_loss'] = lost
+
+        response = request(self._args, 'POST', f'/signal/{uasid}', body={
             'Packet': {
                 'timestamp': {
                     'unix': datetime.now().timestamp(),
                 },
                 'signal': {
-                    'radio': '5G',
+                    'radio': '5GSA',
                     'RSRP': -99 + sim_signal_flux,
                     'RSRQ': -99 + sim_signal_flux,
                     'RSSI': -99 + sim_signal_flux,
                     'SINR': -99 + sim_signal_flux,
                 },
-                'perf': {
-                    'heartbeat_loss': lost,
-                    'RTT': rtt
-                }
+                'perf': perf
             }
         })
 

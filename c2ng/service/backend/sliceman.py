@@ -68,10 +68,6 @@ class SliceMan:
                     "IP": "<address>",
                     "Gateway": "<address>"
                 }
-
-        Raises:
-            RuntimeError: if SliceMan endpoint is not implemented
-
         '''
 
         return self._provider.get_adx_network_creds(uid)

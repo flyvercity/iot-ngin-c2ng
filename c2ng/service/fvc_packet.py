@@ -54,7 +54,7 @@ class FVCSignal(Schema):
 
 class FVCPerf(Schema):
     heartbeat_loss = fields.Boolean(description='Heartbeat Loss Flag')
-    RTT = fields.Integer(description='Round-Trip Time (ms)')
+    RTT = fields.Float(description='Round-Trip Time (ms)')
 
 
 class FVCPacket(Schema):

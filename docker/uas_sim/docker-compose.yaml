@@ -6,6 +6,10 @@ version: '3'
 services:
   c2ng-ua:
     image: c2ng-uas-sim
+    entrypoint: [
+        "python3", "c2ng/uas_sim/uas_sim.py", "ua",
+        "--modem", "simulated"
+      ]  
     env_file:
       - ../../.env
     volumes:

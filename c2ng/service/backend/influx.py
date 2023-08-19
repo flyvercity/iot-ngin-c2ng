@@ -83,13 +83,14 @@ class Influx():
 
         write_api.write(bucket=self._as_bucket, record=point, org=self._org)
 
-    def read(self, uasid: str, value: str, window: int):
+    def read(self, uasid: str, value: str, window: int, function='mean'):
         '''Read signal data from InfluxDB.
 
         Args:
             uasid: UAS identifier.
             value: field name to read.
             window: time window in minutes.
+            function: aggregation function (mean, max, min, etc.).
 
         Returns:
             List of values.
@@ -104,15 +105,9 @@ class Influx():
                 |> filter(fn: (r) => r._measurement == "{MEASUREMENT_NAME}")
                 |> filter(fn: (r) => r.uasid == "{uasid}")
                 |> filter(fn: (r) => r._field == "{value}")
-                |> mean()
+                |> {function}()
         '''
 
         lg.debug(f'Querying InfluxDB: {query}')
         tables = query_api.query(query)
-
-        response = []
-        for table in tables:
-            for record in table.records:
-                response.append(record['_value'])
-
-        return response
+        return tables[0].records[0]['_value']

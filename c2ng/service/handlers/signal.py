@@ -96,10 +96,10 @@ class SignalStatsHandler(AuthHandler):
         '''
 
         try:
-            response = self.statsman.get_signal_stats(uasid)
+            avg_rsrp = self.statsman.get_signal_stats(uasid)
 
             self.respond(SignalRequestResponse, {
-                'Stats': response
+                'Stats': [avg_rsrp]
             })
 
         except Exception as exc:

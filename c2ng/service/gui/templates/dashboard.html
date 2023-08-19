@@ -14,9 +14,9 @@
                     <h2>Active Sessions</h2>
                     {% for session in sessions %}
                     <div class="card">
-                        <h3>{{session['UasID']}}</h3>
-                        <p>Estimated signal quality (RSRP): {{session['AvgSignal']}}</p>
-                        <p>Estimated RTT (Round-Trip Time): {{session['AvgRTT']}}</p>
+                        <h3>ID: {{session['UasID']}}</h3>
+                        <p>Estimated signal quality (RSRP, dBm): {{session['AvgSignal']}}</p>
+                        <p>Estimated RTT (Round-Trip Time, ms): {{session['AvgRTT']}}</p>
                     </div>
                     {% end %}
                 {% end %}
