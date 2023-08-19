@@ -4,6 +4,7 @@
 '''CLI Tools to manage the KeyCloak OAuth service.'''
 import os
 import time
+import logging as lg
 
 from keycloak import KeycloakAdmin
 from keycloak import KeycloakOpenIDConnection
@@ -34,9 +35,10 @@ def run(args: dict):
                 raise UserWarning('Empty connection')
 
         except Exception as exc:
-            print(f'KeyCloak connection failed: {exc}, retrying...')
+            lg.debug(f'Exception while connecting to KeyCloak: {exc}')
+            print('KeyCloak connection failed, retrying...')
             print('Press Ctrl-C to abort')
-            time.sleep(30)
+            time.sleep(10)
 
     admin = KeycloakAdmin(connection=conn)
 

@@ -1,15 +1,22 @@
 # Environment
 
 src := $(wildcard \
-	core/service/*.py \
-	core/service/handlers/*.py \
-	tools/*.py \
-	uss-sim/src/*.py \
+	c2ng/common/*.py \
+	c2ng/service/*.py \
+	c2ng/service/handlers/*.py \
+	c2ng/service/backend/*.py \
+	c2ng/service/backend/net_providers/*.py \
+	c2ng/service/gui/*.py \
+	c2ng/uss-sim/src/*.py \
+	c2ng/uas-sim/src/*.py \
+	c2ng/tools/*.py \
 )
 
 deps-check:
-	which git
 	which python3
+	which pip3
+	pip3 --require-virtualenv install -r requirements.dev.txt -q
+	which git
 	which docker
 	which docker-compose
 
@@ -62,25 +69,33 @@ generate: docbuild
 
 # Documentation
 
+markdowns := $(wildcard docs/*.md)
+images := $(wildcard docs/*.png)
+revision := $(shell git describe --always)
+gen_markdowns := $(addprefix ../, $(wildcard docbuild/gen/*.md))
+deliverable := docbuild/release/D2.C2NG.Final.pdf
+
 darglint: $(src)
 	darglint -s google -z full $(src)
 
-.autogen: docbuild $(src)
+.autogen $(gen_markdowns): darglint $(src)
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service:`pwd`/tools lazydocs \
 		--src-base-url=https://github.com/flyvercity/iot-ngin-c2ng/blob/main/ \
-		--output-path ./docbuild \
+		--output-path ./docbuild/gen \
 		--no-watermark \
-		service \
-		tools
+		c2ng/common \
+		c2ng/service \
+		c2ng/service/handlers \
+		c2ng/service/backend \
+		c2ng/service/backend/net_providers \
+		c2ng/service/gui \
+		c2ng/uss_sim \
+		c2ng/uas_sim \
+		c2ng/tools
 	touch .autogen
 
 docbuild/title.pdf: docs/title.tex
 	pdflatex -output-directory=docbuild docs/title.tex
-
-markdowns := $(wildcard docs/*.md)
-images := $(wildcard docs/*.png)
-revision := $(shell git describe --always)
-deliverable := docbuild/release/D2.C2NG.pdf
 
 docbuild/openapi.md: docs/c2ng.yaml
 	echo "# V. API Reference\n\n" > docbuild/openapi.md
@@ -89,31 +104,23 @@ docbuild/openapi.md: docs/c2ng.yaml
 	echo "\`\`\`\n" >> docbuild/openapi.md
 
 docbuild/body.pdf: .autogen $(markdowns) $(images) docbuild/openapi.md
-	echo "# Document Version Control" > docbuild/release.md
-	echo "_This revision $(revision)_" >> docbuild/release.md
+	echo "# Document Version Control" > docs/release.md
+	echo "_This revision $(revision)_" >> docs/release.md
 	(cd docs; pandoc -s \
-		-V papersize:a4 -V geometry:margin=1in \
-		-F mermaid-filter  \
-		--toc -o ../docbuild/body.pdf \
-		GLOSSARY.md \
-		GENERAL.md \
-		START.md \
-		ADMINISTRATION.md \
-		EXPERIMENTS.md \
-		REFERENCE.md \
-		../docbuild/app.md \
-		../docbuild/secman.md \
-		../docbuild/uss.md \
-		../docbuild/sliceman.md \
-		../docbuild/mongo.md \
-		../docbuild/c2ng.md \
-		../docbuild/crypto_keys.md \
-		../docbuild/gen_openapi.md \
-		../docbuild/oath_admin.md \
-		../docbuild/openapi.md \
-		VERIFICATION.md \
-		../docbuild/release.md \
+			-V papersize:a4 -V geometry:margin=1in \
+			-F mermaid-filter  \
+			--toc -o ../docbuild/body.pdf \
+			GLOSSARY.md \
+			GENERAL.md \
+			START.md \
+			ADMINISTRATION.md \
+			EXPERIMENTS.md \
+			REFERENCE.md \
+			VERIFICATION.md \
+			$(gen_markdowns) \
+			release.md \
 	)
+
 
 $(deliverable): docbuild/title.pdf docbuild/body.pdf
 	mkdir -p docbuild/release

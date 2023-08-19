@@ -1,5 +1,6 @@
 .autogen
 docbuild
+mermaid-filter.err
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

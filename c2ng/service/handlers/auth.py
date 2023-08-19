@@ -23,7 +23,9 @@ async def fetch_keycloak_public_certs(config):
             wkurl = f'{base}/realms/{realm}/protocol/openid-connect/certs'
             lg.info(f"Fetching KeyCloak public keys: {wkurl}")
             config['wkinfo'] = requests.get(wkurl).json()
-            return
+
+            if 'keys' in config['wkinfo']:
+                return
 
         except Exception as exc:
             lg.warning(f'Exception while fetching KeyCloak public keys: {exc}')
