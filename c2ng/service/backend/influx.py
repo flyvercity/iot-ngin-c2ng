@@ -110,4 +110,11 @@ class Influx():
 
         lg.debug(f'Querying InfluxDB: {query}')
         tables = query_api.query(query)
+
+        if not tables:
+            return None
+
+        if not tables[0].records:
+            return None
+
         return tables[0].records[0]['_value']

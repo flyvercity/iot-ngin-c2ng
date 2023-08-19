@@ -1,9 +1,46 @@
+<!-- SPDX-License-Identifier: MIT -->
+<!-- Copyright 2023 Flyvercity -->
+
 <html lang="en" data-theme="dark">
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
             <title>Dashboard</title>
+            <style>
+                .dot {
+                    height: 25px;
+                    width: 25px;
+                    border-radius: 50%;
+                    display: inline-block;
+                }
+                
+                .none {
+                    background-color: #AAAAAA;
+                }
+            
+                .excellent {
+                    background-color: #00FF00;
+                }
+                
+                .good {
+                    background-color: #22AA22;
+                }
+
+                .fair {
+                    background-color: #FFFF00;
+                }
+
+                .poor {
+                    background-color: #FF0000;
+                }
+
+                .spacer {
+                    min-width: 50px;
+                    width: 50px;
+                    max-width: 50px;
+                }
+            </style>
         </head>
         <body>
             <main class="container">
@@ -13,10 +50,26 @@
                 {% else %}
                     <h2>Active Sessions</h2>
                     {% for session in sessions %}
-                    <div class="card">
+                    <div>
                         <h3>ID: {{session['UasID']}}</h3>
-                        <p>Estimated signal quality (RSRP, dBm): {{session['AvgSignal']}}</p>
-                        <p>Estimated RTT (Round-Trip Time, ms): {{session['AvgRTT']}}</p>
+                        <table>
+                            <tr>
+                                <td>
+                                    <span class="dot {{session['SignalClass']}}"/>
+                                </td>
+                                <td>
+                                    Estimated signal quality (RSRP, dBm): {{session['AvgSignal']}}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="dot {{session['RTTClass']}}"/>
+                                </td>
+                                <td>
+                                    Estimated RTT (Round-Trip Time, ms): {{session['AvgRTT']}}
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                     {% end %}
                 {% end %}
