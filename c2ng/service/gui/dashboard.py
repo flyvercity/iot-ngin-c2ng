@@ -101,9 +101,6 @@ class DashboardHandler(HandlerBase):
                     session['RTTClass'] = get_rtt_class(session['AvgRTT'])
                     session['AvgRTT'] = str(round(session['AvgRTT'], 2))
 
-            import copy
-            sessions.append(copy.deepcopy(sessions[0]))
-
             self.render('templates/dashboard.html', sessions=sessions)
 
         except Exception as e:

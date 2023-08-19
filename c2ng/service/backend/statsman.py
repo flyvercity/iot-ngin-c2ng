@@ -54,7 +54,10 @@ class StatsMan:
         sessions = self._sessman.list_sessions()
 
         for session in sessions:
-            session['AvgSignal'] = self._influx.read(session['UasID'], 'RSRP', 30)
-            session['AvgRTT'] = self._influx.read(session['UasID'], 'RTT', 30)
+            uasid = session['UasID']
+            session['AvgSignal'] = self._influx.read(uasid, 'RSRP', 30)
+            session['AvgRTT'] = self._influx.read(uasid, 'RTT', 30)
+            session['UAConnected'] = 'UA' in session
+            session['ADXConnected'] = 'ADX' in session
 
         return sessions

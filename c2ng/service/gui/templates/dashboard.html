@@ -2,77 +2,93 @@
 <!-- Copyright 2023 Flyvercity -->
 
 <html lang="en" data-theme="dark">
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
-            <title>Dashboard</title>
-            <style>
-                .dot {
-                    height: 25px;
-                    width: 25px;
-                    border-radius: 50%;
-                    display: inline-block;
-                }
-                
-                .none {
-                    background-color: #AAAAAA;
-                }
-            
-                .excellent {
-                    background-color: #00FF00;
-                }
-                
-                .good {
-                    background-color: #22AA22;
-                }
-
-                .fair {
-                    background-color: #FFFF00;
-                }
-
-                .poor {
-                    background-color: #FF0000;
-                }
-
-                .spacer {
-                    min-width: 50px;
-                    width: 50px;
-                    max-width: 50px;
-                }
-            </style>
-        </head>
-        <body>
-            <main class="container">
-                <h1>C2NG Service</h1>
-                {% if not sessions %}
-                    <p>There are no active sessions</p>
-                {% else %}
-                    <h2>Active Sessions</h2>
-                    {% for session in sessions %}
-                    <div>
-                        <h3>ID: {{session['UasID']}}</h3>
-                        <table>
-                            <tr>
-                                <td>
-                                    <span class="dot {{session['SignalClass']}}"/>
-                                </td>
-                                <td>
-                                    Estimated signal quality (RSRP, dBm): {{session['AvgSignal']}}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <span class="dot {{session['RTTClass']}}"/>
-                                </td>
-                                <td>
-                                    Estimated RTT (Round-Trip Time, ms): {{session['AvgRTT']}}
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    {% end %}
-                {% end %}
-            </main>
-        </body>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <title>Dashboard</title>
+    <style>
+        .dot {
+            height: 25px;
+            width: 25px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .none {
+            background-color: #AAAAAA;
+        }
+        
+        .excellent {
+            background-color: #00FF00;
+        }
+        
+        .good {
+            background-color: #22AA22;
+        }
+        
+        .fair {
+            background-color: #FFFF00;
+        }
+        
+        .poor {
+            background-color: #FF0000;
+        }
+        
+        .spacer {
+            min-width: 50px;
+            width: 50px;
+            max-width: 50px;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>C2NG Service</h1>
+        {% if not sessions %}
+        <p>There are no active sessions</p>
+        {% else %}
+        <h2>Active Sessions</h2>
+            {% for session in sessions %}
+            <div>
+                <h3>ID: {{session['UasID']}}</h3>
+                <table>
+                    <tr>
+                        <td>
+                            <span class="dot {{'good' if session['UAConnected'] else 'none'}}"/>
+                        </td>
+                        <td>
+                            Unmanned aircraft connected
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="dot {{'good' if session['ADXConnected'] else 'none'}}"/>
+                        </td>
+                        <td>
+                            ADX client connected
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="dot {{session['SignalClass']}}"/>
+                        </td>
+                        <td>
+                            Estimated signal quality (RSRP, dBm): {{session['AvgSignal']}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="dot {{session['RTTClass']}}"/>
+                        </td>
+                        <td>
+                            Estimated RTT (Round-Trip Time, ms): {{session['AvgRTT']}}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            {% end %}
+        {% end %}
+    </main>
+</body>
 </html>

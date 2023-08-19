@@ -47,7 +47,7 @@ class Mongo:
             upsert=True
         )
 
-    def list_sessions(self, projection=['_id']):
+    def list_sessions(self, projection=None):
         '''List all sessions.
 
         Args:
@@ -57,9 +57,16 @@ class Mongo:
             A list of session JSON objects.
         '''
 
+        query = {}
+
+        if projection:
+            query['projection'] = projection
+
+        def convert(s):
+            s['UasID'] = s['_id']
+            return s
+
         return list(map(
-                lambda s: {'UasID': s['_id']},
-                self._client.c2ng.c2session.find(
-                    projection=projection
-                )
+            convert,
+            self._client.c2ng.c2session.find(**query)
         ))
