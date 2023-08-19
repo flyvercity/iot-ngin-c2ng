@@ -143,3 +143,6 @@ class SessMan:
             },
             None
         )
+
+    def list_sessions(self):
+        return self.mongo.list_sessions()

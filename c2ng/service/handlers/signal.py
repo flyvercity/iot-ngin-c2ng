@@ -95,15 +95,17 @@ class SignalStatsHandler(AuthHandler):
                             SignalRequestResponseFailed
         '''
 
-        response, errors = self.influx.read(uasid)
+        try:
+            response = self.statsman.get_signal_stats(uasid)
 
-        if errors:
-            self.fail(
-                SignalRequestResponseFailed,
-                errors={'Database': 'unable_to_read'},
-                message=str(errors)
-            )
-        else:
             self.respond(SignalRequestResponse, {
                 'Stats': response
             })
+
+        except Exception as exc:
+            lg.error(f'Failed to read signal stats: {exc}')
+
+            self.fail(
+                SignalRequestResponseFailed,
+                errors={'Database': 'unable_to_read'},
+            )

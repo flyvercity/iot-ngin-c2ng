@@ -5,15 +5,10 @@
 import logging as lg
 import json
 
-import tornado.web as web
 from marshmallow.exceptions import ValidationError
 
-from c2ng.service.backend.uss import UssInterface  # noqa
-from c2ng.service.backend.mongo import Mongo  # noqa
-from c2ng.service.backend.sliceman import SliceMan  # noqa
-from c2ng.service.backend.secman import SecMan  # noqa
-from c2ng.service.backend.influx import Influx  # noqa
-from c2ng.service.backend.sessman import SessMan  # noqa
+
+from c2ng.service.base import HandlerBase
 
 from c2ng.service.schemas import (
     BaseSuccessSchema,
@@ -21,17 +16,8 @@ from c2ng.service.schemas import (
 )
 
 
-class HandlerBase(web.RequestHandler):
+class APIHandlerBase(HandlerBase):
     '''Helper methods for request and errors handling.'''
-
-    def prepare(self):
-        '''Creates shortcuts to subservices.'''
-        self.uss = self.settings['uss']  # type: UssInterface
-        self.mongo = self.settings['mongo']  # type: Mongo
-        self.sliceman = self.settings['sliceman']  # type: SliceMan
-        self.secman = self.settings['secman']  # type: SecMan
-        self.influx = self.settings['influx']  # type: Influx
-        self.sessman = self.settings['sessman']  # type: SessMan
 
     def _return(self, ResponseSchema: type, response: dict):
         '''Validate and return a response.

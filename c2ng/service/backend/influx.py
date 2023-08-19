@@ -10,7 +10,6 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 
 
 MEASUREMENT_NAME = 'cell-signal'
-ESTIMATION_WINDOW = 30
 
 
 class Influx():
@@ -30,6 +29,13 @@ class Influx():
         self._as_bucket = config['bucket']
 
     def write_signal(self, uasid: str, packet: dict):
+        '''Write signal data to InfluxDB.
+
+        Args:
+            uasid: UAS identifier.
+            packet: signal data packet.
+        '''
+
         write_api = self._client.write_api(write_options=SYNCHRONOUS)
 
         lg.debug(f'Writing {packet} to {self._as_bucket}')
@@ -77,29 +83,36 @@ class Influx():
 
         write_api.write(bucket=self._as_bucket, record=point, org=self._org)
 
-    def read(self, uasid: str):
-        try:
-            query_api = self._client.query_api()
-            bucket = self._as_bucket
+    def read(self, uasid: str, value: str, window: int):
+        '''Read signal data from InfluxDB.
 
-            query = f'''
-                from(bucket: "{bucket}")
-                    |> range(start: -{ESTIMATION_WINDOW}m)
-                    |> filter(fn: (r) => r._measurement == "{MEASUREMENT_NAME}")
-                    |> filter(fn: (r) => r.uasid == "{uasid}")
-                    |> filter(fn: (r) => r._field == "RSRP")
-            '''
+        Args:
+            uasid: UAS identifier.
+            value: field name to read.
+            window: time window in minutes.
 
-            lg.debug(f'Querying InfluxDB: {query}')
-            tables = query_api.query(query)
+        Returns:
+            List of values.
+        '''
 
-            response = []
-            for table in tables:
-                for record in table.records:
-                    response.append(record['_value'])
+        query_api = self._client.query_api()
+        bucket = self._as_bucket
 
-            return response, None
+        query = f'''
+            from(bucket: "{bucket}")
+                |> range(start: -{window}m)
+                |> filter(fn: (r) => r._measurement == "{MEASUREMENT_NAME}")
+                |> filter(fn: (r) => r.uasid == "{uasid}")
+                |> filter(fn: (r) => r._field == "{value}")
+                |> mean()
+        '''
 
-        except Exception as exc:
-            lg.error(f'Failed to read from InfluxDB: {exc}')
-            return None, 'Database unavailable'
+        lg.debug(f'Querying InfluxDB: {query}')
+        tables = query_api.query(query)
+
+        response = []
+        for table in tables:
+            for record in table.records:
+                response.append(record['_value'])
+
+        return response

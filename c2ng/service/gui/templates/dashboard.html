@@ -1,0 +1,25 @@
+<html lang="en" data-theme="dark">
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+            <title>Dashboard</title>
+        </head>
+        <body>
+            <main class="container">
+                <h1>C2NG Service</h1>
+                {% if not sessions %}
+                    <p>There are no active sessions</p>
+                {% else %}
+                    <h2>Active Sessions</h2>
+                    {% for session in sessions %}
+                    <div class="card">
+                        <h3>{{session['UasID']}}</h3>
+                        <p>Estimated signal quality (RSRP): {{session['AvgSignal']}}</p>
+                        <p>Estimated RTT (Round-Trip Time): {{session['AvgRTT']}}</p>
+                    </div>
+                    {% end %}
+                {% end %}
+            </main>
+        </body>
+</html>

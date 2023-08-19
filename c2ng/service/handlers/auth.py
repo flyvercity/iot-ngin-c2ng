@@ -9,7 +9,7 @@ import requests
 from tornado import web
 from jose import jwt, jwk
 
-from c2ng.service.handlers.base import HandlerBase
+from c2ng.service.handlers.base import APIHandlerBase
 
 
 async def fetch_keycloak_public_certs(config):
@@ -33,7 +33,7 @@ async def fetch_keycloak_public_certs(config):
             await asyncio.sleep(timeout)
 
 
-class AuthHandler(HandlerBase):
+class AuthHandler(APIHandlerBase):
     '''Base for all handlers for authenticated requests.'''
 
     def prepare(self):

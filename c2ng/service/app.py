@@ -16,12 +16,15 @@ from c2ng.service.backend.sliceman import SliceMan
 from c2ng.service.backend.influx import Influx
 from c2ng.service.backend.secman import SecMan
 from c2ng.service.backend.sessman import SessMan
+from c2ng.service.backend.statsman import StatsMan
 
 from c2ng.service.handlers.auth import fetch_keycloak_public_certs
 from c2ng.service.handlers.sesssion import SessionHandler
 from c2ng.service.handlers.certificate import CertificateHandler
 from c2ng.service.handlers.address import AddressHandler
 from c2ng.service.handlers.signal import SignalStatsHandler
+
+from c2ng.service.gui.dashboard import DashboardHandler
 
 from c2ng.service.handlers.notify import (
     WebsocketTicketManager,
@@ -47,13 +50,16 @@ def handlers():
     '''
 
     return [
+        # API endpoints
         (r'/', HomepageHandler),
         (r'/session', SessionHandler),
         (r'/certificate/([^/]+)/([^/]+)', CertificateHandler),
         (r'/address/([^/]+)/([^/]+)', AddressHandler),
         (r'/signal/([^/]+)', SignalStatsHandler),
         (r'/notifications/auth/([^/]+)/([^/]+)', WebsocketAuthHandler),
-        (r'/notifications/websocket', WsNotifyHandler)
+        (r'/notifications/websocket', WsNotifyHandler),
+        # GUI pages
+        (r'/gui/dashboard', DashboardHandler)
     ]
 
 
@@ -77,6 +83,7 @@ async def main():
     secman = SecMan(config['security'])
     influx = Influx(config['influx'])
     sessman = SessMan(mongo, uss, sliceman, secman)
+    statsman = StatsMan(influx, sessman)
     wstxman = WebsocketTicketManager()
 
     lg.debug('Perform pre-start activities')
@@ -91,6 +98,7 @@ async def main():
         secman=secman,
         influx=influx,
         sessman=sessman,
+        statsman=statsman,
         wstxman=wstxman
     )
 

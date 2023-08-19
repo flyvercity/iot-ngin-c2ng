@@ -46,3 +46,20 @@ class Mongo:
             session,
             upsert=True
         )
+
+    def list_sessions(self, projection=['_id']):
+        '''List all sessions.
+
+        Args:
+            projection: a list of fields to be included in the result.
+
+        Returns:
+            A list of session JSON objects.
+        '''
+
+        return list(map(
+                lambda s: {'UasID': s['_id']},
+                self._client.c2ng.c2session.find(
+                    projection=projection
+                )
+        ))
