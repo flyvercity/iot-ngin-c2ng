@@ -7,6 +7,12 @@ oauth:
     base: http://oauth:8080
     realm: c2ng
     retry-timeout: 30
+mongo:
+  uri: mongodb://root:example@mongo:27017/
+influx:
+  uri: http://influxdb:8086
+  org: c2ng
+  bucket: aerial-data
 uss:
   endpoint: http://uss:9091
   oauth:
@@ -14,8 +20,6 @@ uss:
       base: http://oauth:8080
       realm: c2ng
       auth-client-id: uss-access
-mongo:
-  uri: mongodb://root:example@mongo:27017/
 sliceman:
   provider: simulated
   simulated:
@@ -28,7 +32,9 @@ security:
   certificate: /app/config/c2ng/service.pem
   private: /app/config/c2ng/private.pem
   default-ttl: 3600
-influx:
-  uri: http://influxdb:8086
-  org: c2ng
-  bucket: aerial-data
+did:
+  issuer-key: /app/config/did/issuer.pem
+  resources:
+    sim-drone-id:
+      did: did:key:z6MkfQ13y6x3QqV9E8BTTRJVSwsWa1pLEZC6dmkF7Yb6Tcju
+      jwt: /app/config/did/sim-drone-id.jwt
