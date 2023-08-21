@@ -415,8 +415,7 @@ class SimC2Subsystem:
         packet = {
             'Message': base64.b64encode(encrypted).decode(),
             'SymmKeyInfo': base64.b64encode(enc_symm_key_info).decode(),
-            'Signature': base64.b64encode(signature).decode(),
-            'KID': self._peer_cert_info['KID']
+            'Signature': base64.b64encode(signature).decode()
         }
 
         if self._config['verbose']:
@@ -435,8 +434,6 @@ class SimC2Subsystem:
         encrypted = base64.b64decode(packet['Message'])
         signature = base64.b64decode(packet['Signature'])
         enc_symm_key_info = base64.b64decode(packet['SymmKeyInfo'])
-        kid = packet['KID']
-        lg.debug(f'Incoming KID: {kid}')
 
         lg.debug('Verifying the signature')
         self._peer_public_key.verify(
