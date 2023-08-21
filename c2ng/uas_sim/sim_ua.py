@@ -182,3 +182,9 @@ class SimUaC2Subsystem(SimC2Subsystem):
         else:
             errors = response['Errors']
             lg.warning(f'There was an error while sending the signal: {errors}')
+
+    def _initialize_did(self):
+        lg.info('Requesting Verified Credential JWT')
+        uasid = self._config['uasid']
+        response = request(self._config, 'GET', f'/did/jwt/{uasid}')
+        self._did_info = response['JWT']

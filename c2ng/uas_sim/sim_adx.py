@@ -9,7 +9,7 @@ import json
 from cryptography.exceptions import InvalidSignature
 
 import c2ng.common.c2ng_util as u
-from c2ng.uas_sim.sim_base import SimC2Subsystem, ECHO_PACKET_SIGN
+from c2ng.uas_sim.sim_base import SimC2Subsystem, ECHO_PACKET_SIGN, request
 
 
 class SimAdxC2Subsystem(SimC2Subsystem):
@@ -73,3 +73,9 @@ class SimAdxC2Subsystem(SimC2Subsystem):
 
             if self._need_reinit():
                 break
+
+    def _initialize_did(self):
+        lg.info('Requesting Verifier configuration')
+        uasid = self._config['uasid']
+        response = request(self._config, 'GET', f'/did/config/{uasid}')
+        self._did_info = response['Config']

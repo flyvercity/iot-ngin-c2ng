@@ -113,6 +113,7 @@ class SimC2Subsystem:
         self._peer_address = None
         self._peer_public_key = None
         self._notify_task = None
+        self._did_info = None
 
     def _reset_insocket(self):
         if self._insocket:
@@ -345,6 +346,9 @@ class SimC2Subsystem:
 
                 if not self._peer_cert_info:
                     self._fetch_peer_certificate()
+
+                if self._config['did'] and not self._did_info:
+                    self._initialize_did()
 
                 await self._work_cycle()
 
