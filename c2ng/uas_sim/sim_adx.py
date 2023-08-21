@@ -56,26 +56,36 @@ class SimAdxC2Subsystem(SimC2Subsystem):
 
                 try:
                     message = self._deconstruct_sec_packet(body_bytes)
+                    payload = json.loads(message.decode())
 
                     if self._config['verbose']:
-                        u.pprint(json.loads(message.decode()))
+                        u.pprint(payload)
 
-                    self._send(message)
+                    if self._config['did']:
+                        lg.debug('Adding DID Verified Credential JWT')
+                        payload['DIDJWT'] = self._did_info
+
+                    pong_message = json.dumps(payload).encode()
+                    lg.debug('Sending back encrypted echo packet')
+                    self._send(pong_message)
                     lg.info('Encrypted echo packet sent back')
+
+                    if self._config['verbose']:
+                        u.pprint(payload)
 
                 except InvalidSignature:
                     lg.warning('Invalid peer signature - resetting peer cert')
                     self._peer_cert_info = None
 
-                except ValueError:
-                    lg.warning('Invalid peer public key - resetting peer cert')
+                except ValueError as exc:
+                    lg.error(f'Invalid peer public key - resetting peer cert. Additional info: {exc}')
                     self._peer_cert_info = None
 
             if self._need_reinit():
                 break
 
     def _initialize_did(self):
-        lg.info('Requesting Verifier configuration')
+        lg.info('Requesting Verified Credential JWT')
         uasid = self._config['uasid']
-        response = request(self._config, 'GET', f'/did/config/{uasid}')
-        self._did_info = response['Config']
+        response = request(self._config, 'GET', f'/did/jwt/{uasid}')
+        self._did_info = response['JWT']

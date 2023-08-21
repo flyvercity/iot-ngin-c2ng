@@ -19,12 +19,14 @@ from cryptography import x509
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
 import tornado.websocket as ws
 
 import c2ng.common.c2ng_util as u
 
 
-RECEIVE_BUFFER = 1024
+RECEIVE_BUFFER = 4096
 '''Maximum size of the UDP receive buffer.'''
 
 ECHO_PACKET_SIGN = b'0'
@@ -375,8 +377,18 @@ class SimC2Subsystem:
         if not self._secure():
             return message
 
-        encrypted = self._peer_public_key.encrypt(
-            message,
+        lg.debug('Creating symmetric key and IV')
+        key = os.urandom(32)
+        iv = os.urandom(16)
+
+        lg.debug('Encrypting symmetric key and IV')
+        symm_key_info = json.dumps({
+            'Key': base64.b64encode(key).decode(),
+            'IV': base64.b64encode(iv).decode()
+        }).encode()
+
+        enc_symm_key_info = self._peer_public_key.encrypt(
+            symm_key_info,
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
                 algorithm=hashes.SHA256(),
@@ -384,6 +396,12 @@ class SimC2Subsystem:
             )
         )
 
+        lg.debug('Encrypting the message')
+        cipher = Cipher(algorithms.AES(key), modes.CTR(iv))
+        encryptor = cipher.encryptor()
+        encrypted = encryptor.update(message) + encryptor.finalize()
+
+        lg.debug('Signing')
         signature = self._private_key.sign(
             encrypted,
             padding.PSS(
@@ -393,10 +411,16 @@ class SimC2Subsystem:
             hashes.SHA256()
         )
 
+        lg.debug('Constructing the packet')
         packet = {
             'Message': base64.b64encode(encrypted).decode(),
-            'Signature': base64.b64encode(signature).decode()
+            'SymmKeyInfo': base64.b64encode(enc_symm_key_info).decode(),
+            'Signature': base64.b64encode(signature).decode(),
+            'KID': self._peer_cert_info['KID']
         }
+
+        if self._config['verbose']:
+            u.pprint(packet)
 
         return json.dumps(packet).encode()
 
@@ -406,10 +430,15 @@ class SimC2Subsystem:
         if not self._secure():
             return packet_bytes
 
+        lg.debug('Deconstructing the packet')
         packet = json.loads(packet_bytes.decode())
         encrypted = base64.b64decode(packet['Message'])
         signature = base64.b64decode(packet['Signature'])
+        enc_symm_key_info = base64.b64decode(packet['SymmKeyInfo'])
+        kid = packet['KID']
+        lg.debug(f'Incoming KID: {kid}')
 
+        lg.debug('Verifying the signature')
         self._peer_public_key.verify(
             signature, encrypted,
             padding.PSS(
@@ -419,8 +448,9 @@ class SimC2Subsystem:
             hashes.SHA256()
         )
 
-        message = self._private_key.decrypt(
-            encrypted,
+        lg.debug('Decrypting the symmetric key and IV')
+        dec_symm_key_info = self._private_key.decrypt(
+            enc_symm_key_info,
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
                 algorithm=hashes.SHA256(),
@@ -428,6 +458,14 @@ class SimC2Subsystem:
             )
         )
 
+        symm_key_info = json.loads(dec_symm_key_info.decode())
+        key = base64.b64decode(symm_key_info['Key'])
+        iv = base64.b64decode(symm_key_info['IV'])
+
+        lg.debug('Decrypting the message')
+        cipher = Cipher(algorithms.AES(key), modes.CTR(iv))
+        decryptor = cipher.decryptor()
+        message = decryptor.update(encrypted) + decryptor.finalize()
         return message
 
     def _send_plain(self, message: bytes):

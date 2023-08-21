@@ -15,6 +15,7 @@ from cryptography.exceptions import InvalidSignature
 
 import c2ng.common.c2ng_util as u
 from c2ng.uas_sim.sim_base import SimC2Subsystem, ECHO_PACKET_SIGN, request
+from c2ng.uas_sim.did_verifier import verify
 
 
 class SimUaC2Subsystem(SimC2Subsystem):
@@ -104,6 +105,23 @@ class SimUaC2Subsystem(SimC2Subsystem):
             if self._config['verbose']:
                 u.pprint(pong_message)
 
+            if self._config['did']:
+                lg.debug('Verifying DID Verified Credential JWT')
+                uasid = self._config['uasid']
+
+                if 'DIDJWT' not in pong_message:
+                    lg.warning('DIDJWT not found in the response')
+                    return None, True
+
+                jwt = pong_message['DIDJWT']
+                valid, error = verify(self._did_info, uasid, jwt)
+
+                if not valid:
+                    lg.warning(f'JWT verification failed: {error}')
+                    return None, True
+                else:
+                    lg.info('JWT verification OK')
+
             if pong_message['EncryptedProbe'] != uid:
                 raise UserWarning('Encrypted probe UID mismatch')
             else:
@@ -184,7 +202,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
             lg.warning(f'There was an error while sending the signal: {errors}')
 
     def _initialize_did(self):
-        lg.info('Requesting Verified Credential JWT')
+        lg.info('Requesting Verifier configuration')
         uasid = self._config['uasid']
-        response = request(self._config, 'GET', f'/did/jwt/{uasid}')
-        self._did_info = response['JWT']
+        response = request(self._config, 'GET', f'/did/config/{uasid}')
+        self._did_info = response['Config']
