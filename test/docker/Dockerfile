@@ -12,6 +12,12 @@ COPY test/docker/requirements.txt .
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
+COPY c2ng ./c2ng
 COPY test/unit ./unit
+COPY docker/core/config/did ./did
+COPY integration/ppssi/py-verifier/IAA/jwt_pep.py ./unit
+COPY integration/ppssi/py-verifier/IAA/resolver.py ./unit
+
+ENV PYTHONPATH "${PYTHONPATH}:/test"
 
 ENTRYPOINT ["pytest", "-v", "unit"]

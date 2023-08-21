@@ -17,7 +17,9 @@ RUN pip install --upgrade pip && \
 
 COPY c2ng/common ./c2ng/common
 COPY c2ng/uas_sim ./c2ng/uas_sim
+COPY integration/ppssi/py-verifier/IAA/jwt_pep.py .
+COPY integration/ppssi/py-verifier/IAA/resolver.py .
 
 ENV PYTHONPATH=/app
 
-ENTRYPOINT ["python3", "c2ng/uas_sim/uas_sim.py", "ua"]
+ENTRYPOINT ["python3", "c2ng/uas_sim/uas_sim.py"]

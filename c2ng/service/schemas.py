@@ -202,3 +202,33 @@ class SignalRequestResponse(BaseSuccessSchema):
         required=True,
         description='Signal averaged statistics'
     )
+
+
+class DIDJWTRequestResponseFailed(ErrorSchema):
+    Errors = fields.Nested(
+        {
+            'UasID': fields.String(validate=validate.OneOf([
+                'not_found'
+            ]))
+        },
+        required=True
+    )
+
+
+class DIDJWTRequestResponse(BaseSuccessSchema):
+    JWT = fields.String(required=True, description='DID JWT')
+
+
+class DIDConfigRequestResponseFailed(ErrorSchema):
+    Errors = fields.Nested(
+        {
+            'UasID': fields.String(validate=validate.OneOf([
+                'not_found'
+            ]))
+        },
+        required=True
+    )
+
+
+class DIDConfigRequestResponse(BaseSuccessSchema):
+    Config = fields.Raw(required=True, description='DID Verifier Config')

@@ -59,7 +59,7 @@ def main():
     gen_openapi.add_arg_subparsers(sp)
     crypto_keys.add_arg_subparsers(sp)
     args = parser.parse_args()
-    u.setup_logging(args)
+    u.setup_logging(args.verbose)
     Handler(args).handle()
 
 

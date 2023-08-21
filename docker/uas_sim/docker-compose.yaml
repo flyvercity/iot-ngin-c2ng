@@ -6,12 +6,10 @@ version: '3'
 services:
   c2ng-ua:
     image: c2ng-uas-sim
-    entrypoint: [
-        "python3", "c2ng/uas_sim/uas_sim.py", "ua",
-        "--modem", "simulated"
-      ]  
     env_file:
       - ../../.env
+    environment:
+      - C2NG_SIM_SUBSYSTEM=ua
     volumes:
       - ../../c2ng/common:/app/c2ng/common
       - ../../c2ng/uas_sim:/app/c2ng/uas_sim
@@ -23,9 +21,10 @@ services:
 
   c2ng-adx:
     image: c2ng-uas-sim
-    entrypoint: ["python3", "c2ng/uas_sim/uas_sim.py", "adx"]
     env_file:
       - ../../.env
+    environment:
+      - C2NG_SIM_SUBSYSTEM=adx
     volumes:
       - ../../c2ng/common:/app/c2ng/common
       - ../../c2ng/uas_sim:/app/c2ng/uas_sim

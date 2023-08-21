@@ -1,3 +1,6 @@
 [submodule "integration/airlink-capture"]
 	path = integration/airlink-capture
 	url = git@github.com:flyvercity/airlink-capture.git
+[submodule "integration/ppssi"]
+	path = integration/ppssi
+	url = git@gitlab.com:scartill/ppssi.git

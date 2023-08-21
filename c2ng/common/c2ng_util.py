@@ -18,14 +18,14 @@ def pprint(data):
         data: json data to print
     '''
     json_str = json.dumps(data, indent=4, sort_keys=True)
-    print(highlight(json_str, JsonnetLexer(), TerminalFormatter()))
+    print(highlight(json_str, JsonnetLexer(), TerminalFormatter()), flush=True)
 
 
-def setup_logging(args):
+def setup_logging(verbose=False):
     '''Setup realtime logging parameters.
 
     Args:
-        args: CLI parameters.
+        verbose: enable verbose logging
     '''
 
     # Setup realtime logging
@@ -36,6 +36,6 @@ def setup_logging(args):
     queue_listener.start()
 
     lg.basicConfig(
-        level=lg.DEBUG if args.verbose else lg.INFO,
+        level=lg.DEBUG if verbose else lg.INFO,
         format="%(asctime)s  %(message)s", handlers=[queue_handler]
     )
