@@ -36,5 +36,4 @@ did:
   issuer-key: /app/config/did/issuer.pem
   resources:
     sim-drone-id:
-      did: did:key:z6MkfQ13y6x3QqV9E8BTTRJVSwsWa1pLEZC6dmkF7Yb6Tcju
       jwt: /app/config/did/sim-drone-id.jwt

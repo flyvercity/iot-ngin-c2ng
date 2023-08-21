@@ -6,3 +6,4 @@ tornado==6.3.2
 pytest==7.4.0
 jwcrypto==1.5.0
 base58==2.1.1
+jsonpath-ng==1.5.3

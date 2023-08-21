@@ -13,6 +13,7 @@ RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 COPY test/unit ./unit
+COPY docker/core/config/did ./did
 COPY integration/ppssi/py-verifier/IAA/jwt_pep.py ./unit
 COPY integration/ppssi/py-verifier/IAA/resolver.py ./unit
 
