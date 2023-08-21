@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright 2023 Flyvercity
 
-'''CLI UA and RPS Simulators.'''
+'''UA and RPS Simulator.'''
 import os
 from datetime import datetime
 import time
@@ -227,7 +227,7 @@ class SimC2Subsystem:
 
         ip = self._session_info['IP']
         port = self._in_port()
-        lg.info(f'Binding to {ip}:{port}')
+        lg.debug(f'Binding to {ip}:{port}')
         self._reset_insocket()
         self._insocket.bind((ip, port))
 
@@ -278,7 +278,9 @@ class SimC2Subsystem:
                 payload = json.loads(message)
 
                 lg.info('Notification received')
-                u.pprint(payload)
+
+                if self._config['verbose']:
+                    u.pprint(payload)
 
                 if payload['Action'] == 'subscribed':
                     self._subscribe = True
@@ -303,12 +305,13 @@ class SimC2Subsystem:
                 continue
 
     async def _do_subscribe(self):
+        lg.info('Subscribing to notifications')
         segment = self._segment()
         uasid = self._config['uasid']
-        lg.info(f'Requesting websocket ticket for {uasid}/{segment}')
+        lg.debug(f'Requesting websocket ticket for {uasid}/{segment}')
         response = request(self._config, 'POST', f'/notifications/auth/{uasid}/{segment}')
         self._ws_ticket = response['Ticket']
-        lg.info('Websocket ticket received, connecting to the websocket')
+        lg.debug('Websocket ticket received, connecting to the websocket')
         url = self._config['websocket']
         conn = await ws.websocket_connect(f'{url}/notifications/websocket')
 
@@ -317,7 +320,7 @@ class SimC2Subsystem:
             'Action': 'subscribe'
         }))
 
-        lg.info('Notification subscription request sent')
+        lg.debug('Notification subscription request sent')
         self._notify_task = asyncio.create_task(self._notify_receive_loop(conn))
 
         while True:
@@ -429,11 +432,11 @@ class SimC2Subsystem:
         if self._peer_address:
             addr = (self._peer_address, self._out_port())
             self._outsocket.sendto(message, addr)
-            lg.info(f'UDP packet sent to {addr}')
+            lg.debug(f'UDP packet sent to {addr}')
 
     def _send(self, message: bytes):
         packet_bytes = NORMAL_PACKET_SIGN + self._construct_sec_packet(message)
-        lg.info('Transmitting')
+        lg.debug('Transmitting')
         self._send_plain(packet_bytes)
 
     def _receive_plain(self):
@@ -449,7 +452,7 @@ class SimC2Subsystem:
 
         body_bytes = packet_bytes[1:]
         message = self._deconstruct_sec_packet(body_bytes)
-        lg.info('Message received')
+        lg.debug('Message received')
         return message
 
     def _need_reinit(self):
@@ -506,7 +509,10 @@ class SimUaC2Subsystem(SimC2Subsystem):
         try:
             uid = str(uuid.uuid4())
             message = {'Probe': uid}
-            u.pprint(message)
+
+            if self._config['verbose']:
+                u.pprint(message)
+
             message_data = ECHO_PACKET_SIGN + json.dumps(message).encode()
             self._send_plain(message_data)
             sent_ts = time.time_ns()
@@ -519,7 +525,9 @@ class SimUaC2Subsystem(SimC2Subsystem):
 
             pong_ts = time.time_ns()
             pong_message = json.loads(pong_body_data.decode())
-            u.pprint(pong_message)
+
+            if self._config['verbose']:
+                u.pprint(pong_message)
 
             if pong_message['Probe'] != uid:
                 raise UserWarning('Probe UID mismatch')
@@ -537,7 +545,10 @@ class SimUaC2Subsystem(SimC2Subsystem):
     def _measure_enc_rtt(self):
         uid = str(uuid.uuid4())
         message = {'EncryptedProbe': uid}
-        u.pprint(message)
+
+        if self._config['verbose']:
+            u.pprint(message)
+
         self._send(json.dumps(message).encode())
         sent_ts = time.time_ns()
 
@@ -545,7 +556,9 @@ class SimUaC2Subsystem(SimC2Subsystem):
             pong_message_data = self._receive()
             pong_ts = time.time_ns()
             pong_message = json.loads(pong_message_data.decode())
-            u.pprint(pong_message)
+
+            if self._config['verbose']:
+                u.pprint(pong_message)
 
             if pong_message['EncryptedProbe'] != uid:
                 raise UserWarning('Encrypted probe UID mismatch')
@@ -576,10 +589,10 @@ class SimUaC2Subsystem(SimC2Subsystem):
             self._measure_enc_rtt()
 
             if self._config['modem'] == 'simulated':
-                lg.info('Reporting simulated signal')
+                lg.debug('Reporting simulated signal')
                 self._report_sim_signal(rtt, lost)
             else:
-                lg.info('Skipping signal reporting')
+                lg.debug('Skipping signal reporting')
 
             if self._need_reinit():
                 break
@@ -671,7 +684,10 @@ class SimAdxC2Subsystem(SimC2Subsystem):
 
                 try:
                     message = self._deconstruct_sec_packet(body_bytes)
-                    u.pprint(json.loads(message.decode()))
+
+                    if self._config['verbose']:
+                        u.pprint(json.loads(message.decode()))
+
                     self._send(message)
                     lg.info('Encrypted echo packet sent back')
 

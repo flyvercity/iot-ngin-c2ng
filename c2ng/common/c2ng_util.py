@@ -18,7 +18,7 @@ def pprint(data):
         data: json data to print
     '''
     json_str = json.dumps(data, indent=4, sort_keys=True)
-    print(highlight(json_str, JsonnetLexer(), TerminalFormatter()))
+    print(highlight(json_str, JsonnetLexer(), TerminalFormatter()), flush=True)
 
 
 def setup_logging(verbose=False):
