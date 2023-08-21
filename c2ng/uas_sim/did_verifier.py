@@ -1,5 +1,9 @@
+# SPDX-License-Identifier: MIT
+# Copyright 2023 Flyvercity
+
 import json
 
+# Importing from 'Privacy preserving Self-Sovereign Identities' IoT-NGIN Project
 from jwt_pep import jwt_pep  # type: ignore  # noqa: F401
 
 

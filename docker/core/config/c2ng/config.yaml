@@ -33,7 +33,7 @@ security:
   private: /app/config/c2ng/private.pem
   default-ttl: 3600
 did:
-  issuer-key: /app/config/did/issuer.pem
+  issuer-did: /app/config/did/issuer.did
   resources:
     sim-drone-id:
       jwt: /app/config/did/sim-drone-id.jwt
