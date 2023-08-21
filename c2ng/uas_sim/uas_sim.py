@@ -13,7 +13,6 @@ import json
 from random import random
 import asyncio
 import uuid
-import argparse
 
 import requests
 from keycloak import KeycloakOpenID
@@ -37,11 +36,11 @@ NORMAL_PACKET_SIGN = b'1'
 '''Binary signature of the normal (encrypted) packet.'''
 
 
-def request(args, method: str, path: str, body={}, qsp={}) -> dict:
+def request(config, method: str, path: str, body={}, qsp={}) -> dict:
     '''Make a authenticated request to the service.
 
     Args:
-        args: CLI arguments.
+        config: configuration dict.
         method: HTTP method.
         path: relative endpoint path.
         body: JSON object for call payload.
@@ -57,17 +56,17 @@ def request(args, method: str, path: str, body={}, qsp={}) -> dict:
     secret = os.getenv('C2NG_UAS_CLIENT_SECRET')
 
     keycloak_openid = KeycloakOpenID(
-        server_url=args.auth,
+        server_url=config['auth'],
         realm_name="c2ng",
         client_id="c2-access",
         client_secret_key=secret
     )
 
-    token = keycloak_openid.token(args.uasid, args.password)
+    token = keycloak_openid.token(config['uasid'], config['password'])
     lg.debug('KeyCloak token received')
     access_token = token['access_token']
     headers = {'Authentication': f'Bearer {access_token}'}
-    url = args.url + path
+    url = config['url'] + path
     r = requests.request(method=method, url=url, json=body, params=qsp, headers=headers)
     reply = r.json()
 
@@ -94,14 +93,14 @@ class SimC2Subsystem:
     Implements the Context Manager protocol.
     '''
 
-    def __init__(self, args: dict):
+    def __init__(self, config: dict):
         '''Constructor.
 
         Args:
-            args: CLI arguments.
+            config: configuration dict.
         '''
 
-        self._args = args
+        self._config = config
         self._insocket = None
         self._outsocket = None
         self._reset()
@@ -173,14 +172,14 @@ class SimC2Subsystem:
 
         payload = {
             'ReferenceTime': datetime.now().timestamp(),
-            'UasID': self._args.uasid,
+            'UasID': self._config['uasid'],
             'Segment': segment
         }
 
         if segment == 'ua':
             payload['IMSI'] = '123456789012345'
 
-        session_info = request(self._args, 'POST', '/session', payload)
+        session_info = request(self._config, 'POST', '/session', payload)
         return session_info
 
     def _request_peer_certificate(self):
@@ -191,8 +190,8 @@ class SimC2Subsystem:
         '''
 
         segment = self._peer_segment()
-        uasid = self._args.uasid
-        cert_info = request(self._args, 'GET', f'/certificate/{uasid}/{segment}')
+        uasid = self._config['uasid']
+        cert_info = request(self._config, 'GET', f'/certificate/{uasid}/{segment}')
         return cert_info
 
     def _request_peer_address(self):
@@ -203,8 +202,8 @@ class SimC2Subsystem:
         '''
 
         segment = self._peer_segment()
-        uasid = self._args.uasid
-        address_info = request(self._args, 'GET', f'/address/{uasid}/{segment}')
+        uasid = self._config['uasid']
+        address_info = request(self._config, 'GET', f'/address/{uasid}/{segment}')
         return address_info
 
     async def _work_cycle(self):
@@ -223,7 +222,7 @@ class SimC2Subsystem:
         lg.info('Requesting session')
         self._session_info = self._request_session()
 
-        if self._args.verbose:
+        if self._config['verbose']:
             u.pprint(self._session_info)
 
         ip = self._session_info['IP']
@@ -250,7 +249,7 @@ class SimC2Subsystem:
         lg.info('Requesting peer certificate')
         self._peer_cert_info = self._request_peer_certificate()
 
-        if self._args.verbose:
+        if self._config['verbose']:
             u.pprint(self._peer_cert_info)
 
         cert = x509.load_pem_x509_certificate(
@@ -305,12 +304,12 @@ class SimC2Subsystem:
 
     async def _do_subscribe(self):
         segment = self._segment()
-        uasid = self._args.uasid
+        uasid = self._config['uasid']
         lg.info(f'Requesting websocket ticket for {uasid}/{segment}')
-        response = request(self._args, 'POST', f'/notifications/auth/{uasid}/{segment}')
+        response = request(self._config, 'POST', f'/notifications/auth/{uasid}/{segment}')
         self._ws_ticket = response['Ticket']
         lg.info('Websocket ticket received, connecting to the websocket')
-        url = self._args.websocket
+        url = self._config['websocket']
         conn = await ws.websocket_connect(f'{url}/notifications/websocket')
 
         await conn.write_message(json.dumps({
@@ -482,28 +481,13 @@ class SimUaC2Subsystem(SimC2Subsystem):
 
         return 'ua'
 
-    async def run(self):
-        '''Run the simulations.
-
-        Overrides the inherited method.
-        '''
-
-        if not self._args.signal_only:
-            await super().run()
-        else:
-            lg.info('Starting signal reporting loop')
-
-            while True:
-                self._report_sim_signal(None, None)
-                time.sleep(5)
-
     def _in_port(self) -> int:
         '''Implements `_in_port` for the UA simulator.
 
         Returns:
             Incoming UDP Port.'''
 
-        return int(self._args.ua_port)
+        return int(self._config['ua_port'])
 
     def _out_port(self) -> int:
         '''Implements `_out_port` for the UA simulator.
@@ -512,7 +496,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
             Outgoing UDP Port.
         '''
 
-        return int(self._args.adx_port)
+        return int(self._config['adx_port'])
 
     def _reset_insocket(self):
         super()._reset_insocket()
@@ -591,7 +575,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
             rtt, lost = self._measure_plain_rtt()
             self._measure_enc_rtt()
 
-            if self._args.modem == 'simulated':
+            if self._config['modem'] == 'simulated':
                 lg.info('Reporting simulated signal')
                 self._report_sim_signal(rtt, lost)
             else:
@@ -610,7 +594,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
             lost: heartbeat loss flag.
         '''
         sim_signal_flux = int(15*random())
-        uasid = self._args.uasid
+        uasid = self._config['uasid']
 
         perf = {}
 
@@ -620,7 +604,7 @@ class SimUaC2Subsystem(SimC2Subsystem):
         if lost:
             perf['heartbeat_loss'] = lost
 
-        response = request(self._args, 'POST', f'/signal/{uasid}', body={
+        response = request(self._config, 'POST', f'/signal/{uasid}', body={
             'Packet': {
                 'timestamp': {
                     'unix': datetime.now().timestamp(),
@@ -660,7 +644,7 @@ class SimAdxC2Subsystem(SimC2Subsystem):
         Returns:
             Inbound UDP port.
         '''
-        return int(self._args.adx_port)
+        return int(self._config['adx_port'])
 
     def _out_port(self) -> int:
         '''Implements `_out_port` for the RPS simulator.
@@ -668,7 +652,7 @@ class SimAdxC2Subsystem(SimC2Subsystem):
         Returns:
             Outbound UDP port.
         '''
-        return int(self._args.ua_port)
+        return int(self._config['ua_port'])
 
     async def _work_cycle(self):
         '''Implements `_work_cycle` for the RPS simulator.'''
@@ -704,82 +688,44 @@ class SimAdxC2Subsystem(SimC2Subsystem):
 
 
 async def main():
+    C2NG_SIM_SUBSYSTEM = os.getenv('C2NG_SIM_SUBSYSTEM')
     C2NG_SIM_DRONE_ID = os.getenv('C2NG_SIM_DRONE_ID')
     C2NG_DEFAULT_UA_UDP_PORT = os.getenv('C2NG_DEFAULT_UA_UDP_PORT')
     C2NG_DEFAULT_ADX_UDP_PORT = os.getenv('C2NG_DEFAULT_ADX_UDP_PORT')
+    C2NG_UA_DEFAULT_PASSWORD = os.getenv('C2NG_UA_DEFAULT_PASSWORD')
+    C2NG_SIM_VERBOSE = os.getenv('C2NG_SIM_VERBOSE')
+    C2NG_SIM_OAUTH_URL = os.getenv('C2NG_SIM_OAUTH_URL')
+    C2NG_SIM_CORE_URL = os.getenv('C2NG_SIM_CORE_URL')
+    C2NG_SIM_CORE_WS_URL = os.getenv('C2NG_SIM_CORE_WS_URL')
+    C2NG_SIM_UA_MODEM = os.getenv('C2NG_SIM_UA_MODEM')
 
-    parser = argparse.ArgumentParser()
+    config = {
+        'auth': C2NG_SIM_OAUTH_URL,
+        'uasid': C2NG_SIM_DRONE_ID,
+        'password': C2NG_UA_DEFAULT_PASSWORD,
+        'verbose': C2NG_SIM_VERBOSE == 'true',
+        'url': C2NG_SIM_CORE_URL,
+        'websocket': C2NG_SIM_CORE_WS_URL,
+        'ua_port': int(C2NG_DEFAULT_UA_UDP_PORT),
+        'adx_port': int(C2NG_DEFAULT_ADX_UDP_PORT),
+        'subsystem': C2NG_SIM_SUBSYSTEM,
+        'modem': C2NG_SIM_UA_MODEM
+    }
 
-    parser.add_argument(
-        '-a', '--auth', help='Address of the OIDC server (by default, KeyCloak)',
-        default='http://oauth:8080/'
-    )
+    u.setup_logging(config['verbose'])
 
-    parser.add_argument(
-        '-i', '--uasid', help='UAS Logical ID',
-        default=C2NG_SIM_DRONE_ID
-    )
-
-    parser.add_argument(
-        '-p', '--password', help='OIDC authentication password',
-        default=os.getenv('C2NG_UA_DEFAULT_PASSWORD')
-    )
-
-    parser.add_argument(
-        '-v', '--verbose',
-        action='store_true', help='Verbose logging'
-    )
-
-    parser.add_argument(
-        '-u', '--url', help='C2NG service URL',
-        default='http://c2ng:9090'
-    )
-
-    parser.add_argument(
-        '-w', '--websocket', help='C2NG service websocket URL',
-        default='ws://c2ng:9090'
-    )
-
-    parser.add_argument(
-        '--ua-port', help='Incoming UDP port for UA C2 sim',
-        type=int, default=C2NG_DEFAULT_UA_UDP_PORT
-    )
-
-    parser.add_argument(
-        '--adx-port', help='Incoming UDP port for ADX C2 sim',
-        type=int, default=C2NG_DEFAULT_ADX_UDP_PORT
-    )
-
-    sp = parser.add_subparsers(dest='subsystem', help='Subsystem (ua|adx)')
-    ua = sp.add_parser('ua', help='Command on behalf of UA')
-
-    ua.add_argument(
-        '-S', '--signal-only', help='Do not connect, transmit signal only',
-        action='store_true', default=False
-    )
-
-    ua.add_argument(
-        '-m', '--modem', help='Modem type (none|simulated)',
-        choices=['none', 'simulated'], default='none'
-    )
-
-    adx = sp.add_parser(  # noqa
-        'adx',
-        help='Command on behalf of ADX client (RPS is simulated)'
-    )
-
-    args = parser.parse_args()
-    u.setup_logging(args)
     lg.info('------ Starting ------')
 
-    if args.subsystem == 'ua':
+    if config['subsystem'] == 'ua':
         lg.info('Selected UA subsystem')
         Sim = SimUaC2Subsystem
-    else:
+    elif config['subsystem'] == 'adx':
         lg.info('Selected ADX subsystem')
         Sim = SimAdxC2Subsystem
+    else:
+        raise UserWarning('Unknown subsystem')
 
-    with Sim(args) as sim:
+    with Sim(config) as sim:
         await sim.run()
 
 
