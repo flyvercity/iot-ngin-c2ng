@@ -32,7 +32,6 @@ def verify(config, resource_id, token):
 
     vc = payload['vc']
     capabilities = vc['credentialSubject']['capabilities']
-    print('CAPS', capabilities)
 
     if 'CONTROL' not in capabilities[resource_id]:
         return False, 'CONTROL capability is not present'

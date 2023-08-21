@@ -7,6 +7,7 @@ src := $(wildcard \
 	c2ng/service/backend/*.py \
 	c2ng/service/backend/net_providers/*.py \
 	c2ng/service/gui/*.py \
+	c2ng/service/did/*.py \
 	c2ng/uss-sim/src/*.py \
 	c2ng/uas-sim/src/*.py \
 	c2ng/tools/*.py \
@@ -44,8 +45,26 @@ docker/core/config/c2ng/private.pem:
 
 prerun: docker/core/config/c2ng/private.pem
 
-up: build prerun
+# Decentralized Identities Support
+
+did_files := $(addprefix docker/core/config/did/, \
+	issuer.pem \
+	issuer.did \
+	sim-drone-id.pem \
+	sim-drone-id.did \
+	sim-drone-id.jwt \
+)
+
+$(did_files):
+	./scripts/did-init.sh
+
+did: $(did_files)
+
+# Integrated start
+
+up: build prerun did
 	./scripts/ctrl-core.sh up -d
+	./scripts/ctrl-sims.sh stop
 	./scripts/ctrl-sims.sh create
 
 start: up
@@ -72,27 +91,18 @@ generate: docbuild
 markdowns := $(wildcard docs/*.md)
 images := $(wildcard docs/*.png)
 revision := $(shell git describe --always)
-gen_markdowns := $(addprefix ../, $(wildcard docbuild/gen/*.md))
+gen_markdowns := $(addprefix docbuild/gen/, $(addsuffix .md, $(notdir $(src))))
 deliverable := docbuild/release/D2.C2NG.Final.pdf
 
 darglint: $(src)
 	darglint -s google -z full $(src)
 
-.autogen $(gen_markdowns): darglint $(src)
+$(gen_markdowns) &: darglint $(src)
 	PYTHONPATH=${PYTHONPATH}:`pwd`/service:`pwd`/tools lazydocs \
 		--src-base-url=https://github.com/flyvercity/iot-ngin-c2ng/blob/main/ \
 		--output-path ./docbuild/gen \
 		--no-watermark \
-		c2ng/common \
-		c2ng/service \
-		c2ng/service/handlers \
-		c2ng/service/backend \
-		c2ng/service/backend/net_providers \
-		c2ng/service/gui \
-		c2ng/uss_sim \
-		c2ng/uas_sim \
-		c2ng/tools
-	touch .autogen
+		$(src)
 
 docbuild/title.pdf: docs/title.tex
 	pdflatex -output-directory=docbuild docs/title.tex
@@ -103,29 +113,28 @@ docbuild/openapi.md: docs/c2ng.yaml
 	cat docs/c2ng.yaml >> docbuild/openapi.md
 	echo "\`\`\`\n" >> docbuild/openapi.md
 
-docbuild/body.pdf: .autogen $(markdowns) $(images) docbuild/openapi.md
+docbuild/body.pdf: $(markdowns) $(gen_markdowns) $(images) docbuild/openapi.md
 	echo "# Document Version Control" > docs/release.md
 	echo "_This revision $(revision)_" >> docs/release.md
 	(cd docs; pandoc -s \
-			-V papersize:a4 -V geometry:margin=1in \
-			-F mermaid-filter  \
-			--toc -o ../docbuild/body.pdf \
-			GLOSSARY.md \
-			GENERAL.md \
-			START.md \
-			ADMINISTRATION.md \
-			EXPERIMENTS.md \
-			REFERENCE.md \
-			VERIFICATION.md \
-			$(gen_markdowns) \
-			release.md \
+		-V papersize:a4 -V geometry:margin=1in \
+		-F mermaid-filter  \
+		--toc -o ../docbuild/body.pdf \
+		GLOSSARY.md \
+		GENERAL.md \
+		START.md \
+		ADMINISTRATION.md \
+		EXPERIMENTS.md \
+		REFERENCE.md \
+		VERIFICATION.md \
+		$(addprefix ../, $(gen_markdowns)) \
+		release.md \
 	)
-
 
 $(deliverable): docbuild/title.pdf docbuild/body.pdf
 	mkdir -p docbuild/release
 	python -m fitz join -o $(deliverable) \
-						   docbuild/title.pdf \
-						   docbuild/body.pdf
+		docbuild/title.pdf \
+		docbuild/body.pdf
 
 docs: deps-check-docs $(deliverable)

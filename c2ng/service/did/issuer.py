@@ -7,7 +7,7 @@ from pathlib import Path
 def gen_verifier_config(issuer_did, resource_id):
     config = {
         'resources': {
-            'sim-drone-id': {
+            resource_id: {
                 'authorization': {
                     'type': 'jwt-vc',
                     'trusted_issuers': {
