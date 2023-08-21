@@ -7,6 +7,7 @@ from c2ng.service.backend.secman import SecMan  # noqa
 from c2ng.service.backend.influx import Influx  # noqa
 from c2ng.service.backend.sessman import SessMan  # noqa
 from c2ng.service.backend.statsman import StatsMan  # noqa
+from c2ng.service.did.issuer import DIDIssuer  # noqa
 
 
 class HandlerBase(web.RequestHandler):
@@ -21,3 +22,4 @@ class HandlerBase(web.RequestHandler):
         self.influx = self.settings['influx']  # type: Influx
         self.sessman = self.settings['sessman']  # type: SessMan
         self.statsman = self.settings['statsman']  # type: StatsMan
+        self.didissuer = self.settings['didissuer']  # type: DIDIssuer
