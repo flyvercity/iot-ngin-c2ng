@@ -17,4 +17,4 @@ COPY docker/core/config/did ./did
 COPY integration/ppssi/py-verifier/IAA/jwt_pep.py ./unit
 COPY integration/ppssi/py-verifier/IAA/resolver.py ./unit
 
-ENTRYPOINT ["pytest", "-v", "unit/test_did_verifier.py"]
+ENTRYPOINT ["pytest", "-v"]
