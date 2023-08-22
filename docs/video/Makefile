@@ -44,8 +44,15 @@ output/video/03-04-skydrone.mp4: $(skydrone_video_local)
 			  -vf scale=1280:720 \
 			  -y $@
 
+output/video/03-04-skydrone-aud.mp4: output/video/03-04-skydrone.mp4 output/audio/03-04.mp3
+	$(FFMPEG) -i output/video/03-04-skydrone.mp4 \
+			  -i output/audio/03-04.mp3 \
+			  -shortest \
+			  -vf scale=1280:720 \
+			  -y $@
+
 fragments := output/slides/02-01.mp4 \
-			 output/video/03-04-skydrone.mp4
+			 output/video/03-04-skydrone-aud.mp4
 
 video: .deps-check output/contents.txt $(fragments)
 	$(FFMPEG) -safe 0 -r $(framerate) -f concat \
