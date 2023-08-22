@@ -1,5 +1,6 @@
 .SECONDARY:
 
+PYTHON3 ?= python
 AWS_CLI ?= aws
 DRAWIO ?= drawio
 FFMPEG ?= ffmpeg
@@ -12,6 +13,7 @@ skydrone_video = s3://flyvercity.private/flights/skydrone_2023_08_16/2023-08-15_
 skydrone_video_local = downloads/video/$(notdir $(skydrone_video))
 
 .deps-check:
+	$(PYTHON3) --version
 	$(AWS_CLI) --version
 	$(DRAWIO) --version
 	$(FFMPEG) -version
@@ -53,6 +55,9 @@ output/video/03-04-skydrone-aud.mp4: output/video/03-04-skydrone.mp4 output/audi
 
 fragments := output/slides/02-01.mp4 \
 			 output/video/03-04-skydrone-aud.mp4
+
+output/contents.txt:
+	$(PYTHON3) gen_contents.py $(fragments) > $@
 
 video: .deps-check output/contents.txt $(fragments)
 	$(FFMPEG) -safe 0 -r $(framerate) -f concat \
