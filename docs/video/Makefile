@@ -63,6 +63,8 @@ output/video/03-04-skydrone-aud.mp4: output/video/03-04-skydrone.mp4 output/audi
 
 fragments := output/slides/02-01.mp4 \
 			 output/slides/02-02.mp4 \
+			 output/slides/02-03.mp4 \
+			 output/slides/02-04.mp4 \
 			 output/slides/03-01.mp4 \
 			 output/video/03-04-skydrone-aud.mp4
 
