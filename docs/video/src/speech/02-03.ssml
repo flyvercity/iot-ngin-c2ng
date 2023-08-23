@@ -1,0 +1,12 @@
+<speak>
+<p>The C2<say-as interpret-as="characters">NG</say-as> platform was developed as an integral part of the <say-as interpret-as="characters">IoT</say-as><sub alias="engine">-NGIN</sub> project.
+</p>
+<p>The platform supports remote pilot station authorization to control the drones via the advanced decentralized identification mechanism developed by <sub alias="exceed">ExcID</sub>, an Open Call participant company. Their <say-as interpret-as="characters">DID</say-as> solution provides the Verified Credentials mechanism which allows the platform or its users to manage authorization without permanent connection to the drones or the pilot stations themselves.
+</p>
+
+<p>Network integration and quality-of-service subsystem was tested in the lab of Cumucore, another company within <say-as interpret-as="characters">IoT</say-as><sub alias="engine">-NGIN</sub> project. Their advanced 5G core is capable of managing the network slices and providing the required connectivity for the drones.
+</p>
+
+<p>Besides that, the software architecture of the platform was designed to comply with project approach and recommendations, using containerized microservices and <say-as interpret-as="characters">CICD</say-as> pipeline for the development and deployment.
+</p>
+</speak>

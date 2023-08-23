@@ -23,6 +23,7 @@ skydrone_video_local = downloads/video/$(notdir $(skydrone_video))
 output/audio/%.mp3: src/speech/%.ssml
 	$(PYTHON3) mkdir.py $(dir $@)
 	$(AWS_CLI) --profile $(AWS_PROFILE) polly synthesize-speech \
+		--engine neural \
 		--output-format mp3 \
 		--voice-id Matthew \
 		--text-type ssml \
@@ -62,6 +63,7 @@ output/video/03-04-skydrone-aud.mp4: output/video/03-04-skydrone.mp4 output/audi
 
 fragments := output/slides/02-01.mp4 \
 			 output/slides/02-02.mp4 \
+			 output/slides/03-01.mp4 \
 			 output/video/03-04-skydrone-aud.mp4
 
 output/contents.txt:
