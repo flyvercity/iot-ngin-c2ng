@@ -11,6 +11,7 @@ framerate = 30
 
 skydrone_video = s3://flyvercity.private/flights/skydrone_2023_08_16/2023-08-15_18-29-09.mkv
 skydrone_video_local = downloads/video/$(notdir $(skydrone_video))
+signal_overlay = src/images/skydrone-20m.png
 
 .deps-check:
 	$(PYTHON3) --version
@@ -49,8 +50,17 @@ $(skydrone_video_local):
 
 output/video/03-04-skydrone.mp4: $(skydrone_video_local)
 	$(PYTHON3) mkdir.py $(dir $@)
-	$(FFMPEG) -r $(framerate) -i $< -ss 00:00:20 -t 00:01:20 \
-			  -vf scale=1280:720 \
+	$(FFMPEG) -r $(framerate) \
+			  -i $< \
+			     -ss 00:00:20 -t 00:01:20 \
+			  -y $@
+
+output/video/03-04-skydrone-over.mp4: output/video/03-04-skydrone.mp4
+	$(PYTHON3) mkdir.py $(dir $@)
+	$(FFMPEG) -r $(framerate) \
+			  -i output/video/03-04-skydrone.mp4 \
+			  -i $(signal_overlay) \
+			     -filter_complex "[0:v][1:v] overlay=10:10:enable='between(t,60,80)'" \
 			  -y $@
 
 output/video/03-04-skydrone-aud.mp4: output/video/03-04-skydrone.mp4 output/audio/03-04.mp3
