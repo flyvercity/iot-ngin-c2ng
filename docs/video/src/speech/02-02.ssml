@@ -1,4 +1,5 @@
 <speak>
+<break time="1s"/>
 <p>The main goal of the project is to create a bridge between all components participating in establishing an aviation-grade C2 data link based on the 5G technology: <break time="0.3s"/> air vehicles, remote pilot stations a.k.a. ground control stations, mobile networks, and uncrewed traffic management systems.
 </p>
 
