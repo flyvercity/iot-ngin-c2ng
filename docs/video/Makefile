@@ -60,14 +60,16 @@ output/video/03-04-skydrone-over.mp4: output/video/03-04-skydrone.mp4
 	$(FFMPEG) -r $(framerate) \
 			  -i output/video/03-04-skydrone.mp4 \
 			  -i $(signal_overlay) \
-			     -filter_complex "[0:v][1:v] overlay=10:10:enable='between(t,60,80)'" \
+			     -filter_complex " \
+				 	[1:v]scale=640:480 [ovrl], \
+				 	[0:v][ovrl] overlay=50:50:enable='between(t,45,80)' \
+			     " \
 			  -y $@
 
-output/video/03-04-skydrone-aud.mp4: output/video/03-04-skydrone.mp4 output/audio/03-04.mp3
+output/video/03-04-skydrone-aud.mp4: output/video/03-04-skydrone-over.mp4 output/audio/03-04.mp3
 	$(PYTHON3) mkdir.py $(dir $@)
-	$(FFMPEG) -i output/video/03-04-skydrone.mp4 \
+	$(FFMPEG) -i output/video/03-04-skydrone-over.mp4 \
 			  -i output/audio/03-04.mp3 \
-			  -shortest \
 			  -vf scale=1280:720 \
 			  -y $@
 
