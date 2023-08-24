@@ -7,6 +7,8 @@
 <p>After the flights, we analyzed the data and created a 3D model of the signal strength. The model shows that the signal behavior is non-trivial and sometimes counter-intuitive. The signal strength is also affected by the height of the drone, and the signal is stronger at higher altitudes. This is why pre-operational signal surveillance and analysis is a critical part of the cellular command-and-control deployment process.</p>
 
 <break time="3s"/>
-<p>Resulting 3D model of the signal strength is shown as a 3D graph above.</p>
+<p>Resulting model of the signal strength is shown as a 3D graph above.</p>
+
+<p>Overall results of the flight trials show that public 5G networks can be used to control drones without any modifications to the network. The signal strength is sufficient to maintain a stable connection in a pre-surveyed zone.</p>
 
 </speak>
