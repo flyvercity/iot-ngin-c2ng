@@ -1,9 +1,17 @@
 <speak>
 <break time="1s"/>
-<p>The platform, by leveraging the <sub alias="exceed">ExcID</sub> technology, is able to provide a unique and secure way to identify and authenticate remote pilot stations willing to operate the drones by issuing and managing Verifiable Credentials. It can also integrate with external third party "external owners", for example, fleet management systems, which may support the same authorization mechanism.</p>
+<p>The primary use case of the platform is illustrated by the following interaction flow.</p>
 
-<p>A remote pilot station is provided with a verifiable credential that contains identifiers of the drones the station may control. The station can then use the credential to prove to the drone that it is authorized to control it. The drone can verify the credential based of the verifier configuration provided by the platform.</p>
+<p>First, the remote pilot station requests a reliable connectivity session from the platform's core service via a dedicated data network called Aviation Data Exchange Network, or <say-as interpret-as="characters">ADX</say-as>.</p>
 
-<p>Most of the components used for this mechanism are provided by an open repository and developed by the <sub alias="exceed">ExcID</sub> project. Flyvercity has implemented a custom verifier suitable to be deployed as a part of drone's software.</p>
+<p>Next, the same session is requested by the Uncrewed Aircraft via the 5G<say-as interpret-as="characters">RAN</say-as>, or Radio Access Network.</p>
+
+<p>Upon the aircraft's request, the core service ensures that the aircraft is authorized to perform a beyond line of sight flight in the requested airspace. To do so, the core service reaches out to a traffic management system responsible for the flight.</p> 
+
+<p>Once the authorization is granted, the core service establishes a reliable connectivity session between the remote pilot station and the aircraft via corresponding network APIs, such as Network Slice Admission Control Function.</p>
+
+<p>Finally, the remote pilot station and the aircraft exchange the flight control commands and telemetry data via the established connectivity session.</p>
+
+<p>As the flight progresses, the core service monitors the connectivity session and signal quality. It ensures that the aircraft is always connected to the remote pilot station with performance that meets the service level agreement.</p>
 
 </speak>
