@@ -10,7 +10,9 @@ AWS_PROFILE ?= flyvercity
 framerate = 30
 
 gen_videos_path = s3://flyvercity.private/gen-videos/iot-ngin-c2ng/xcoded
-signal_overlay = src/images/skydrone-20m.png
+
+signal_overlay_s3 = s3://flyvercity.private/flights/skydrone_2023_08_16/converted/03-04.overlay.gif
+signal_overlay = downloads/gif/03-04.overlay.gif
 
 
 # Checking dependencies
@@ -28,6 +30,10 @@ signal_overlay = src/images/skydrone-20m.png
 downloads/video/%.mp4:
 	$(PYTHON3) mkdir.py $(dir $@)
 	$(AWS_CLI) --profile $(AWS_PROFILE) s3 cp $(gen_videos_path)/$(notdir $@) $@
+
+downloads/gif/03-04.overlay.gif:
+	$(PYTHON3) mkdir.py $(dir $@)
+	$(AWS_CLI) --profile $(AWS_PROFILE) s3 cp $(signal_overlay_s3) $@
 
 upsync:
 	$(AWS_CLI) --profile $(AWS_PROFILE) s3 sync downloads/video/ s3://flyvercity.private/gen-videos/iot-ngin-c2ng/xcoded
@@ -100,12 +106,12 @@ output/video/01-04.mp4: output/audio/01-04.mp3 \
 output/video/03-04.mp4: downloads/video/03-04.mp4 output/audio/03-04.mp3 $(signal_overlay)
 	$(PYTHON3) mkdir.py $(dir $@)
 	$(FFMPEG) -i downloads/video/03-04.mp4 \
-			  -i $(signal_overlay) \
+			  -stream_loop -1 -i $(signal_overlay) \
 			  -i output/audio/03-04.mp3 \
 			  -filter_complex " \
 				[0:v] trim=start=20:end=90,setpts=PTS-STARTPTS [cut], \
 				[1:v] scale=640:480 [ovrl], \
-				[cut][ovrl] overlay=50:50:enable='between(t,45,80)' \
+				[cut][ovrl] overlay=50:50:enable='between(t,45,80):shortest=1' \
 			  " \
 			  -ar 48000 -ac 2 \
 			  -y $@
