@@ -1,0 +1,5 @@
+<speak>
+
+<p>To support Verifiable Credentials, we need to generate some more cryptographic objects: an issuer private key, an issuer decentralized identifer, a simulated remote pilot station private key, a pilot station decentralized identifer, and, finally, a json web token derived from the template verifiable credential.</p>
+
+</speak>
