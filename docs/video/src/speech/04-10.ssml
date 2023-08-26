@@ -1,0 +1,9 @@
+<speak>
+
+<p>Now were create a dedicated test harness docker image and run our suite of automated tests inside it.</p>
+
+<break time="4s"/>
+
+<p>All tests run successfully.</p>
+
+</speak>
