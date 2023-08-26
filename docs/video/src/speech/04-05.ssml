@@ -1,0 +1,7 @@
+<speak>
+
+<p>Next, we build a Docker container for our Uncrewed Traffic Management System aerial connection authorization service.</p>
+
+<p>For this experiment, we used it instead of an external service to authorize the drone to fly in the airspace.</p>
+
+</speak>
