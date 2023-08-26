@@ -109,9 +109,9 @@ output/video/03-04.mp4: downloads/video/03-04.mp4 output/audio/03-04.mp3 $(signa
 			  -stream_loop -1 -i $(signal_overlay) \
 			  -i output/audio/03-04.mp3 \
 			  -filter_complex " \
-				[0:v] trim=start=20:end=90,setpts=PTS-STARTPTS [cut], \
+				[0:v] trim=start=40:end=90,setpts=PTS-STARTPTS [cut], \
 				[1:v] scale=640:480 [ovrl], \
-				[cut][ovrl] overlay=50:50:enable='between(t,45,80):shortest=1' \
+				[cut][ovrl] overlay=320:120:enable='between(t,30,65):shortest=1' \
 			  " \
 			  -ar 48000 -ac 2 \
 			  -y $@
