@@ -29,6 +29,8 @@ downloads/video/%.mp4:
 	$(PYTHON3) mkdir.py $(dir $@)
 	$(AWS_CLI) --profile $(AWS_PROFILE) s3 cp $(gen_videos_path)/$(notdir $@) $@
 
+upsync:
+	$(AWS_CLI) --profile $(AWS_PROFILE) s3 sync downloads/video/ s3://flyvercity.private/gen-videos/iot-ngin-c2ng/xcoded
 
 # Generic generation
 
@@ -65,7 +67,6 @@ output/nvideo/%.mp4: downloads/video/%.mp4 output/audio/%.mp3
 	$(FFMPEG) -i downloads/video/$*.mp4 \
 		      -i output/audio/$*.mp3 \
 			  -c:v copy -map 0:v:0 -map 1:a:0 \
-			  -shortest -fflags +shortest -max_interleave_delta 100M  \
 			  -y $@
 
 

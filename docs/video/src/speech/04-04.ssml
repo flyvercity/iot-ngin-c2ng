@@ -4,18 +4,14 @@
 
 <p>First, we clone a clean version of the repository. This may take some time.</p> 
 
-<break time="30s"/>
+<break time="3s"/>
 
 <p>Then, we initialize submodules containting <sub alias="exceeds">ExcID's</sub> Verifiable Credentials library and a signal acquisition tool developed from flight trials.</p>
 
-<break time="30s"/>
-
 <p>Next, we update the submodules.</p>
 
-<break time="30s"/>
+<break time="1s"/>
 
 <p>Once the submodules are ready, we can build the service.</p>
-
-<break time="10s"/>
 
 </speak>
