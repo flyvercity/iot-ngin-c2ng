@@ -46,6 +46,9 @@ output/images/%.png: src/drawings/%.drawio
 	$(PYTHON3) mkdir.py $(dir $@)
 	$(DRAWIO) --export --width 1920 --height 1080 --output $@ $<
 
+
+# Static slides with narration
+
 output/slides/%.mp4: output/audio/%.mp3 output/images/%.png
 	$(PYTHON3) mkdir.py $(dir $@)
 	$(FFMPEG) -r $(framerate) -loop 1 \
@@ -55,10 +58,14 @@ output/slides/%.mp4: output/audio/%.mp3 output/images/%.png
 			  -vf scale=1280:720 \
 			  -y $@
 
-output/video/%.mp4: downloads/video/%.mp4 output/audio/%.mp3
+# Generic video with narration
+
+output/nvideo/%.mp4: downloads/video/%.mp4 output/audio/%.mp3
 	$(PYTHON3) mkdir.py $(dir $@)
-	$(FFMPEG) -i downloads/video/%.mp4 \
-		      -i output/audio/%.mp3 \
+	$(FFMPEG) -i downloads/video/$*.mp4 \
+		      -i output/audio/$*.mp3 \
+			  -c:v copy -map 0:v:0 -map 1:a:0 \
+			  -shortest -fflags +shortest -max_interleave_delta 100M  \
 			  -y $@
 
 
@@ -95,9 +102,9 @@ output/video/03-04.mp4: downloads/video/03-04.mp4 output/audio/03-04.mp3 $(signa
 
 # Complete video
 
-fragments := output/video/01-01.mp4 \
-			 output/video/01-02.mp4 \
-			 output/video/01-03.mp4 \
+fragments := output/nvideo/01-01.mp4 \
+			 output/nvideo/01-02.mp4 \
+			 output/nvideo/01-03.mp4 \
 			 output/video/01-04.mp4 \
 			 output/slides/02-01.mp4 \
 			 output/slides/02-02.mp4 \
