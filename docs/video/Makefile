@@ -66,17 +66,18 @@ output/nvideo/%.mp4: downloads/video/%.mp4 output/audio/%.mp3
 	$(PYTHON3) mkdir.py $(dir $@)
 	$(FFMPEG) -i downloads/video/$*.mp4 \
 		      -i output/audio/$*.mp3 \
-			  -c:v copy -map 0:v:0 -map 1:a:0 \
+			  -map 0:v:0 -map 1:a:0 \
+			  -vf scale=1280:720 \
 			  -y $@
 
 
 # Intro video
 
 output/video/01-04.mp4: output/audio/01-04.mp3 \
-						downloads/video/$(gen_video_01_04) \
+						downloads/video/01-04.mp4 \
 						src/images/01-04.overlay.png
 	$(PYTHON3) mkdir.py $(dir $@)
-	$(FFMPEG) -i downloads/video/$(gen_video_01_04) \
+	$(FFMPEG) -i downloads/video/01-04.mp4 \
 		      -i output/audio/01-04.mp3 \
 			  -i src/images/01-04.overlay.png \
 			  -filter_complex " \
@@ -114,7 +115,10 @@ fragments := output/nvideo/01-01.mp4 \
 			 output/slides/02-05.mp4 \
 			 output/slides/03-01.mp4 \
 			 output/video/03-04.mp4 \
-			 output/slides/04-01.mp4
+			 output/slides/04-01.mp4 \
+			 output/nvideo/04-04.mp4 \
+			 output/nvideo/04-05.mp4 \
+			 output/nvideo/04-06.mp4 \
 
 output/contents.txt:
 	$(PYTHON3) mkdir.py $(dir $@)
