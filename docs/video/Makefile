@@ -49,6 +49,10 @@ output/images/%.png: src/drawings/%.drawio
 	$(DRAWIO) --export --width 1920 --height 1080 --output $@ $<
 
 
+output/images/04-02.png: src/images/04-02.xcf
+	$(PYTHON3) mkdir.py $(dir $@)
+	echo "Please use GIMP to produce $@ from $<" && exit 1
+
 # Static slides with narration
 
 output/slides/%.mp4: output/audio/%.mp3 output/images/%.png
@@ -112,14 +116,8 @@ fragments := output/nvideo/01-01.mp4 \
 			 output/nvideo/01-02.mp4 \
 			 output/nvideo/01-03.mp4 \
 			 output/video/01-04.mp4 \
-			 output/slides/02-01.mp4 \
-			 output/slides/02-02.mp4 \
-			 output/slides/02-03.mp4 \
-			 output/slides/02-04.mp4 \
-			 output/slides/02-05.mp4 \
-			 output/slides/03-01.mp4 \
 			 output/video/03-04.mp4 \
-			 output/slides/04-01.mp4 \
+			 output/nvideo/04-01.mp4 \
 			 output/nvideo/04-04.mp4 \
 			 output/nvideo/04-05.mp4 \
 			 output/nvideo/04-06.mp4 \

@@ -2,8 +2,10 @@
 
 <break time="1s"/>
 
-<p>An experimental setup in Cumucore's lab. created a full traffic loop, that simulated both Internet and dedicated network slice traffic. The setup was used to test the performance of Cumucore's 5G Core Network, and to demonstrate the benefits of network slicing for drone C2 use case. This setup included a lab base station, the Core, an industrial 5G router with a Qualcomm modem.</p>
+<p>An experimental setup in Cumucore's lab creates a full traffic loop, that simulated both Internet and dedicated network slice traffic. The setup was used to test the performance of 5G Core Network, and to demonstrate the benefits of network slicing for drone C2 use case. This setup included a lab base station, the Core, an industrial 5G router with a Qualcomm modem.</p>
 
-<p>The whole experiment was conducted remotely in Cumucore's lab. Their infrastructure supported  deployment of containerized applications running Flyvercity's core C2NG service as well as drone and pilot station simulater. This setup allowed for a fully-remove access and management of the experiment.</p>
+<break time="1s"/>
+
+<p>To run Flyvercity software, a Docker-based containerized environment was used. The software was deployed on a Docker Compose network, which was running on a virtual machine. The virtual machine was running on a laptop, which was connected to the 5G Core Network and the router.</p>
 
 </speak>
