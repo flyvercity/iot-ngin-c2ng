@@ -30,13 +30,13 @@ deps-check-docs:
 # Core and simulators
 
 build-core: 
-	docker build -t c2ng:latest -f docker/core/Dockerfile .
+	docker build ${C2NG_DOCKER_BUILD_ARGS} -t c2ng:latest -f docker/core/Dockerfile .
 
 build-uss-sim:
-	docker build -t c2ng-uss-sim:latest -f docker/uss_sim/Dockerfile .
+	docker build ${C2NG_DOCKER_BUILD_ARGS} -t c2ng-uss-sim:latest -f docker/uss_sim/Dockerfile .
 
 build-uas-sim:
-	docker build -t c2ng-uas-sim:latest -f docker/uas_sim/Dockerfile .
+	docker build ${C2NG_DOCKER_BUILD_ARGS} -t c2ng-uas-sim:latest -f docker/uas_sim/Dockerfile .
 
 build: deps-check build-core build-uss-sim build-uas-sim
 
@@ -73,7 +73,7 @@ start: up
 # Tests
 
 build-unit-tests:
-	docker build -t c2ng-unit-tests:latest -f test/docker/Dockerfile .
+	docker build ${C2MG_DOCKER_BUILD_ARGS} -t c2ng-unit-tests:latest -f test/docker/Dockerfile .
 
 test: build-unit-tests
 	./scripts/test-unit.sh
