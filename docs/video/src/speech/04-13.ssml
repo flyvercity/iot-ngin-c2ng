@@ -1,0 +1,9 @@
+<speak>
+
+<p>.The last component of the simulation is, of course, a drone simulator. It also, upon start-up, subscribes to asynchronious notifications API, requests a session from the core service, requests peer's address and certificate. To support remote pilot station decentralized identifier and verifiable credential, the drone simulator also receives configuration data for its internal verifier from the core.</p>
+
+<p>Since the <say-as interpret-as="characters">ADX</say-as> simulator is already started, the data exchange process begins. We use two separated data flows, encrypted and open, to access pure rount-trip times and encryption-aware rount-trip times that take all security overhead into account. The data exchange process is repeated multiple times, and the results are sent to the core service signal accessment component.</p>
+
+<p>It is also important to note that the drone simulator also verifies the remote pilot station's access by analysing the verifiable Credential received as a json web token.</p>
+
+</speak>
