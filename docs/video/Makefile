@@ -110,8 +110,9 @@ output/video/03-04.mp4: downloads/video/03-04.mp4 output/audio/03-04.mp3 $(signa
 			  -i output/audio/03-04.mp3 \
 			  -filter_complex " \
 				[0:v] trim=start=40:end=90,setpts=PTS-STARTPTS [cut], \
+				[cut] scale=1280:720 [back], \
 				[1:v] scale=640:480 [ovrl], \
-				[cut][ovrl] overlay=320:120:enable='between(t,30,65):shortest=1' \
+				[back][ovrl] overlay=320:120:enable='between(t,30,65):shortest=1' \
 			  " \
 			  -ar 48000 -ac 2 \
 			  -y $@
@@ -122,8 +123,19 @@ fragments := output/nvideo/01-01.mp4 \
 			 output/nvideo/01-02.mp4 \
 			 output/nvideo/01-03.mp4 \
 			 output/video/01-04.mp4 \
+			 \
+			 output/slides/02-01.mp4 \
+			 output/slides/02-02.mp4 \
+			 output/slides/02-03.mp4 \
+			 output/slides/02-04.mp4 \
+			 output/slides/02-05.mp4 \
+			 \
+			 output/slides/03-01.mp4 \
+			 output/nvideo/03-03.mp4 \
 			 output/video/03-04.mp4 \
-			 output/nvideo/04-01.mp4 \
+			 \
+			 output/slides/04-01.mp4 \
+			 output/slides/04-02.mp4 \
 			 output/nvideo/04-04.mp4 \
 			 output/nvideo/04-05.mp4 \
 			 output/nvideo/04-06.mp4 \
@@ -134,7 +146,11 @@ fragments := output/nvideo/01-01.mp4 \
 			 output/nvideo/04-11.mp4 \
 			 output/nvideo/04-12.mp4 \
 			 output/nvideo/04-13.mp4 \
-			 output/nvideo/04-14.mp4 
+			 output/nvideo/04-14.mp4 \
+			 \
+			 output/nvideo/05-01.mp4 \
+			 output/slides/05-02.mp4 \
+			 output/nvideo/05-03.mp4
 
 output/contents.txt:
 	$(PYTHON3) mkdir.py $(dir $@)
@@ -143,4 +159,6 @@ output/contents.txt:
 video: .deps-check output/contents.txt $(fragments)
 	$(FFMPEG) -safe 0 -r $(framerate) -f concat \
 			  -i output/contents.txt \
+			  -vcodec h264 \
+			  -acodec copy \
 			  -y output/video/deliverable.mp4
