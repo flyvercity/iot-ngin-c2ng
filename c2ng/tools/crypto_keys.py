@@ -81,4 +81,8 @@ def run(args):
         )
     )
 
+    print(f'Written {args.private}')
+
     Path(args.certificate).write_bytes(service_sscert.public_bytes(Encoding.PEM))
+    print(f'Written {args.certificate}')
+
