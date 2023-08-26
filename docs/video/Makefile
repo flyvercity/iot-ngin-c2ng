@@ -56,7 +56,7 @@ output/slides/%.mp4: output/audio/%.mp3 output/images/%.png
 	$(FFMPEG) -r $(framerate) -loop 1 \
 			  -i output/images/$*.png \
 		      -i output/audio/$*.mp3 \
-			   -shortest -fflags +shortest -max_interleave_delta 100M  \
+			  -shortest -fflags +shortest -max_interleave_delta 100M  \
 			  -vf scale=1280:720 \
 			  -y $@
 
