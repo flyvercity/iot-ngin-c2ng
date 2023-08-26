@@ -58,6 +58,7 @@ output/slides/%.mp4: output/audio/%.mp3 output/images/%.png
 		      -i output/audio/$*.mp3 \
 			  -shortest -fflags +shortest -max_interleave_delta 100M  \
 			  -vf scale=1280:720 \
+			  -ar 48000 -ac 2 \
 			  -y $@
 
 # Generic video with narration
@@ -68,6 +69,7 @@ output/nvideo/%.mp4: downloads/video/%.mp4 output/audio/%.mp3
 		      -i output/audio/$*.mp3 \
 			  -map 0:v:0 -map 1:a:0 \
 			  -vf scale=1280:720 \
+			  -ar 48000 -ac 2 \
 			  -y $@
 
 
@@ -85,6 +87,7 @@ output/video/01-04.mp4: output/audio/01-04.mp3 \
 				[2:v]scale=1280:720 [ovrl], \
 				[back][ovrl] overlay=0:0' \
 			  " \
+			  -ar 48000 -ac 2 \
 			  -y $@
 
 
@@ -100,6 +103,7 @@ output/video/03-04.mp4: downloads/video/03-04.mp4 output/audio/03-04.mp3 $(signa
 				[1:v] scale=640:480 [ovrl], \
 				[cut][ovrl] overlay=50:50:enable='between(t,45,80)' \
 			  " \
+			  -ar 48000 -ac 2 \
 			  -y $@
 
 # Complete video
@@ -119,6 +123,14 @@ fragments := output/nvideo/01-01.mp4 \
 			 output/nvideo/04-04.mp4 \
 			 output/nvideo/04-05.mp4 \
 			 output/nvideo/04-06.mp4 \
+			 output/nvideo/04-07.mp4 \
+			 output/nvideo/04-08.mp4 \
+			 output/nvideo/04-09.mp4 \
+			 output/nvideo/04-10.mp4 \
+			 output/nvideo/04-11.mp4 \
+			 output/nvideo/04-12.mp4 \
+			 output/nvideo/04-13.mp4 \
+			 output/nvideo/04-14.mp4 
 
 output/contents.txt:
 	$(PYTHON3) mkdir.py $(dir $@)
