@@ -12,6 +12,6 @@
 
 <break time="1s"/>
 
-<p>Once the submodules are ready, we can build the service.</p>
+<p>Once the submodules are ready, we can build the core docker images for the service.</p>
 
 </speak>
