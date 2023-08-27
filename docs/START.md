@@ -1,6 +1,7 @@
-# III. Getting Started with Next Generation UAS C2 Connectivity Service
+# II. Getting Started with Next Generation UAS C2 Connectivity Service
 
-[External Service Interface Specification](./c2ng.yaml)
+[Core Service REST API Specification](./c2ng.yaml)
+[Core Service Notification API Specification](./c2ng-async.yaml)
 
 ## Introduction
 
@@ -88,7 +89,7 @@ sudo ymn install -y atk-devel at-spi2-atk libdrm libxkbcommon libXcomposite libX
 
 ### Building the Deliverable
 
-To build `D2.C2NG.Final.pdf` (MVP documentation), execute
+To build `D2.C2NG.Final.pdf` (MVP documentation), execute:
 
 ```sh
 make docs

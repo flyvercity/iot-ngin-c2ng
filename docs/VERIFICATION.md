@@ -1,4 +1,4 @@
-# VI: Verification
+# V. Verification
 
 This section describes a basic scenario for software testing and demostation. These step shall follow the steps describes in the ["Getting Started"](./START.md#launch-sequence) section.
 
