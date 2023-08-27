@@ -1,5 +1,6 @@
 .autogen
 mermaid-filter.err
+.deps-check-docs
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

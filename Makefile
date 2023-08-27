@@ -17,11 +17,12 @@ deps-check:
 	which docker
 	which docker-compose
 
-deps-check-docs:
+.deps-check-docs:
 	which darglint
 	which pdflatex
 	which lazydocs
 	which pandoc
+	touch $@
 
 # Core and simulators
 
@@ -88,7 +89,9 @@ markdowns := $(wildcard docs/*.md)
 images := $(wildcard docs/*.png)
 revision := $(shell git describe --always)
 gen_markdowns := $(addprefix docbuild/gen/, $(addsuffix .md, $(notdir $(src))))
-deliverable := docbuild/release/Flyvercity.D2.MVP_Documentation.2.0.pdf
+deliverable_mvp := docbuild/release/Flyvercity.D2.MVP_Documentation.2.0.pdf
+deliverable_tv := docbuild/release/Flyvercity.D3.Test_and_Validation.1.0.pdf
+
 
 darglint: $(src)
 	darglint -s google -z full $(src)
@@ -100,8 +103,11 @@ $(gen_markdowns) &: darglint $(src)
 		--no-watermark \
 		$(src)
 
-docbuild/title.pdf: docs/title.tex
-	pdflatex -output-directory=docbuild docs/title.tex
+docbuild/title_mvp.pdf: docs/title_mvp.tex
+	pdflatex -output-directory=docbuild docs/title_mvp.tex
+
+docbuild/title_tv.pdf: docs/title_tv.tex
+	pdflatex -output-directory=docbuild docs/title_tv.tex
 
 docbuild/openapi.md: docs/c2ng.yaml
 	echo "# V. API Reference\n\n" > docbuild/openapi.md
@@ -109,7 +115,7 @@ docbuild/openapi.md: docs/c2ng.yaml
 	cat docs/c2ng.yaml >> docbuild/openapi.md
 	echo "\`\`\`\n" >> docbuild/openapi.md
 
-docbuild/body.pdf: $(markdowns) $(gen_markdowns) $(images)
+docbuild/body_mvp.pdf: $(markdowns) $(gen_markdowns) $(images)
 	echo "# Document Version Control" > docs/release.md
 	echo "_This revision $(revision)_" >> docs/release.md
 	(cd docs; pandoc -s \
@@ -127,10 +133,32 @@ docbuild/body.pdf: $(markdowns) $(gen_markdowns) $(images)
 		release.md \
 	)
 
-$(deliverable): docbuild/title.pdf docbuild/body.pdf
+$(deliverable_mvp): docbuild/title_mvp.pdf docbuild/body_mvp.pdf
 	mkdir -p $(dir $@)
 	python -m fitz join -o $@ \
-		docbuild/title.pdf \
-		docbuild/body.pdf
+		docbuild/title_mvp.pdf \
+		docbuild/body_mvp.pdf
 
-docs: deps-check-docs $(deliverable)
+docbuild/body_tv.pdf: $(markdowns) $(gen_markdowns) $(images)
+	echo "# Document Version Control" > docs/release.md
+	echo "_This revision $(revision)_" >> docs/release.md
+	(cd docs; pandoc -s \
+		-V papersize:a4 -V geometry:margin=1in \
+		-F mermaid-filter  \
+		--toc -o ../$@ \
+		GLOSSARY.md \
+		GENERAL.md \
+		START.md \
+		ADMINISTRATION.md \
+		EXPERIMENTS.md \
+		VERIFICATION.md \
+		release.md \
+	)
+
+$(deliverable_tv): docbuild/title_tv.pdf docbuild/body_tv.pdf
+	mkdir -p $(dir $@)
+	python -m fitz join -o $@ \
+		docbuild/title_tv.pdf \
+		docbuild/body_tv.pdf
+
+docs: .deps-check-docs $(deliverable_mvp) $(deliverable_tv)
