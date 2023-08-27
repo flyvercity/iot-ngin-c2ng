@@ -117,6 +117,16 @@ output/video/03-04.mp4: downloads/video/03-04.mp4 output/audio/03-04.mp3 $(signa
 			  -ar 48000 -ac 2 \
 			  -y $@
 
+
+# Pre-recorded video
+
+output/video/05-00.mp4: downloads/video/05-00.mp4
+	$(PYTHON3) mkdir.py $(dir $@)
+	$(FFMPEG) -i $< \
+			  -vf scale=1280:720 \
+			  -ar 48000 -ac 2 \
+			  -y $@
+
 # Complete video
 
 fragments := output/nvideo/01-01.mp4 \
@@ -148,6 +158,7 @@ fragments := output/nvideo/01-01.mp4 \
 			 output/nvideo/04-13.mp4 \
 			 output/nvideo/04-14.mp4 \
 			 \
+			 output/video/05-00.mp4 \
 			 output/nvideo/05-01.mp4 \
 			 output/slides/05-02.mp4 \
 			 output/nvideo/05-03.mp4
