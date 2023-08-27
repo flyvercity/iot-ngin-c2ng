@@ -230,3 +230,7 @@ To extract OpenAPI 3 service specification from code, run:
 ```sh
 make generate
 ```
+
+## Other Environment Variables
+
+* `C2NG_DOCKER_BUILD_ARGS` - additional arguments for `docker build` command use in the main `Makefile` to build images. For example, to build images for a specific architecture, use `C2NG_DOCKER_BUILD_ARGS=--no-cache`.

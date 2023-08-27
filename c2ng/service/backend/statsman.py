@@ -40,8 +40,6 @@ class StatsMan:
         '''List all sessions.
 
         Returns:
-            JSON object::
-
                 [
                     {
                        "UasID": "string(uasid)",

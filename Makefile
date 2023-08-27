@@ -2,10 +2,8 @@
 
 src := $(wildcard \
 	c2ng/common/*.py \
-	c2ng/service/*.py \
 	c2ng/service/backend/*.py \
 	c2ng/service/backend/net_providers/*.py \
-	c2ng/service/gui/*.py \
 	c2ng/service/did/*.py \
 	c2ng/uss-sim/src/*.py \
 	c2ng/uas-sim/src/*.py \
@@ -71,7 +69,7 @@ start: up
 # Tests
 
 build-unit-tests:
-	docker build ${C2MG_DOCKER_BUILD_ARGS} -t c2ng-unit-tests:latest -f test/docker/Dockerfile .
+	docker build ${C2NG_DOCKER_BUILD_ARGS} -t c2ng-unit-tests:latest -f test/docker/Dockerfile .
 
 test: build-unit-tests
 	./scripts/test-unit.sh
@@ -111,13 +109,13 @@ docbuild/openapi.md: docs/c2ng.yaml
 	cat docs/c2ng.yaml >> docbuild/openapi.md
 	echo "\`\`\`\n" >> docbuild/openapi.md
 
-docbuild/body.pdf: $(markdowns) $(gen_markdowns) $(images) docbuild/openapi.md
+docbuild/body.pdf: $(markdowns) $(gen_markdowns) $(images)
 	echo "# Document Version Control" > docs/release.md
 	echo "_This revision $(revision)_" >> docs/release.md
 	(cd docs; pandoc -s \
 		-V papersize:a4 -V geometry:margin=1in \
 		-F mermaid-filter  \
-		--toc -o ../docbuild/body.pdf \
+		--toc -o ../$@ \
 		GLOSSARY.md \
 		GENERAL.md \
 		START.md \
@@ -130,8 +128,8 @@ docbuild/body.pdf: $(markdowns) $(gen_markdowns) $(images) docbuild/openapi.md
 	)
 
 $(deliverable): docbuild/title.pdf docbuild/body.pdf
-	mkdir -p docbuild/release
-	python -m fitz join -o $(deliverable) \
+	mkdir -p $(dir $@)
+	python -m fitz join -o $@ \
 		docbuild/title.pdf \
 		docbuild/body.pdf
 

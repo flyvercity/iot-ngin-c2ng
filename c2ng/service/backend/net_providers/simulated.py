@@ -25,8 +25,6 @@ class SimulatedSlice:
             imsi: unique UE identifier.
 
         Returns:
-            JSON object::
-
                 {
                     "IP": "<address>",
                     "Gateway": "<address>"
@@ -45,8 +43,6 @@ class SimulatedSlice:
             uid: unique ID
 
         Returns:
-            JSON object::
-
                 {
                     "IP": "<address>",
                     "Gateway": "<address>"
