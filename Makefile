@@ -123,8 +123,8 @@ docbuild/body.pdf: $(markdowns) $(gen_markdowns) $(images) docbuild/openapi.md
 		START.md \
 		ADMINISTRATION.md \
 		EXPERIMENTS.md \
-		REFERENCE.md \
 		VERIFICATION.md \
+		REFERENCE.md \
 		$(addprefix ../, $(gen_markdowns)) \
 		release.md \
 	)
