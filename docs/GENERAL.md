@@ -26,6 +26,8 @@ There are two types of users of the service:
 * Aerial Connection Users are flying objects equipped with 5G UE and requiring to establish a reliable connection. Generally these are Aerial Vehicles a.k.a. drones. These also may include Wireless RPS (remote pilot stations) a.k.a. GCS (ground control stations).
 * ADX Users are stationary entities that connect to aerial users via the Aviation Data Exchange Network. These are generally fixed ground control center workstations.
 
+Besides that, the service supports RPS to UA authorization based on the ExcID's Verifiable Credentials mechanism (see. [here](https://gitlab.com/h2020-iot-ngin/enhancing_iot_cybersecurity_and_data_privacy/privacy-preserving-self-sovereign-identities)). The service also can serve as an "issuer" of credentials.
+
 ## Primary Interactions
 
 ```mermaid
@@ -42,17 +44,17 @@ sequenceDiagram
 
 ## Application Architecture
 
-The Application is based on containerized services and comprises three open source basic components (KeyCloak, MongoDB, and InfluxDB) and the core software service (C2NG). Besides the core software, a CLI tool was developed to control all administrative task, simulation and demostration.
+The Application is based on containerized services and comprises three open source basic components (KeyCloak, MongoDB, and InfluxDB) and the core software service (C2NG). Besides the core software, CLI tools was developed to control all administrative task, simulation and demostration.
 
 KeyCloak is an open source implementation OIDC protocol and supports authorized calls to the service.
 
-SliceManMan is a Network Function exposed by the 5G Core to control which users are authorized to use a slide, and hence enjoy high-reliablity allocated to it.
+NSACF is a Network Function exposed by the 5G Core to control which users are authorized to use a slide, and hence enjoy high-reliablity allocated to it. It can be also extended by a particular implementation to control 5G slices in a more fine-grained manner (umbrella term is "Network Slice Management" - NSM).
 
 MongoDB is a NoSQL database that serves as a persistence layer. The database is schema-less, but a logic schema is described is the corresponding [section](#mongodb-logical-schema).
 
 InfluxDB is a timeseries database used to collect signal characteristics reported by aerial users.
 
-C2NG designates the service itself. C2NG is a web service and exposes the API described in the [API Definition](#api-definition) sections.
+C2NG designates the service itself. C2NG is a web service and exposes two APIs. The REST API described in the [API Definition](#api-definition) section is used by the users to request connectivity sessions and report signal quality information. The second API is is any web-socket based asynchronious API used to notify the users about the changes in the session status in real time. It is defined in the [Websocket API](#websocket-api) section.
 
 The following diagram presents a schematic view of the C2NG application architecture.
 
@@ -66,7 +68,7 @@ flowchart
         C2NG --> KeyCloak
         MongoDB --> MongoExpress
     end
-    Application --> SliceMan
+    Application --> NSACF-NSM
     Application --> USS
 ```
 
@@ -76,25 +78,53 @@ The whole application is a set of Docker containers defined by the Docker Compos
 
 The primary repository is open and resides on GitHub: <https://github.com/flyvercity/iot-ngin-c2ng>. It contain the following main components:
 
-* `service` directory contains the code of the service itself.
-* `tools` directory contains the code of CLI tools, include simulators.
-* `config` directory contains configuration files mounted inside correspoding containers by Docker Compose.
+* `c2ng` directory contains the source code:
+  * `common` directory contains common code used by the service and CLI tools;
+  * `service` directory contains the code of the service itself;
+  * `tools` directory contains the code of CLI tools;
+  * `uas_sim` directory contains the code of the UA and RPS simulators;
+  * `uss_sim` directory contains the code of the USS simulator;
+* `docker` directory contains Docker and configuration files:
+  * `core` directory contains a Docker image definition of the core service.
+    * `docker-compose.yaml` is a Docker Compose file for development environment (core service and the USS simulator).
+  * `uas_sim` directory contains a Docker image definition of the UA and RPS simulators.
+    * `docker-compose.yaml` is a Docker Compose file for development environment (UA and RPS simulators).
+  * `uss_sim` directory contains a Docker image definition of the USS simulator.
 * `docs` directory contains present documentation.
-* `Dockerfile` contains a Docker image defition of the main service.
-* `docker-compose.yaml` contains a definition of the whole application for development and testing environment. Refer to the ["Running Simulation"](./ADMINISTRATION.md#running-simulation) section in Part II. 
+* `integration` directory contains submodules:
+  * `airlink_capture` directory contains the code of the AirLink Capture tool used for data aquisition during the flight trials.
+  * `ppssi` directory contains the code of the Privacy-Preserving Self-Sovereign Identities (PPSSI) tool suite forked from the [original ExcID repository](https://gitlab.com/h2020-iot-ngin/enhancing_iot_cybersecurity_and_data_privacy/privacy-preserving-self-sovereign-identities) on IoT-NGIN GitLab.
+* `scripts` directory contains Bash scripts used for development and testing.
+* `test` directory contains test code.
 
 # API Definition
 
 The short description 
 
-* `/ua/session` - request a connectivity session for a UA-type user.
-* `/adx/session` - request a connectivity session for an ADX-type user.  
-* `/certificate/ua/(uas_id)` - request peer's (i.e., an ADX user for a UA user and _vice versa_) for a UA-type user.
-* `/certificate/adx/(uas_id)`- request peer's for a ADX-type user.
-* `/address/ua/(uas_id)` - request an address of the UA user (to be used by an ADX user).
-* `/signal` - an endpoint where the UA users report signal telemetry.
+* `/session` - request a connectivity session for all users.
+* `/certificate/(segment)/(uas_id)` - request a certificate for a user.
+* `/address/(segment)/(uas_id)` - request an IP address for a user.
+* `/signal/(uas_id)` - an endpoint where the UA users report signal telemetry.
+* `/notifications/auth/(segment)/(uas_id)` - an endpoint to pre-authenticate websocket connections.
+* `/notifications/websocket` - a websocket endpoint to receive notifications about the session status changes.
+* `/did/jwt/(uas_id)` - an endpoint to request a DID JWT token with a Verifiable Credential.
+* `/did/config/(uas_id)` - an endpoint to request a verifier configuration.
+* `/gui/dashboard` - render a dashboard page.
 
 OpenAPI v.3 defition files contains an exhaustive description of the API see [Part V. API Reference](./c2ng.yaml) (generated from [`c2ng.yaml`](./c2ng.yaml)). This information is extracted from Marshmellow definitions in a special [module `schemas`](../service/schemas.py).
+
+# Websocket API
+
+* --> `subscribe` - subscribe to the session status updates.
+* --> `unsubscribe` - unsubscribe from the session status updates.
+* <-- `subscribed` - comfirmation of subscription.
+* <-- `notification` - a notification about the session status change:
+  * `signal-ok` - notify that the cellular signal is back to normal.
+  * `signal-abnormal` - notify that the cellular signal is not usable.
+  * `signal-degraded` - notify that the cellular signal is degraded.
+  * `request-own-session` - notify that the user shall re-request its own session.
+  * `peer-address-changed` - notify that the peer's address has changed.
+  * `peer-credentials-changed` - notify that the peer's security scredentials were changed.
 
 ## C2NG Service Architecture
 
@@ -108,17 +138,25 @@ flowchart
     App --> Sessions
     App --> Certificates
     App --> Signal
-    Sessions --> USS
-    Sessions --> SliceMan
-    Sessions --> SecMan
+    App --> StatsMan
+    App --> WsTxMan
+    Sessions --> SessMan
+    WsTxMan --> SessMan
+    SessMan --> USS
+    SessMan --> SliceMan
+    SessMan --> SecMan
+    StatsMan --> Influx
+    StatsMan --> SessMan
     Certificates --> SecMan
     Signal --> Influx
+    SliceMan --> Cumucore
 ```
 
 The are two layers in the application:
 
-* user-facing interfaces comprise `Sessions`, `Certificates`, `Signal` request handlers.
-* "backbone" service interfaces comprises `USS`, `SliceMan`, `Mongo`, and `Influx` class. Besides that, this layer also contain the Security Manager component responsible to manage session security credentials.
+* user-facing interfaces comprise `Sessions`, `Certificates`, `Signal` request handlers. `WsTxMan` is a websocket manager that handles websocket connections and distributes notifications. `StatsMan` is a manager of signal statistics. 
+* "backbone" service interfaces comprises `USS`, `SliceMan`, `Mongo`, and `Influx` class. Besides that, this layer also contain the Security Manager `SecMan` component responsible to manage session security credentials.
+* The `SliceMan` also has a lower-level interface, for example to the Cumucore Network Configuration service.
 
 Main service dependencies are:
 
@@ -129,6 +167,7 @@ Main service dependencies are:
 * `python-jose` - a set of functions work with JWT tokens.
 * `python-keycloak` - an interface to KeyCloak.
 * `influxdb-client-python` - an interface to InfluxDB.
+* `jwcrypto`, `jsonpath-ng`, and `base58` are PSPSSI dependencies.
 
 ## Security Credentials
 
@@ -144,6 +183,42 @@ flowchart BT
 ```
 
 The root private key and certificate are generated during the deployment and configuration process, session keys are generated every time what a new reliable connectivity session is requested by a user.
+
+## Decentralized Authorization Procedure
+
+
+```mermaid
+sequenceDiagram
+    Owner ->> C2NG: Provide VC
+    UA-Verifier ->> C2NG: Request Verifier Config
+    RPS ->> C2NG: Request JWT
+    RPS ->> UA-Verifier: Control Request
+    UA-Verifier ->> UA-Software: Authorized Control Request
+```
+
+### Remote Pilot Station Verifiable Credential Template
+
+```json
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+	"https://mm.aueb.gr/contexts/capabilities/v1"
+  ],
+  
+  "id": "https://iot-ngin.eu/",
+  "type": ["VerifiableCredential"],
+
+  "credentialSubject": {
+  	"capabilities": {
+	  "sim-drone-id": ["CONTROL"]
+  	}
+  }
+}
+```
+
+This VC at this version uses a single capability `CONTROL`, allowing a UA simulator to emulate access check. 
+
+For details refer to the [original description](https://gitlab.com/scartill/ppssi/-/blob/main/README.md).
 
 #### Session Establishment
 
@@ -224,15 +299,19 @@ Document schema:
     "UasID": "string",
     "UaID": "string",
 
-    "UaIP": "string: IPv4 or IPv6 address",
-    "UaGatewayIP": "string: IPv4 or IPv6 address",
-    "UaCertificate": "string: PEM",
-    "UaKeyID" : "string: UUID",
+    "UA": {
+        "IP": "string: IPv4 or IPv6 address",
+        "GatewayIP": "string: IPv4 or IPv6 address",
+        "Certificate": "string: PEM",
+        "KID" : "string: UUID",
+    },
 
-    "AdxIP": "string: IPv4 or IPv6 address",
-    "AdxGatewayIP": "string: IPv4 or IPv6 address",
-    "AdxCertificate": "string: PEM",
-    "AdxKeyID" : "string: UUID"
+    "ADX": {
+        "IP": "string: IPv4 or IPv6 address",
+        "GatewayIP": "string: IPv4 or IPv6 address",
+        "Certificate": "string: PEM",
+        "KID" : "string: UUID"
+    }
 }
 ```
 

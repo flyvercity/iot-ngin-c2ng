@@ -88,7 +88,7 @@ markdowns := $(wildcard docs/*.md)
 images := $(wildcard docs/*.png)
 revision := $(shell git describe --always)
 gen_markdowns := $(addprefix docbuild/gen/, $(addsuffix .md, $(notdir $(src))))
-deliverable := docbuild/release/D2.C2NG.Final.pdf
+deliverable := docbuild/release/Flyvercity.D2.MVP_Documentation.2.0.pdf
 
 darglint: $(src)
 	darglint -s google -z full $(src)
