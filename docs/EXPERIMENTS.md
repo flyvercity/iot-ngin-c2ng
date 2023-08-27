@@ -68,13 +68,97 @@ Acquisition format: local JSON record files. Refer to CUE [specification](https:
 #### Raw Data Sample (2023-08-15)
 
 ```json
-{"timestamp": {"unix": 1692125286.592828}, "position": {"location": {"lat": 51.7027428, "lon": -0.2682453, "alt": 125.674}, "attitude": {"roll": -0.011166839860379696, "pitch": 0.0075567238964140415, "yaw": 2.0088229179382324}}, "signal": {"radio": "5GNSA", "RSRP": -93, "RSRQ": -11}}
+{"timestamp": 
+  {
+    "unix": 1692125286.592828
+  }, 
+  "position": {
+    "location": {
+      "lat": 51.7027428,
+      "lon": -0.2682453,
+      "alt": 125.674
+    },
+    "attitude": {
+      "roll": -0.011166839860379696,
+      "pitch": 0.0075567238964140415,
+      "yaw": 2.0088229179382324
+    }
+  },
+  "signal": {
+    "radio": "5GNSA",
+    "RSRP": -93, 
+    "RSRQ": -11
+  }
+}
 
-{"timestamp": {"unix": 1692125287.594658}, "position": {"location": {"lat": 51.7027429, "lon": -0.2682453, "alt": 125.686}, "attitude": {"roll": -0.01098616886883974, "pitch": 0.007935342378914356, "yaw": 2.009046792984009}}, "signal": {"radio": "5GNSA", "RSRP": -93, "RSRQ": -11}}
+{
+    "timestamp": {
+        "unix": 1692125287.594658
+    },
+    "position": {
+        "location": {
+            "lat": 51.7027429,
+            "lon": -0.2682453,
+            "alt": 125.686
+        },
+        "attitude": {
+            "roll": -0.01098616886883974,
+            "pitch": 0.007935342378914356,
+            "yaw": 2.009046792984009
+        }
+    },
+    "signal": {
+        "radio": "5GNSA",
+        "RSRP": -93,
+        "RSRQ": -11
+    }
+}
 
-{"timestamp": {"unix": 1692125288.595598}, "position": {"location": {"lat": 51.7027429, "lon": -0.2682456, "alt": 125.703}, "attitude": {"roll": -0.010614585131406784, "pitch": 0.007171763107180595, "yaw": 2.009789228439331}}, "signal": {"radio": "5GNSA", "RSRP": -93, "RSRQ": -12}}
+{
+    "timestamp": {
+        "unix": 1692125288.595598
+    },
+    "position": {
+        "location": {
+            "lat": 51.7027429,
+            "lon": -0.2682456,
+            "alt": 125.703
+        },
+        "attitude": {
+            "roll": -0.010614585131406784,
+            "pitch": 0.007171763107180595,
+            "yaw": 2.009789228439331
+        }
+    },
+    "signal": {
+        "radio": "5GNSA",
+        "RSRP": -93,
+        "RSRQ": -12
+    }
+}
 
-{"timestamp": {"unix": 1692125289.596702}, "position": {"location": {"lat": 51.7027433, "lon": -0.2682459, "alt": 125.809}, "attitude": {"roll": -0.010071463882923126, "pitch": 0.008770615793764591, "yaw": 2.010474681854248}}, "signal": {"radio": "4G", "RSRP": -93, "RSRQ": -12}}
+{
+    "timestamp": {
+        "unix": 1692125289.596702
+    },
+    "position": {
+        "location": {
+            "lat": 51.7027433,
+            "lon": -0.2682459,
+            "alt": 125.809
+        },
+        "attitude": {
+            "roll": -0.010071463882923126,
+            "pitch": 0.008770615793764591,
+            "yaw": 2.010474681854248
+        }
+    },
+    "signal": {
+        "radio": "4G",
+        "RSRP": -93,
+        "RSRQ": -12
+    }
+}
 ```
 
 #### Captured Signal 3D Plot
@@ -86,7 +170,7 @@ The rendering below show a 3D graph of the RSRP values captured during two valid
 * fair: -90 to -100 dBm;
 * poor: -100 to -120 dBm.
 
-![3D Plot](images/SignalPlot3D.png)
+![3D Signal Quality Plot](images/SignalPlot3D.png)
 
 
 #### Flight Stats
