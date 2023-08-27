@@ -80,6 +80,7 @@ output/nvideo/%.mp4: downloads/video/%.mp4 output/audio/%.mp3
 			  -map 0:v:0 -map 1:a:0 \
 			  -vf scale=1280:720 \
 			  -ar 48000 -ac 2 \
+			  -r $(framerate) \
 			  -y $@
 
 
@@ -98,6 +99,7 @@ output/video/01-04.mp4: output/audio/01-04.mp3 \
 				[back][ovrl] overlay=0:0' \
 			  " \
 			  -ar 48000 -ac 2 \
+			  -r $(framerate) \
 			  -y $@
 
 
@@ -115,6 +117,7 @@ output/video/03-04.mp4: downloads/video/03-04.mp4 output/audio/03-04.mp3 $(signa
 				[back][ovrl] overlay=320:120:enable='between(t,30,65):shortest=1' \
 			  " \
 			  -ar 48000 -ac 2 \
+			  -r $(framerate) \
 			  -y $@
 
 
@@ -125,6 +128,7 @@ output/video/05-00.mp4: downloads/video/05-00.mp4
 	$(FFMPEG) -i $< \
 			  -vf scale=1280:720 \
 			  -ar 48000 -ac 2 \
+			  -r $(framerate) \
 			  -y $@
 
 # Complete video
@@ -132,7 +136,7 @@ output/video/05-00.mp4: downloads/video/05-00.mp4
 fragments := output/nvideo/01-01.mp4 \
 			 output/nvideo/01-02.mp4 \
 			 output/nvideo/01-03.mp4 \
-			 output/video/01-04.mp4 \
+			 output/video/01-04.mp4  \
 			 \
 			 output/slides/02-01.mp4 \
 			 output/slides/02-02.mp4 \
@@ -156,20 +160,18 @@ fragments := output/nvideo/01-01.mp4 \
 			 output/nvideo/04-11.mp4 \
 			 output/nvideo/04-12.mp4 \
 			 output/nvideo/04-13.mp4 \
-			 output/nvideo/04-14.mp4 \
-			 \
-			 output/video/05-00.mp4 \
-			 output/nvideo/05-01.mp4 \
-			 output/slides/05-02.mp4 \
-			 output/nvideo/05-03.mp4
+			 output/nvideo/04-14.mp4
 
 output/contents.txt:
 	$(PYTHON3) mkdir.py $(dir $@)
 	$(PYTHON3) gen_contents.py $(fragments) > $@
 
-video: .deps-check output/contents.txt $(fragments)
+output/video/deliverable.mp4: .deps-check output/contents.txt $(fragments)
+	$(PYTHON3) mkdir.py $(dir $@)
 	$(FFMPEG) -safe 0 -r $(framerate) -f concat \
 			  -i output/contents.txt \
 			  -vcodec h264 \
 			  -acodec copy \
 			  -y output/video/deliverable.mp4
+
+video: output/video/deliverable.mp4
