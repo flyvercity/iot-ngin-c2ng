@@ -37,6 +37,9 @@ components:
       properties:
         Errors:
           $ref: '#/components/schemas/AddressRequestResponseErrors'
+        Message:
+          description: Auxillary error message
+          type: string
         Success:
           description: Failure flag.
           enum:
@@ -110,6 +113,9 @@ components:
       properties:
         Errors:
           $ref: '#/components/schemas/AerialConnectionSessionResponseErrors'
+        Message:
+          description: Auxillary error message
+          type: string
         Success:
           description: Failure flag.
           enum:
@@ -163,6 +169,9 @@ components:
       properties:
         Errors:
           $ref: '#/components/schemas/CertificateRequestResponseErrors'
+        Message:
+          description: Auxillary error message
+          type: string
         Success:
           description: Failure flag.
           enum:
@@ -171,107 +180,265 @@ components:
       required:
       - Errors
       type: object
-    GeoPointWGS84:
+    DIDConfigRequestResponse:
       properties:
-        Altitude:
+        Config:
+          description: DID Verifier Config
+        Success:
+          description: Success flag
+          enum:
+          - true
+          type: boolean
+      required:
+      - Config
+      type: object
+    DIDConfigRequestResponseFailed:
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Generated2'
+        Message:
+          description: Auxillary error message
+          type: string
+        Success:
+          description: Failure flag.
+          enum:
+          - false
+          type: boolean
+      required:
+      - Errors
+      type: object
+    DIDJWTRequestResponse:
+      properties:
+        JWT:
+          description: DID JWT
+          type: string
+        Success:
+          description: Success flag
+          enum:
+          - true
+          type: boolean
+      required:
+      - JWT
+      type: object
+    DIDJWTRequestResponseFailed:
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Generated1'
+        Message:
+          description: Auxillary error message
+          type: string
+        Success:
+          description: Failure flag.
+          enum:
+          - false
+          type: boolean
+      required:
+      - Errors
+      type: object
+    FVCAttiude:
+      properties:
+        heading:
+          description: Aircraft True Heading (degrees)
+          type: number
+        pitch:
+          description: Aircraft Pitch (degrees)
+          type: integer
+        roll:
+          description: Aircraft Roll (degrees)
+          type: integer
+        yaw:
+          description: Aircraft Yaw (degrees)
+          type: integer
+      type: object
+    FVCDataPacketTime:
+      properties:
+        unix:
+          type: number
+      required:
+      - unix
+      type: object
+    FVCLocation:
+      properties:
+        alt:
           description: Geodetic altitude in meters
           type: number
-        Latitude:
+        baro:
+          description: Aircraft Barometric Altitude
+          type: number
+        lat:
           description: Latitude in degress
           type: number
-        Longitude:
+        lon:
           description: Longitude in degress
           type: number
       required:
-      - Altitude
-      - Latitude
-      - Longitude
+      - lat
+      - lon
       type: object
-    SignalStatsReportRequest:
+    FVCPacket:
       properties:
-        Baro:
-          description: Aircraft Barometric Altitude
+        perf:
+          $ref: '#/components/schemas/FVCPerf'
+        position:
+          $ref: '#/components/schemas/FVCPosition'
+        signal:
+          $ref: '#/components/schemas/FVCSignal'
+        timestamp:
+          $ref: '#/components/schemas/FVCDataPacketTime'
+      required:
+      - timestamp
+      type: object
+    FVCPerf:
+      properties:
+        RTT:
+          description: Round-Trip Time (ms)
           type: number
-        Cell:
-          description: Aircraft Serving physical cell identifier
-          type: string
-        FrequencyBand:
-          description: Aircraft Serving Frequency Band Identification
-          type: string
-        Heading:
-          description: Aircraft True Heading (degrees)
-          type: number
-        HeartbeatLoss:
+        heartbeat_loss:
           description: Heartbeat Loss Flag
           type: boolean
-        Pitch:
-          description: Aircraft Pitch (degrees)
-          type: integer
+      type: object
+    FVCPosition:
+      properties:
+        attitude:
+          $ref: '#/components/schemas/FVCAttiude'
+        location:
+          $ref: '#/components/schemas/FVCLocation'
+        speeds:
+          $ref: '#/components/schemas/FVCSpeeds'
+      required:
+      - location
+      type: object
+    FVCSignal:
+      properties:
         RSRP:
           description: Reference Signal Received Power
+          type: integer
+        RSRP_4G:
+          description: Reference Signal Received Power (LTE)
+          type: integer
+        RSRP_5G:
+          description: Reference Signal Received Power (LTE)
           type: integer
         RSRQ:
           description: Reference Signal Received Quality
           type: integer
+        RSRQ_4G:
+          description: Reference Signal Received Quality (LTE)
+          type: integer
+        RSRQ_5G:
+          description: Reference Signal Received Quality (NR)
+          type: integer
         RSSI:
           description: Received Signal Strength Indicator
-          type: integer
-        RTT:
-          description: Round-Trip Time (ms)
-          type: integer
-        Radio:
-          description: Current radio access mode
-          enum:
-          - 4glte
-          - 5gnr
-          type: string
-        ReferenceTime:
-          description: UNIX Timestamp
-          type: number
-        Roll:
-          description: Aircraft Roll (degrees)
           type: integer
         SINR:
           description: Signal to Interference & Noise Ratio
           type: integer
-        UasID:
+        band:
+          description: Aircraft Serving Frequency Band Identification
           type: string
-        VAir:
+        cell:
+          description: Aircraft Serving physical cell identifier
+          type: string
+        radio:
+          description: Current Radio Mode
+          enum:
+          - UNKNOWN
+          - 4G
+          - 5GNSA
+          - 5GSA
+          type: string
+      required:
+      - radio
+      type: object
+    FVCSpeeds:
+      properties:
+        vair:
           description: Aircraft Air Speed (meters per second)
           type: number
-        VDown:
+        vdown:
           description: Aircraft Downward Velocity (meters per second)
           type: number
-        VEast:
+        veast:
           description: Aircraft Eest Velocity (meters per second)
           type: number
-        VNorth:
+        vnorth:
           description: Aircraft North Velocity (meters per second)
           type: number
-        Waypoint:
-          allOf:
-          - $ref: '#/components/schemas/GeoPointWGS84'
-          description: Reference Position
-        Yaw:
-          description: Aircraft Yaw (degrees)
-          type: integer
+      type: object
+    Generated:
+      properties:
+        Database:
+          enum:
+          - unable_to_read
+          type: string
+        UasID:
+          enum:
+          - not_found
+          type: string
+      type: object
+    Generated1:
+      properties:
+        UasID:
+          enum:
+          - not_found
+          type: string
+      type: object
+    Generated2:
+      properties:
+        UasID:
+          enum:
+          - not_found
+          type: string
+      type: object
+    SignalRequestResponse:
+      properties:
+        Stats:
+          description: Signal averaged statistics
+          items:
+            type: integer
+          type: array
+        Success:
+          description: Success flag
+          enum:
+          - true
+          type: boolean
       required:
-      - HeartbeatLoss
-      - RSRP
-      - Radio
-      - ReferenceTime
-      - UasID
-      - Waypoint
+      - Stats
+      type: object
+    SignalRequestResponseFailed:
+      properties:
+        Errors:
+          $ref: '#/components/schemas/Generated'
+        Message:
+          description: Auxillary error message
+          type: string
+        Success:
+          description: Failure flag.
+          enum:
+          - false
+          type: boolean
+      required:
+      - Errors
+      type: object
+    SignalStatsReportRequest:
+      properties:
+        Packet:
+          $ref: '#/components/schemas/FVCPacket'
+      required:
+      - Packet
       type: object
     ValidationError:
       properties:
         Errors:
           additionalProperties:
-            items:
-              type: string
-            type: array
+            additionalProperties: {}
+            type: object
           description: Error identifier dict
           type: object
+        Message:
+          description: Auxillary error message
+          type: string
         Success:
           description: Failure flag.
           enum:
@@ -343,6 +510,53 @@ paths:
                 $ref: '#/components/schemas/CertificateRequestResponseFailed'
           description: Payload containing error description
       summary: Request a current certificate from existing connectivity session.
+  /did/config/{uasid}:
+    get:
+      parameters:
+      - description: UAS ID for which to issue a Verificable Credential.
+        in: path
+        name: UasID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DIDConfigRequestResponse'
+          description: Success payload containing JWT-encoded Verificable Credential.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DIDConfigRequestResponseFailed'
+          description: Payload containing error description
+      summary: Request a configuration for a Credential Verifier from a central authority
+        ("issuer").
+  /did/jwt/{uasid}:
+    get:
+      parameters:
+      - description: UAS ID for which to issue a Verificable Credential.
+        in: path
+        name: UasID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DIDJWTRequestResponse'
+          description: Success payload containing JWT-encoded Verificable Credential.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DIDJWTRequestResponseFailed'
+          description: Payload containing error description
+      summary: Request a Verificable Credential in a form of signed JWT.
   /session:
     delete:
       parameters:
@@ -382,8 +596,37 @@ paths:
                 $ref: '#/components/schemas/AerialConnectionSessionResponseFailed'
           description: Payload containing error description
       summary: Request a new session for an ADX client (RPS or USS services)
-  /signal:
+  /signal/{uasid}:
+    get:
+      parameters:
+      - description: UAS ID for which to fetch the peer's address.
+        in: path
+        name: UasID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalRequestResponse'
+          description: Success payload containing peer's address
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalRequestResponseFailed'
+          description: Payload containing error description
+      summary: Request a current address from existing connectivity session.
     post:
+      parameters:
+      - description: UAS ID that sent the sample.
+        in: path
+        name: UasID
+        required: true
+        schema:
+          type: string
       requestBody:
         content:
           application/json:

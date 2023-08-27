@@ -3,14 +3,12 @@
 src := $(wildcard \
 	c2ng/common/*.py \
 	c2ng/service/*.py \
-	c2ng/service/handlers/*.py \
 	c2ng/service/backend/*.py \
 	c2ng/service/backend/net_providers/*.py \
 	c2ng/service/gui/*.py \
 	c2ng/service/did/*.py \
 	c2ng/uss-sim/src/*.py \
 	c2ng/uas-sim/src/*.py \
-	c2ng/tools/*.py \
 )
 
 deps-check:
