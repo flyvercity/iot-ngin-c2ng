@@ -19,6 +19,14 @@ Lab experiment is set up in cooperation with Cumucore Oy.
 * C2NG - a docker containter that runs the core service.
 * RPS C2 Sim -  A simulator is another small piece of software developed by Flyvercity. 
 
+### Round-Trip Time (RTT) Measurement
+
+In order to access connectivity quality, the round-trip time (RTT) is measured. The RTT is the time it takes for a signal to be sent plus the time it takes for an acknowledgement of that signal to be received. The RTT is measured in milliseconds (ms). The RTT was measured by the UA C2 Sim software component.
+
+Two types of RTT measurements were performed: pure and encryption-aware. Pure RTT is measured based on the required to transmit small UDP packets. Encryption-aware RTT is measured based on the time required to transmit encrypted and signed UDP packets. The encryption is performed by both UA C2 Sim software and RPS C2 Sim software components.
+
+The result show significant, but not critical, increase in RTT when encryption is enabled. The average RTT is 5 ms (lab network) when encryption is disabled and 12 ms when encryption is enabled (given the hardware used - Core i5 laptop). The RTT is expected to be higher when the C2 software component is deployed on a UA.
+
 ## Flight Experiment
 
 Flight experiment is set up in cooperation with Sky-Drones Technologies Ltd.

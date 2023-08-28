@@ -302,7 +302,7 @@ The session data is stored in the data base as shown on the following MongoExpre
 
 Simultaneously, the UA simulator send the emulated signal data to the service, as reflected in the service logs:
 
-![Signal Stats Screenshot](./images/SignalStats.png)
+<img src="./images/SignalStats.png" width="200">
 
 USS Simulator Output:
 
@@ -321,3 +321,13 @@ core-uss-1  | INFO:root:Service authorized: 192.168.48.7
 core-uss-1  | INFO:root:Approving connection for sim-drone-id
 core-uss-1  | INFO:tornado.access:200 GET /approve?UasID=sim-drone-id (192.168.48.7) 13.73ms
 ```
+
+## Conclusions
+
+Our two experiments and tests show that:
+
+* 5G connectivity can be used for UA C2;
+* quality of service is acceptable for UA C2, but depends on the height of the UA in a non-trivial way, thus requiring further *a priori* measurements and analysis for each specific zone of operation;
+* the 5G network can be used to transmit encrypted and signed UA C2 messages, with a reasonable increase in latency;
+* Flyvercity C2NG Platform can be used to provide UA C2 services over 5G networks, without requiring network-operator-specific pre-flight network configuration on the UA or RPS;
+* C2NG Platform can be integrated with ExcID's Verifiable Credentials to provide a secure and privacy-preserving RPS authentication and authorization mechanism.
