@@ -59,30 +59,6 @@ output/images/04-02.png: src/images/04-02.xcf
 	$(PYTHON3) mkdir.py $(dir $@)
 	echo "Please use GIMP to produce $@ from $<" && exit 1
 
-# Static slides with narration
-
-output/slides/%.mp4: output/audio/%.mp3 output/images/%.png
-	$(PYTHON3) mkdir.py $(dir $@)
-	$(FFMPEG) -r $(framerate) -loop 1 \
-			  -i output/images/$*.png \
-		      -i output/audio/$*.mp3 \
-			  -shortest -fflags +shortest -max_interleave_delta 100M  \
-			  -vf scale=1280:720 \
-			  -ar 48000 -ac 2 \
-			  -y $@
-
-# Generic video with narration
-
-output/nvideo/%.mp4: downloads/video/%.mp4 output/audio/%.mp3
-	$(PYTHON3) mkdir.py $(dir $@)
-	$(FFMPEG) -i downloads/video/$*.mp4 \
-		      -i output/audio/$*.mp3 \
-			  -map 0:v:0 -map 1:a:0 \
-			  -vf scale=1280:720 \
-			  -ar 48000 -ac 2 \
-			  -r $(framerate) \
-			  -y $@
-
 
 # Intro video
 
@@ -130,4 +106,3 @@ output/video/05-00.mp4: downloads/video/05-00.mp4
 			  -ar 48000 -ac 2 \
 			  -r $(framerate) \
 			  -y $@
-
