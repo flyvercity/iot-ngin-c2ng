@@ -1,0 +1,5 @@
+<speak>
+
+<p>Command-and-control simulation starts with the remote pilot station simulator. For this simulation, it plays a passive role as it waits for incoming messages from a drone simulator. The simulator performs a number of startup tasks that reflect the logic of data exchanges: subscribes to asynchronious notifications API, requests a session from the core service, requests peer's address and certificate. Finally, it requests a verifiable credential from the core service that acts here as an issuer.</p>
+
+</speak>

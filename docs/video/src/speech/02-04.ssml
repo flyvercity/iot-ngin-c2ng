@@ -1,0 +1,17 @@
+<speak>
+<break time="1s"/>
+<p>The primary use case of the platform is illustrated by the following interaction flow.</p>
+
+<p>First, the remote pilot station requests a reliable connectivity session from the platform's core service via a dedicated data network called Aviation Data Exchange Network, or <say-as interpret-as="characters">ADX</say-as>.</p>
+
+<p>Next, the same session is requested by the Uncrewed Aircraft via the 5G<say-as interpret-as="characters">RAN</say-as>, or Radio Access Network.</p>
+
+<p>Upon the aircraft's request, the core service ensures that the aircraft is authorized to perform a beyond line of sight flight in the requested airspace. To do so, the core service reaches out to a traffic management system responsible for the flight.</p> 
+
+<p>Once the authorization is granted, the core service establishes a reliable connectivity session between the remote pilot station and the aircraft via corresponding network APIs, such as Network Slice Admission Control Function.</p>
+
+<p>Finally, the remote pilot station and the aircraft exchange the flight control commands and telemetry data via the established connectivity session.</p>
+
+<p>As the flight progresses, the core service monitors the connectivity session and signal quality. It ensures that the aircraft is always connected to the remote pilot station with performance that meets the service level agreement.</p>
+
+</speak>

@@ -1,0 +1,8 @@
+<speak>
+<break time="1s"/>
+<p>The main goal of the project is to create a bridge between all components participating in establishing an aviation-grade C2 data link based on the 5G technology: <break time="0.3s"/> air vehicles, remote pilot stations a.k.a. ground control stations, mobile networks, and uncrewed traffic management systems.
+</p>
+
+<p>The capabilities of the Platform include: <break time="0.2s"/> user-transparent network configuration and slicing control,<break time="0.2s"/> public key management,<break time="0.2s"/> discovery services,<break time="0.2s"/> aerial connection authentication and authorization support,<break time="0.2s"/> cellular signal analysis<break time="0.2s"/> and Service Level Agreement conformance monitoring.
+</p>
+</speak>

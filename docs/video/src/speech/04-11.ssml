@@ -1,0 +1,5 @@
+<speak>
+
+<p>Before running a simulation, we have to create containers for the remote pilot station simulator and the drone simulator. Pilot station simulator is designated within the system as an Aviation Data Exchange Network client, or <say-as interpret-as="characters">ADX</say-as> client.</p>
+
+</speak>
