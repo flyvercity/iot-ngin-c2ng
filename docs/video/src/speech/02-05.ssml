@@ -1,0 +1,9 @@
+<speak>
+<break time="1s"/>
+<p>The platform, by leveraging the <sub alias="exceed">ExcID</sub> technology, is able to provide a unique and secure way to identify and authenticate remote pilot stations willing to operate the drones by issuing and managing Verifiable Credentials. It can also integrate with external third party "external owners", for example, fleet management systems, which may support the same authorization mechanism.</p>
+
+<p>A remote pilot station is provided with a verifiable credential that contains identifiers of the drones the station may control. The station can then use the credential to prove to the drone that it is authorized to control it. The drone can verify the credential based of the verifier configuration provided by the platform.</p>
+
+<p>Most of the components used for this mechanism are provided by an open repository and developed by the <sub alias="exceed">ExcID</sub> project. Flyvercity has implemented a custom verifier suitable to be deployed as a part of drone's software.</p>
+
+</speak>

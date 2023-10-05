@@ -1,0 +1,7 @@
+<speak>
+
+<break time="1s"/>
+
+<p>The whole experiment was conducted remotely in the lab of Cumucore, a partner company and a part of the <say-as interpret-as="characters">IoT</say-as><sub alias="engine">-NGIN</sub> ecosystem. Their infrastructure supported  deployment of containerized applications running Flyvercity's core C2<say-as interpret-as="characters">NG</say-as> service as well as drone and pilot station simulater. This setup allowed for a full-remote access and management of the experiment.</p>
+
+</speak>
