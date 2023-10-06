@@ -68,10 +68,9 @@ We identify the following aspects of C2 connectivity that need to be addressed:
 \item establish a discovery mechanism between airborne and ground entities.
 \item manage reliability of connection by interacting with 5G network functions.
 \item support data transmission security by managing security credentials as defined by aviation regulation \cite{icao:annex10VI} and \cite{rtca:do377a}.
-\item support aerial connection authorization to address emerging regulatory requirements as defined by telecom regulation \ref{3gpp:uual}
+\item support aerial connection authorization to address emerging regulatory requirements as defined by telecom regulation \ref{3gpp:uuaa}
 \item manage remote pilot station (RPS) access to drones under control.
 \end{itemize}
-
 
 \section{Commmand-and-Control Middleware Platform}
 
@@ -132,12 +131,12 @@ An external user, such as a drone operator, is not able to determine a mapping b
 
 For the cellular implemementation, the integrity parameter is driven by a probability of data corruption. Assuming sane and correct checksum-based procedure are in place, probability of integrity loss as associated by a probability of intentional data tampering. The service addesses this issue by providing session security credentials. The user, however, is responsible for the correct implementation of the encryption and signing procedures \ref{security}.
 
-Parameters controlled by the network may vary depending on the given network architecture. During our trials, we used two-step procedure:
+Parameters controlled by the network may vary depending on the given network architecture. During our trials, we used multi-step procedure:
 
 \begin{enumerate}
 \item RLP parameters looked up in the database based on the drone type and the requested operation.
 \item Based on Availability/Continuity failure, the service selected one of a set pre-configured network slices.
-\item The slice's 5QI (5G QoS Identifier) was adjusted based on latency requirement.
+\item The slice's 5QI (5G QoS Identifier) was adjusted based on latency requirement (see \cite{3gpp:rely}).
 \item Overall throughput analysed to avoid any overloads.
 \item New user (aerial or an ADX) was added to the slice via the NSACF.
 \end{enumerate}
@@ -176,8 +175,25 @@ It shall be noted, that for the sake of simplicity, the figure does not show any
 
 \subsection{Aerial Connection Authorization}
 
-tbd
+The platform supports the USS (UTM Service Supplier) UAV (Uncrewed Aerial Vehicle) Authorization and Authentication (UUAA in 3GPP terminology) procedure as defined by \cite{3gpp:uuaa}. 
 
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.9\linewidth]{images/uuaa.png}
+\caption{USS UAV Authorization and Authentication}\label{fig:uuaa}
+\end{figure}
+
+This procedure involves severa entities and steps:
+
+\begin{enumerate}
+  \item The platform registers itself within the Core as entity responsible for UUAA.
+  \item The drone requests a connection session from the platform.
+  \item The platform determines relevant UTM system(s) based on flight intent provided by the drone, and requests authorization from the UTM system(s).
+  \item The drone's cellular user equipment (UE) requests an connection. This connection is identified by the 5G System as aerial based on the UE identification.
+  \item This request triggers the UUAA procedure. The 5G Core requests the platform to provide the authorization data.
+\end{enumerate}
+
+Hence, in the presence of the C2NG platform, neither drone nor UTM system are required to implement any specific procedures to support UUAA. The platform is able to support any UTM system that is able to provide the authorization data.
 
 \subsection{Remote Pilot Station Access}
 \label{section:did}
@@ -197,6 +213,8 @@ The platform supports the following "key" and "self" DID types, and can serve as
 A drone itself implemement a verifier that operates based on the verifier configuration provided by the platform. The verifier is able to determine if the RPS is authorized to control the drone, based on the encrypted token provided by the RPS.
 
 \section{Implementation and Evaluation}
+
+This section describes the implementation of the platform and some results of validation conducted in the scope of current paper's development.
 
 \subsection{Application Architecture}
 
@@ -235,12 +253,29 @@ This paper is based on the results of IoT UAS C2 project, a sub-project funded v
 
 \begin{thebibliography}{2}
 
-\bibitem{IEEEhowto:kopka}
-H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
-  0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
+\bibitem{uai}
+B. Resnick, \emph{Scaling cellular command-and-control capability for multiple drone operations},\hskip 1em plus 0.5em minus 0.4em\relax https://www.unmannedairspace.info/commentary/scaling-cellular-command-and-control-capability-for-multiple-drone-operations/, 2023. 
+
+\bibitem{excid:did}
+N. Fotiou, V. A. Siris, G. C. Polyzos, Y. Kortesniemi, D. Lagutin, \emph{Capabilities-based access control for IoT devices using Verifiable Credentials", in IEEE Symposium on Security and Privacy Workshops},\hskip 1em plus 0.5em minus 0.4em\relax Workshop on the Internet of Safe Things (SafeThings), 2022
 
 \bibitem{cryptoeprint:2000/065}
 M.~Mitomo and K.~Kurosawa, \emph{How to Encrypt Long Messages without Large Size Symmetric/Asymmetric Encryption Schemes}, Cryptology ePrint Archive, Paper 2000/065.\hskip 1em plus 0.5em minus 0.4em\relax https://eprint.iacr.org/2000/065, 2000.
+
+\bibitem{3gpp:rely}
+3GPP, \emph{5G; Service requirements for the 5G system}.\hskip 1em plus 0.5em minus 0.4em\relax (3GPP TS 22.261 version 16.14.0 Release 16.
+
+\bibitem{3gpp:uuaa}
+3GPP, \emph{5G; Security aspects of Uncrewed Aerial Systems (UAS)}.\hskip 1em plus 0.5em minus 0.4em\relax 3GPP TS 33.256 version 17.0.0 Release 17.
+
+\bibitem{market}
+Levitate Captital, \emph{The Future of the Drone Economy}. Whitepaper\hskip 1em plus 0.5em minus 0.4em\relax https://levitatecap.com/levitate/wp-content/uploads/2020/12/Levitate-Capital-White-Paper.pdf, 2020
+
+\bibitem{icao:annex10VI}
+ICAO, \emph{Aeronautical Telecommunications. Communication Systems and Procedures Relating to Remotely Piloted Aircraft Systems C2 Link},\hskip 1em plus 0.5em minus 0.4em\relax Annex 10 on the Convention on International Civil Aviation. 1st Edition, July 2021.
+
+\bibitem{rtca:do377a}
+RTCA, \emph{Minimum Aviation System Performance Standards for C2 Link Systems Supporting Operations of Unmanned Aircraft Systems in U.S. Airspace},\hskip 1em plus 0.5em minus 0.4em\relax RTCA DO-377A, 2021.
 
 \end{thebibliography}
 \end{document}
