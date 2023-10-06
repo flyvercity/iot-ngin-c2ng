@@ -69,20 +69,21 @@ We identify the following aspects of C2 connectivity that need to be addressed:
 \item manage reliability of connection by interacting with 5G network functions.
 \item support data transmission security by managing security credentials as defined by aviation regulation \cite{icao:annex10VI} and \cite{rtca:do377a}.
 \item support aerial connection authorization to address emerging regulatory requirements as defined by telecom regulation \ref{3gpp:uual}
-\item monitor performance and compliance by signal data acquisition and analysis.
 \item manage remote pilot station (RPS) access to drones under control.
 \end{itemize}
 
 
 \section{Commmand-and-Control Middleware Platform}
 
-This paper describes a possible approach to address the above issues. The approach is based on the following principles:
+This paper describes a possible approach to address the above issues. The approach is to build a platform based on the following principles:
 
 \begin{itemize}
 \item The platform is based on a cloud native architecture.
 \item The platform is designed to be deployed on mobile network operator's (MNO) resources, following the concept of multi-acceess edge computing (MEC).
 \item The implementation in open-source and extensible.
 \end{itemize}
+
+This paper describes our attempt to build such a platform, with a working title of C2NG (next-generation command-and-control).
 
 There are two types of users of the platform:
 
@@ -129,6 +130,8 @@ For the perspective of the requested drone operation, the QoS is determined by t
 
 An external user, such as a drone operator, is not able to determine a mapping between these parameters and network configuration. On the contrary, the service, being tighly integrated with the network, can derive feasibility of QoS provision and necessary measures.
 
+For the cellular implemementation, the integrity parameter is driven by a probability of data corruption. Assuming sane and correct checksum-based procedure are in place, probability of integrity loss as associated by a probability of intentional data tampering. The service addesses this issue by providing session security credentials. The user, however, is responsible for the correct implementation of the encryption and signing procedures \ref{security}.
+
 Parameters controlled by the network may vary depending on the given network architecture. During our trials, we used two-step procedure:
 
 \begin{enumerate}
@@ -142,18 +145,42 @@ Parameters controlled by the network may vary depending on the given network arc
 It also worth mentioning that these technical provisions should be supported by organizational means such as SLA (Service Level Agreements) when deployed operationally.
 
 \subsection{Security}
+\label{security}
 
-tbd
+Cellular radio communications are inherenly secured by 3GPP-defined mechanisms. Nevertheless, the regulation call also to end-to-end reliable encryption. To support this requirement, the platform implements session security credentials management based by asymmetric cryptograhy. This prototype supports RSA encryption (\ref{section:keys}). It is also important for all participants to apply the protocol correctly as decrined in \ref{section:exchange}. Data transmission security require  Additional security mechanism associated with RPS access to drones described in \ref{section:did}.
+
+\subsubsection{Key Management}
+\label{section:keys}
+
+The service uses a static root private key and a corresponding certificate to sign user session certificate, hence serving a local cerfication authority (see Figure \ref{fig:keys}). A new session keypair are generate on creation of the session, separatly for aerial and ground users. 
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.9\linewidth]{images/keys.png}
+\caption{Keys Hierarchyl}\label{fig:keys}
+\end{figure}
+
+Public keys are distributed to the users during the discovery and session identification procedure.
+
+\subsubsection{Secure Data Exchange Procedure}
+
+Correct key distribution is not enough to ensure integrity. Below is a standard procedure that is obligatory for all users to follow to ensure secure data exchange (see Figure \ref{fig:exchange}).
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=0.9\linewidth]{images/exchange.png}
+\caption{Session Establishment Procedure}\label{fig:exchange}
+\end{figure}
+
+It shall be noted, that for the sake of simplicity, the figure does not show any procedures required to transmit longer messages (e.g., see \cite{cryptoeprint:2000/065}). 
 
 \subsection{Aerial Connection Authorization}
 
 tbd
 
-\subsection{Performance Monitoring}
-
-tbd
 
 \subsection{Remote Pilot Station Access}
+\label{section:did}
 
 To help drone operators (designate this section as "owners") to manage their fleet, the platform provides a mechanism to manage access to the drones by remote pilot stations (RPS).
 
@@ -168,21 +195,6 @@ The platform supports remote pilot station authorization to control the drones v
 The platform supports the following "key" and "self" DID types, and can serve as a drone owner or support drone operator as an owner. For purposes of the decentralized authentication mechanism, the owner is a entity that issues a Verifiable Credential to their RPS station under control.
 
 A drone itself implemement a verifier that operates based on the verifier configuration provided by the platform. The verifier is able to determine if the RPS is authorized to control the drone, based on the encrypted token provided by the RPS.
-
-% \begin{table}[ht!]
-%   \begin{center}
-%     \caption{Example of generic table}
-%     \label{tab:table1}
-%     \begin{tabular}{@{}lcr@{}} % <-- Alignments: 1st column left, 2nd middle and 3rd right
-%       Column 1 & Column 2 & Column 3 \\
-%       $\alpha$ & $\beta$ & $\gamma$ \\
-%       \hline
-%       1 & 1110.1 & a\\
-%       2 & 10.1 & b\\
-%       3 & 23.113231 & c\\
-%     \end{tabular}
-%   \end{center}
-% \end{table}
 
 \section{Implementation and Evaluation}
 
@@ -206,30 +218,29 @@ The whole application is a set of Docker containers defined by the Docker Compos
 
 Network integration and quality-of-service subsystem was tested in the lab, associated with IoT-NGIN project, with an advanced 5G core is capable of managing the network slices and providing the required connectivity for the drones.
 
+In order to access connectivity quality, the round-trip time (RTT) workstations measured. The RTT is the time it takes for a signal to be sent plus the time it takes for an acknowledgement of that signal to be received. The RTT is measured in milliseconds (ms). The RTT was measured by the UA (uncrewed aircraft) software simulator. Two types of RTT measurements were performed: pure and encryption-aware. Pure RTT is measured based on the required to transmit small UDP packets. Encryption-aware RTT is measured based on the time required to transmit encrypted and signed UDP (User Datagram Protocol) packets, and also to validate an access token. The encryption is performed by both UA and RPS C2 simulators.
+
+The results show significant, but not critical, increase in RTT when encryption is enabled. The average RTT is 5 ms (lab network) when encryption is disabled and 12 ms when encryption is enabled (given the hardware used - Core i5 laptop). The RTT is expected to be higher when the C2 software component is deployed on a real UA.
+
 \section{Conclusion}
-The conclusion goes here.
+
+\begin{itemize}
+\item Flyvercity C2NG Platform can be used to provide UA C2 services over 5G networks, without requiring network-operator-specific pre-flight network configuration on the UA or RPS;
+\item C2NG Platform can be integrated with Verifiable Credentials components to provide a secure and privacy-preserving RPS authentication and authorization mechanism.
+\end{itemize}
 
 \section*{Acknowledgment}
 
 This paper is based on the results of IoT UAS C2 project, a sub-project funded via the IoT-NGIN project Open Call. IoT-NGIN has received funding from the European Union’s Horizon 2020 research and innovation programme (Grant Agreement No 957246).
 
-% can use a bibliography generated by BibTeX as a .bbl file
-% BibTeX documentation can be easily obtained at:
-% http://www.ctan.org/tex-archive/biblio/bibtex/contrib/doc/
-% The IEEEtran BibTeX style support page is at:
-% http://www.michaelshell.org/tex/ieeetran/bibtex/
-%\bibliographystyle{IEEEtran}
-% argument is your BibTeX string definitions and bibliography database(s)
-%\bibliography{IEEEabrv,../bib/paper}
-%
-% <OR> manually copy in the resultant .bbl file
-% set second argument of \begin to the number of references
-% (used to reserve space for the reference number labels box)
-\begin{thebibliography}{1}
+\begin{thebibliography}{2}
 
 \bibitem{IEEEhowto:kopka}
 H.~Kopka and P.~W. Daly, \emph{A Guide to \LaTeX}, 3rd~ed.\hskip 1em plus
   0.5em minus 0.4em\relax Harlow, England: Addison-Wesley, 1999.
+
+\bibitem{cryptoeprint:2000/065}
+M.~Mitomo and K.~Kurosawa, \emph{How to Encrypt Long Messages without Large Size Symmetric/Asymmetric Encryption Schemes}, Cryptology ePrint Archive, Paper 2000/065.\hskip 1em plus 0.5em minus 0.4em\relax https://eprint.iacr.org/2000/065, 2000.
 
 \end{thebibliography}
 \end{document}
