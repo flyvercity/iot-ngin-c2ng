@@ -1,3 +1,5 @@
+NOTE: This project was concluded, development will proceed here: https://github.com/flyvercity/c2ng
+
 # Next Generation UAS C2 Connectivity Service
 
 This service manages 5G aerial connections and security credentials for Uncrewed Aviation Systems.
